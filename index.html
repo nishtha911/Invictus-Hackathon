@@ -93,26 +93,67 @@
 
         <!-- 2. DISCOVERY VIEW -->
         <section id="discovery-view" class="view">
-            <div class="container discovery-layout">
-                <div class="chat-area">
-                    <div class="chat-header">
-                        <h2>Nova AI Assistant</h2>
-                        <span class="badge badge-ai">AI Powered</span>
-                    </div>
-                    <div id="chat-history" class="chat-history">
-                        <!-- Chat messages injected here -->
-                    </div>
-                    <div id="chat-input-area" class="chat-input-area">
-                        <!-- Dynamic inputs injected here -->
-                    </div>
-                </div>
-                
-                <div class="sidebar-profile">
-                    <h3>Your Profile</h3>
-                    <p class="profile-hint">Profile created for this session</p>
-                    <div id="live-profile-details" class="profile-details">
-                        <div class="empty-profile">Answering questions will build your profile here.</div>
-                    </div>
+            <div class="container narrow-container">
+                <div class="form-card">
+                    <h2 class="section-title text-center">Tell us about your needs</h2>
+                    <p class="text-center text-muted mb-30">Fill out this quick form to get personalized loan recommendations.</p>
+                    
+                    <form id="discovery-form" onsubmit="submitDiscoveryForm(event)">
+                        <!-- Purpose -->
+                        <div class="form-group">
+                            <label for="loanPurpose">What are you planning to finance?</label>
+                            <select id="loanPurpose" required>
+                                <option value="Home">Home</option>
+                                <option value="Car / Vehicle">Car / Vehicle</option>
+                                <option value="Personal expenses">Personal expenses</option>
+                                <option value="Education">Education</option>
+                            </select>
+                        </div>
+
+                        <!-- Amount Slider -->
+                        <div class="form-group">
+                            <label for="loanAmountRange">How much do you need? (₹)</label>
+                            <div class="slider-container">
+                                <input type="range" id="loanAmountRange" min="100000" max="10000000" step="50000" value="1000000" oninput="syncSlider('loanAmountRange', 'loanAmountInput')">
+                                <div class="slider-labels">
+                                    <span>₹1L</span>
+                                    <span>₹1Cr</span>
+                                </div>
+                            </div>
+                            <input type="number" id="loanAmountInput" value="1000000" min="100000" max="10000000" oninput="syncSlider('loanAmountInput', 'loanAmountRange')" class="mt-10">
+                        </div>
+
+                        <!-- Tenure Slider -->
+                        <div class="form-group">
+                            <label for="loanTenureRange">Preferred Tenure (Years)</label>
+                            <div class="slider-container">
+                                <input type="range" id="loanTenureRange" min="1" max="30" step="1" value="5" oninput="syncSlider('loanTenureRange', 'loanTenureInput')">
+                                <div class="slider-labels">
+                                    <span>1 Yr</span>
+                                    <span>30 Yrs</span>
+                                </div>
+                            </div>
+                            <input type="number" id="loanTenureInput" value="5" min="1" max="30" oninput="syncSlider('loanTenureInput', 'loanTenureRange')" class="mt-10">
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="form-group">
+                            <label>What matters most to you?</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="loanPriority" value="Lower EMI" checked> Lower EMI</label>
+                                <label><input type="radio" name="loanPriority" value="Lower interest rate"> Lower Interest</label>
+                                <label><input type="radio" name="loanPriority" value="Flexible repayment"> Flexible Repayment</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Income -->
+                        <div class="form-group">
+                            <label for="monthlyIncome">Approximate Monthly Income (₹)</label>
+                            <input type="number" id="monthlyIncome" required placeholder="E.g. 85000">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full btn-large mt-20">Get Recommendations</button>
+                    </form>
                 </div>
             </div>
         </section>
@@ -348,6 +389,23 @@
         </section>
 
     </main>
+
+    <!-- Floating RAG Chatbot -->
+    <div class="rag-chatbot-btn" onclick="toggleRagChat()">💬 Need Help?</div>
+    <div class="rag-chatbot-window" id="rag-chatbot-window">
+        <div class="rag-chat-header">
+            Nova Support (RAG Bot)
+            <button class="btn-close" onclick="toggleRagChat()">×</button>
+        </div>
+        <div class="rag-chat-body" id="rag-chat-body">
+            <div class="msg msg-ai">Hi! I am Nova's knowledge assistant. I can answer questions about our loan policies, rates, and terms using our internal knowledge base. How can I help?</div>
+        </div>
+        <div class="rag-chat-footer">
+            <button class="btn-attach" onclick="mockUploadPDF()" title="Upload Document">📎</button>
+            <input type="text" id="rag-chat-input" placeholder="Ask about policies..." onkeypress="handleRagInput(event)">
+            <button onclick="sendRagMessage()">Send</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

@@ -120,11 +120,8 @@ function navigateTo(viewId) {
 // Reset App
 function resetApp() {
     userProfile = {};
-    currentQuestionIndex = 0;
     isExistingCustomer = false;
     leadData = null;
-    chatHistory.innerHTML = '';
-    liveProfileDetails.innerHTML = '<div class="empty-profile">Answering questions will build your profile here.</div>';
     navigateTo('landing-view');
 }
 
@@ -138,147 +135,42 @@ function handleLogin(e) {
 // Start Discovery Flow
 function startDiscovery(prefilledCategory = null, fromDashboard = false) {
     userProfile = {};
-    currentQuestionIndex = 0;
-    chatHistory.innerHTML = '';
+    document.getElementById('discovery-form').reset();
+    
+    if (prefilledCategory) {
+        document.getElementById('loanPurpose').value = prefilledCategory;
+    }
     
     navigateTo('discovery-view');
-    
-    let greeting = fromDashboard 
-        ? "Hi Aarav! I can help you find loan options tailored to your existing profile."
-        : "Hi! I can help you find loan options that match your needs. You don't need an account to explore.";
-        
-    addAIMessage(greeting);
-    
-    setTimeout(() => {
-        if (prefilledCategory) {
-            addAIMessage(`I see you're interested in a ${prefilledCategory} Loan.`);
-            handleAnswer("purpose", prefilledCategory);
-        } else {
-            askNextQuestion();
-        }
-    }, 1000);
 }
 
-// Chat UI Helpers
-function addAIMessage(text) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'msg msg-ai';
-    msgDiv.innerText = text;
-    chatHistory.appendChild(msgDiv);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+// Slider Syncing
+function syncSlider(sourceId, targetId) {
+    const val = document.getElementById(sourceId).value;
+    document.getElementById(targetId).value = val;
 }
 
-function addUserMessage(text) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'msg msg-user';
-    msgDiv.innerText = text;
-    chatHistory.appendChild(msgDiv);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-}
-
-// AI Question Flow
-function askNextQuestion() {
-    if (currentQuestionIndex >= conversationFlow.length) {
-        finishDiscovery();
-        return;
-    }
-
-    const q = conversationFlow[currentQuestionIndex];
-    addAIMessage(q.question);
-    renderInputUI(q);
-}
-
-function renderInputUI(q) {
-    chatInputArea.innerHTML = '';
+// Discovery Form Submission
+function submitDiscoveryForm(e) {
+    e.preventDefault();
     
-    if (q.type === 'options') {
-        const wrap = document.createElement('div');
-        wrap.className = 'quick-options';
-        q.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'quick-btn';
-            btn.innerText = opt;
-            btn.onclick = () => {
-                chatInputArea.innerHTML = '';
-                handleAnswer(q.key, opt);
-            };
-            wrap.appendChild(btn);
-        });
-        chatInputArea.appendChild(wrap);
-    } else if (q.type === 'input') {
-        const wrap = document.createElement('div');
-        wrap.className = 'input-with-btn';
-        
-        const input = document.createElement('input');
-        input.type = q.inputType || 'text';
-        input.placeholder = q.placeholder;
-        
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary';
-        btn.innerText = 'Send';
-        btn.onclick = () => {
-            if(input.value.trim() === '') return;
-            chatInputArea.innerHTML = '';
-            handleAnswer(q.key, input.value);
-        };
-        
-        // Enter key support
-        input.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') btn.click();
-        });
-        
-        wrap.appendChild(input);
-        wrap.appendChild(btn);
-        chatInputArea.appendChild(wrap);
-        input.focus();
-    }
-}
+    const purpose = document.getElementById('loanPurpose').value;
+    const amount = document.getElementById('loanAmountInput').value;
+    const tenure = document.getElementById('loanTenureInput').value;
+    const priority = document.querySelector('input[name="loanPriority"]:checked').value;
+    const income = document.getElementById('monthlyIncome').value;
 
-function handleAnswer(key, value) {
-    addUserMessage(value);
-    userProfile[key] = value;
-    
-    updateLiveProfileUI();
-    
-    currentQuestionIndex++;
-    setTimeout(() => {
-        askNextQuestion();
-    }, 600);
-}
-
-// Profile UI
-function updateLiveProfileUI() {
-    if (Object.keys(userProfile).length === 0) return;
-    
-    let html = '';
-    const labels = {
-        purpose: "Purpose",
-        amount: "Amount Needed",
-        priority: "Priority",
-        income: "Monthly Income",
-        additional: "Notes"
+    userProfile = {
+        purpose: purpose,
+        amount: `₹${parseInt(amount).toLocaleString('en-IN')}`,
+        tenure: `${tenure} Years`,
+        priority: priority,
+        income: `₹${parseInt(income).toLocaleString('en-IN')}`,
+        additional: "Standard application"
     };
-
-    for (const [key, val] of Object.entries(userProfile)) {
-        html += `
-            <div class="profile-item">
-                <div class="profile-label">${labels[key]}</div>
-                <div class="profile-val">${val}</div>
-            </div>
-        `;
-    }
     
-    liveProfileDetails.innerHTML = html;
-}
-
-function finishDiscovery() {
-    chatInputArea.innerHTML = '';
-    addAIMessage("Perfect. I've compiled your profile based on your answers. Let's look at your summary.");
-    
-    setTimeout(() => {
-        populateProfileView();
-        navigateTo('profile-view');
-    }, 1500);
+    // Jump straight to recommendations or show profile summary first. Let's go to recommendations.
+    showRecommendations();
 }
 
 function populateProfileView() {
@@ -481,3 +373,58 @@ function addLeadToDashboard(lead) {
 window.onload = () => {
     // We are on landing page initially.
 };
+
+// RAG Chatbot Logic
+function toggleRagChat() {
+    const chatWindow = document.getElementById('rag-chatbot-window');
+    chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function handleRagInput(e) {
+    if (e.key === 'Enter') {
+        sendRagMessage();
+    }
+}
+
+function sendRagMessage() {
+    const input = document.getElementById('rag-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatBody = document.getElementById('rag-chat-body');
+    
+    // User message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg msg-user';
+    userMsg.innerText = text;
+    chatBody.appendChild(userMsg);
+    
+    input.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Simulate RAG response after short delay
+    setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'msg msg-ai';
+        aiMsg.innerHTML = `<span style="font-size: 0.75rem; color: #888; display: block; margin-bottom: 5px;">[Retrieved from knowledge_base/loan_policies_2026.pdf]</span>Based on our internal documents, the required CIBIL score for this product tier is 720 or above. Would you like to know more about the income documentation required?`;
+        chatBody.appendChild(aiMsg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }, 1000);
+}
+
+function mockUploadPDF() {
+    const chatBody = document.getElementById('rag-chat-body');
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg msg-user';
+    userMsg.innerHTML = `📎 <em>income_statement_2026.pdf uploaded</em>`;
+    chatBody.appendChild(userMsg);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    
+    setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'msg msg-ai';
+        aiMsg.innerHTML = `I've analyzed your uploaded document. Your stated income looks sufficient for the top-tier loans. Is there anything specific you want me to check in this document?`;
+        chatBody.appendChild(aiMsg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }, 1500);
+}
