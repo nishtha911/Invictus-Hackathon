@@ -1,0 +1,29 @@
+import { apiClient } from "./client";
+import { DashboardKPIs, SalesDashboardLeadItem } from "../types/contracts";
+import {
+  MOCK_DASHBOARD_KPIS,
+  MOCK_LEAD_TREND_DATA,
+  MOCK_PRODUCT_DEMAND_DATA,
+  MOCK_SCORE_DISTRIBUTION_DATA,
+  MOCK_SALES_LEADS,
+} from "../mocks/dashboard";
+
+export async function fetchDashboardData(): Promise<{
+  kpis: DashboardKPIs;
+  trends: typeof MOCK_LEAD_TREND_DATA;
+  productDemand: typeof MOCK_PRODUCT_DEMAND_DATA;
+  scoreDistribution: typeof MOCK_SCORE_DISTRIBUTION_DATA;
+  leads: SalesDashboardLeadItem[];
+}> {
+  return apiClient(
+    "/api/v1/dashboard",
+    { method: "GET" },
+    () => ({
+      kpis: MOCK_DASHBOARD_KPIS,
+      trends: MOCK_LEAD_TREND_DATA,
+      productDemand: MOCK_PRODUCT_DEMAND_DATA,
+      scoreDistribution: MOCK_SCORE_DISTRIBUTION_DATA,
+      leads: MOCK_SALES_LEADS,
+    })
+  );
+}
