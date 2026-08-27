@@ -53,6 +53,8 @@ const cardEmployment = document.getElementById("cardEmployment");
 const cardDebts = document.getElementById("cardDebts");
 const cardCreditScore = document.getElementById("cardCreditScore");
 const cardTenureAge = document.getElementById("cardTenureAge");
+const cardPreferredEMI = document.getElementById("cardPreferredEMI");
+const cardInterestType = document.getElementById("cardInterestType");
 const cardUrgency = document.getElementById("cardUrgency");
 
 // Initialize app
@@ -247,7 +249,13 @@ async function updateSidebarProfile() {
       cardIncome.className = "text-slate-200 font-mono font-semibold";
     }
     if (p.employment_type) {
-      cardEmployment.innerText = p.employment_type.replace(/_/g, " ").toUpperCase();
+      let empText = p.employment_type.replace(/_/g, " ").toUpperCase();
+      if (p.years_at_current_job !== undefined && p.years_at_current_job !== null) {
+        empText += ` (${p.years_at_current_job} YRS)`;
+      } else if (p.years_in_business !== undefined && p.years_in_business !== null) {
+        empText += ` (${p.years_in_business} YRS)`;
+      }
+      cardEmployment.innerText = empText;
       cardEmployment.className = "text-slate-200 font-mono font-semibold";
     }
     if (p.has_existing_loans !== undefined) {
@@ -267,6 +275,14 @@ async function updateSidebarProfile() {
       const a = p.age ? `${p.age} y/o` : "-";
       cardTenureAge.innerText = `${t} • ${a}`;
       cardTenureAge.className = "text-slate-200 font-mono font-semibold";
+    }
+    if (p.preferred_emi) {
+      cardPreferredEMI.innerText = p.preferred_emi.replace(/_/g, " ").toUpperCase();
+      cardPreferredEMI.className = "text-slate-200 font-mono font-semibold";
+    }
+    if (p.interest_type) {
+      cardInterestType.innerText = p.interest_type.replace(/_/g, " ").toUpperCase();
+      cardInterestType.className = "text-slate-200 font-mono font-semibold";
     }
     if (p.urgency) {
       cardUrgency.innerText = p.urgency.replace(/_/g, " ").toUpperCase();

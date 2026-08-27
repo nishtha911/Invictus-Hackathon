@@ -1,4 +1,3 @@
-# /backend/app/graph/builder.py
 """
 LangGraph graph construction.
 
@@ -6,11 +5,6 @@ This module builds the advisory conversation graph by:
 1. Registering all nodes (from nodes.py)
 2. Wiring conditional edges (using router.py)
 3. Compiling the graph into a runnable
-
-The compiled graph is a stateful machine where:
-- State = AdvisoryState (partial profile + chat history + phase)
-- Each node fills one or more profile fields
-- The router decides which node runs next based on current state
 """
 
 from __future__ import annotations
@@ -18,6 +12,7 @@ from __future__ import annotations
 import logging
 
 from langgraph.graph import StateGraph, END
+from langgraph.graph.state import CompiledGraph
 
 from app.graph.state import AdvisoryState
 from app.graph.nodes import (
@@ -32,6 +27,8 @@ from app.graph.nodes import (
     extract_age_node,
     extract_tenure_node,
     extract_co_applicant_node,
+    extract_preferred_emi_node,
+    extract_interest_type_node,
     extract_urgency_node,
     completion_node,
 )
@@ -47,53 +44,17 @@ from app.graph.router import (
     route_after_age,
     route_after_tenure,
     route_after_co_applicant,
+    route_after_preferred_emi,
+    route_after_interest_type,
     route_after_urgency,
 )
 
 logger = logging.getLogger(__name__)
 
-def build_advisory_graph() -> StateGraph:
+def build_advisory_graph() -> CompiledGraph:
     """
     Build and compile the full advisory conversation graph.
-
-    Graph topology:
-
-        greeting
-            │
-            ▼
-        extract_loan_type  ◄─── (re-ask loop)
-            │
-            ▼
-        extract_loan_type_details  ◄─── (multi-step sub-flow for vehicle/education)
-            │
-            ├───► extract_loan_amount  (if amount not derived from type details)
-            │         │
-            │         ▼
-            └───► extract_income_employment  ◄─── (2-step: employment → income)
-                      │
-                      ▼
-                  extract_existing_debts  ◄─── (2-step: yes/no → amount)
-                      │
-                      ▼
-                  extract_credit_score
-                      │
-                      ▼
-                  extract_age
-                      │
-                      ▼
-                  extract_tenure
-                      │
-                      ▼
-                  extract_co_applicant
-                      │
-                      ▼
-                  extract_urgency
-                      │
-                      ▼
-                  completion ───► END
     """
-
-    # ── Create the graph with our state schema ─────────────────────────
     graph = StateGraph(AdvisoryState)
 
     # ── Register all nodes ─────────────────────────────────────────────
@@ -108,6 +69,8 @@ def build_advisory_graph() -> StateGraph:
     graph.add_node("extract_age", extract_age_node)
     graph.add_node("extract_tenure", extract_tenure_node)
     graph.add_node("extract_co_applicant", extract_co_applicant_node)
+    graph.add_node("extract_preferred_emi", extract_preferred_emi_node)
+    graph.add_node("extract_interest_type", extract_interest_type_node)
     graph.add_node("extract_urgency", extract_urgency_node)
     graph.add_node("completion", completion_node)
 
@@ -115,15 +78,10 @@ def build_advisory_graph() -> StateGraph:
     graph.set_entry_point("greeting")
 
     # ── Wire conditional edges ─────────────────────────────────────────
-    # Each node's outgoing edge is controlled by a router function
-    # that inspects state and returns the name of the next node.
-
     graph.add_conditional_edges(
         "greeting",
         route_after_greeting,
-        {
-            "extract_name": "extract_name",
-        },
+        {"extract_name": "extract_name"},
     )
 
     graph.add_conditional_edges(
@@ -213,6 +171,24 @@ def build_advisory_graph() -> StateGraph:
         route_after_co_applicant,
         {
             "extract_co_applicant": "extract_co_applicant",
+            "extract_preferred_emi": "extract_preferred_emi",
+        },
+    )
+
+    graph.add_conditional_edges(
+        "extract_preferred_emi",
+        route_after_preferred_emi,
+        {
+            "extract_preferred_emi": "extract_preferred_emi",
+            "extract_interest_type": "extract_interest_type",
+        },
+    )
+
+    graph.add_conditional_edges(
+        "extract_interest_type",
+        route_after_interest_type,
+        {
+            "extract_interest_type": "extract_interest_type",
             "extract_urgency": "extract_urgency",
         },
     )
@@ -230,18 +206,14 @@ def build_advisory_graph() -> StateGraph:
     graph.add_edge("completion", END)
 
     # ── Compile and return ─────────────────────────────────────────────
-    logger.info("Advisory graph built successfully with 12 nodes")
     return graph.compile()
 
-# ── Module-level singleton ─────────────────────────────────────────────
-# This gets compiled once and reused across all sessions.
 
 _compiled_graph = None
 
 def get_advisory_graph():
     """
     Return the compiled advisory graph (singleton).
-    Compiled once on first call, then reused.
     """
     global _compiled_graph
     if _compiled_graph is None:

@@ -76,4 +76,4 @@ def generate_conversational_response(
         return response.content.strip()
     except Exception as e:
         logger.error(f"LLM call failed: {e}")
-        return "I apologize, but I'm having trouble processing that. Could you try again?"
+        return "Got it."

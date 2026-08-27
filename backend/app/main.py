@@ -322,6 +322,7 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
     we directly call the node function for the current phase.
     """
     from app.graph.nodes import (
+        extract_name_node,
         extract_loan_type_node,
         extract_loan_type_details_node,
         extract_loan_amount_node,
@@ -331,6 +332,8 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
         extract_age_node,
         extract_tenure_node,
         extract_co_applicant_node,
+        extract_preferred_emi_node,
+        extract_interest_type_node,
         extract_urgency_node,
         completion_node,
     )
@@ -338,6 +341,7 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
     phase = state.current_phase
 
     node_map = {
+        "name": extract_name_node,
         "loan_type": extract_loan_type_node,
         "loan_type_details": extract_loan_type_details_node,
         "loan_amount": extract_loan_amount_node,
@@ -347,6 +351,8 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
         "age": extract_age_node,
         "tenure": extract_tenure_node,
         "co_applicant": extract_co_applicant_node,
+        "preferred_emi": extract_preferred_emi_node,
+        "interest_type": extract_interest_type_node,
         "urgency": extract_urgency_node,
         "complete": completion_node,
     }
@@ -361,6 +367,7 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
         next_phase = _route_by_missing_fields(state)
         # Map node name back to phase
         phase_map = {
+            "extract_name": "name",
             "extract_loan_type": "loan_type",
             "extract_loan_type_details": "loan_type_details",
             "extract_loan_amount": "loan_amount",
@@ -370,6 +377,8 @@ def _run_next_node(state: AdvisoryState) -> AdvisoryState:
             "extract_age": "age",
             "extract_tenure": "tenure",
             "extract_co_applicant": "co_applicant",
+            "extract_preferred_emi": "preferred_emi",
+            "extract_interest_type": "interest_type",
             "extract_urgency": "urgency",
             "completion": "complete",
         }

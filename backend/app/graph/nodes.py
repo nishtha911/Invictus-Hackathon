@@ -143,7 +143,9 @@ def _try_parse_number(text: str) -> float | None:
     """
     import re
 
-    text = text.strip().lower().replace(",", "").replace("₹", "").replace("rs", "").replace("inr", "").strip()
+    text = text.strip().lower().replace(",", "").replace("₹", "").replace("rs", "").replace("inr", "")
+    text = text.replace("years", "").replace("year", "").replace("yrs", "").replace("yr", "")
+    text = text.replace("months", "").replace("month", "").replace("mos", "").replace("mo", "").strip()
 
     # Pattern: number followed by unit word
     match = re.match(
@@ -180,15 +182,17 @@ def _ask_loan_type_details(state: AdvisoryState, intent: LoanIntent) -> None:
             state,
             content=(
                 "For your home loan, I need a few property details. "
-                "What is the approximate property value and how much loan do you need? "
-                "Banks typically finance 80–90% of the property value."
+                "First, what is the approximate property value?"
             ),
             ui_component={
-                "type": UIComponentType.TEXT_INPUT.value,
-                "placeholder": "e.g., Property: 50 lakh, Loan: 40 lakh",
+                "type": UIComponentType.NUMBER_INPUT.value,
+                "min_value": 5_00_000,
+                "max_value": 50_00_00_000,
+                "step": 1_00_000,
                 "unit": "₹",
+                "placeholder": "e.g., 5000000",
             },
-            field_target="home_loan_details",
+            field_target="home_loan_details.property_value",
         )
 
     elif intent == LoanIntent.VEHICLE_LOAN:
@@ -288,6 +292,10 @@ def _ask_loan_amount(state: AdvisoryState) -> None:
 
 def _ask_income_employment(state: AdvisoryState) -> None:
     """Ask about income and employment status."""
+    if state.profile.employment_type is not None:
+        _ask_monthly_income(state)
+        return
+
     _add_bot_message(
         state,
         content="What is your employment type?",
@@ -324,6 +332,28 @@ def _ask_monthly_income(state: AdvisoryState) -> None:
             "placeholder": "e.g., 65000",
         },
         field_target="monthly_income",
+    )
+
+def _ask_occupation_vintage(state: AdvisoryState) -> None:
+    """Ask for occupation vintage (years in job or business)."""
+    emp = state.profile.employment_type
+    if emp == EmploymentType.SALARIED:
+        label = "How many years have you been working at your current company?"
+        target = "years_at_current_job"
+    else:
+        label = "How many years have you been running your current business / practice?"
+        target = "years_in_business"
+
+    _add_bot_message(
+        state,
+        content=label,
+        ui_component={
+            "type": UIComponentType.SLIDER.value,
+            "min_value": 0,
+            "max_value": 40,
+            "default_value": 2,
+        },
+        field_target=target,
     )
 
 def _ask_existing_debts(state: AdvisoryState) -> None:
@@ -633,6 +663,7 @@ def extract_loan_type_node(state: AdvisoryState) -> AdvisoryState:
             state.profile.personal_loan_details = PersonalLoanDetails()
         elif intent == LoanIntent.BUSINESS_LOAN:
             state.profile.business_loan_details = BusinessLoanDetails()
+            state.profile.employment_type = EmploymentType.BUSINESS_OWNER
 
         _update_completeness(state)
 
@@ -681,33 +712,127 @@ def extract_loan_type_details_node(state: AdvisoryState) -> AdvisoryState:
 
     # ── HOME LOAN ──────────────────────────────────────────────────────
     if intent == LoanIntent.HOME_LOAN:
-        result = extract_json_from_llm(
-            SYSTEM_PROMPT,
-            EXTRACT_HOME_LOAN_DETAILS_PROMPT.format(user_input=user_input),
-        )
-        if result:
-            details = state.profile.home_loan_details or HomeLoanDetails()
-            if result.get("property_value"):
-                details.property_value = float(result["property_value"])
-            if result.get("down_payment"):
-                details.down_payment = float(result["down_payment"])
-            if result.get("property_location"):
-                details.property_location = result["property_location"]
-            if result.get("is_first_property") is not None:
-                details.is_first_property = result["is_first_property"]
-            if result.get("property_status"):
-                details.property_status = result["property_status"]
-            state.profile.home_loan_details = details
+        details = state.profile.home_loan_details or HomeLoanDetails()
 
-            # Derive loan amount from property value if not yet set
-            if details.property_value and not state.profile.requested_loan_amount:
-                if details.down_payment:
-                    state.profile.requested_loan_amount = (
-                        details.property_value - details.down_payment
-                    )
-                else:
-                    # Default 80% LTV
-                    state.profile.requested_loan_amount = details.property_value * 0.8
+        # Step 1: property_value
+        if details.property_value is None:
+            val = _try_parse_number(user_input)
+            if val and val > 0:
+                details.property_value = val
+                state.profile.home_loan_details = details
+                _update_completeness(state)
+                _add_bot_message(
+                    state,
+                    content="Great. What is your planned down payment amount?",
+                    ui_component={
+                        "type": UIComponentType.NUMBER_INPUT.value,
+                        "min_value": 0,
+                        "max_value": val,
+                        "step": 1_00_000,
+                        "unit": "₹",
+                        "placeholder": "e.g., 500000",
+                    },
+                    field_target="home_loan_details.down_payment",
+                )
+            else:
+                _add_bot_message(state, content="Please enter a valid property value.")
+                _ask_loan_type_details(state, intent)
+            return state
+
+        # Step 2: down_payment
+        if details.down_payment is None:
+            val = _try_parse_number(user_input)
+            if val is not None and val >= 0:
+                details.down_payment = val
+                state.profile.home_loan_details = details
+                _update_completeness(state)
+                _add_bot_message(
+                    state,
+                    content="Which city or area is the property located in?",
+                    ui_component={
+                        "type": UIComponentType.TEXT_INPUT.value,
+                        "placeholder": "e.g., Mumbai, Andheri West",
+                    },
+                    field_target="home_loan_details.property_location",
+                )
+            else:
+                _add_bot_message(state, content="Please enter a valid down payment amount.")
+                _add_bot_message(
+                    state,
+                    content="What is your planned down payment amount?",
+                    ui_component={
+                        "type": UIComponentType.NUMBER_INPUT.value,
+                        "min_value": 0,
+                        "max_value": details.property_value,
+                        "step": 1_00_000,
+                        "unit": "₹",
+                    },
+                    field_target="home_loan_details.down_payment",
+                )
+            return state
+
+        # Step 3: property_location
+        if details.property_location is None:
+            if user_input.strip():
+                details.property_location = user_input.strip()
+                state.profile.home_loan_details = details
+                _update_completeness(state)
+                _add_bot_message(
+                    state,
+                    content="Is this your first property purchase?",
+                    ui_component={
+                        "type": UIComponentType.YES_NO.value,
+                        "options": [
+                            {"label": "✅ Yes", "value": "yes"},
+                            {"label": "❌ No", "value": "no"},
+                        ],
+                    },
+                    field_target="home_loan_details.is_first_property",
+                )
+            else:
+                _add_bot_message(state, content="Please enter the property location.")
+            return state
+
+        # Step 4: is_first_property
+        if details.is_first_property is None:
+            if user_input.strip().lower() in ("yes", "no"):
+                details.is_first_property = (user_input.strip().lower() == "yes")
+                state.profile.home_loan_details = details
+                _update_completeness(state)
+                _add_bot_message(
+                    state,
+                    content="What is the status of the property?",
+                    ui_component={
+                        "type": UIComponentType.MCQ.value,
+                        "options": [
+                            {"label": "🏠 Ready to Move", "value": "ready_to_move"},
+                            {"label": "🏗️ Under Construction", "value": "under_construction"},
+                        ],
+                    },
+                    field_target="home_loan_details.property_status",
+                )
+            else:
+                _add_bot_message(state, content="Please select Yes or No.")
+            return state
+
+        # Step 5: property_status
+        if details.property_status is None:
+            if user_input.strip().lower() in ("ready_to_move", "under_construction"):
+                details.property_status = user_input.strip().lower()
+                state.profile.home_loan_details = details
+                
+                # Derive requested_loan_amount if not set
+                if not state.profile.requested_loan_amount:
+                    if details.down_payment is not None:
+                        state.profile.requested_loan_amount = details.property_value - details.down_payment
+                    else:
+                        state.profile.requested_loan_amount = details.property_value * 0.8
+                
+                _update_completeness(state)
+            else:
+                _add_bot_message(state, content="Please select a valid property status.")
+                return state
+
 
     # ── VEHICLE LOAN (multi-step sub-flow) ─────────────────────────────
     elif intent == LoanIntent.VEHICLE_LOAN:
@@ -906,7 +1031,7 @@ def extract_loan_type_details_node(state: AdvisoryState) -> AdvisoryState:
             if result.get("business_type"):
                 details.business_type = result["business_type"]
             if result.get("years_in_business"):
-                details.years_in_business = int(result["years_in_business"])
+                state.profile.years_in_business = int(result["years_in_business"])
             if result.get("annual_turnover"):
                 details.annual_turnover = float(result["annual_turnover"])
         state.profile.business_loan_details = details
@@ -1057,9 +1182,11 @@ def extract_income_employment_node(state: AdvisoryState) -> AdvisoryState:
                 if result.get("employer_type"):
                     state.profile.employer_type = result["employer_type"]
                 if result.get("years_at_current_job"):
-                    state.profile.years_at_current_job = int(
-                        result["years_at_current_job"]
-                    )
+                    years = int(result["years_at_current_job"])
+                    if emp == EmploymentType.SALARIED:
+                        state.profile.years_at_current_job = years
+                    else:
+                        state.profile.years_in_business = years
 
         if emp:
             state.profile.employment_type = emp
@@ -1085,8 +1212,13 @@ def extract_income_employment_node(state: AdvisoryState) -> AdvisoryState:
                 )
                 _add_bot_message(state, content=ack)
                 _add_to_history(state, "assistant", ack)
-                state.current_phase = "existing_debts"
-                _ask_existing_debts(state)
+                
+                # We also need vintage, let's ask for it
+                if (state.profile.employment_type == EmploymentType.SALARIED and state.profile.years_at_current_job is None) or (state.profile.employment_type in (EmploymentType.SELF_EMPLOYED, EmploymentType.BUSINESS_OWNER) and state.profile.years_in_business is None):
+                    _ask_occupation_vintage(state)
+                else:
+                    state.current_phase = "existing_debts"
+                    _ask_existing_debts(state)
             else:
                 # Ask income as follow-up
                 _ask_monthly_income(state)
@@ -1128,7 +1260,7 @@ def extract_income_employment_node(state: AdvisoryState) -> AdvisoryState:
                 state.warnings.append(validation.warning)
 
             _update_completeness(state)
-            state.current_phase = "existing_debts"
+            # We don't change phase yet because we still need vintage.
 
             ack = _generate_ack(
                 "monthly income",
@@ -1138,7 +1270,7 @@ def extract_income_employment_node(state: AdvisoryState) -> AdvisoryState:
             )
             _add_bot_message(state, content=ack)
             _add_to_history(state, "assistant", ack)
-            _ask_existing_debts(state)
+            _ask_occupation_vintage(state)
         else:
             _add_bot_message(
                 state,
@@ -1148,6 +1280,42 @@ def extract_income_employment_node(state: AdvisoryState) -> AdvisoryState:
                 ),
             )
             _ask_monthly_income(state)
+
+        return state
+
+    # ── Sub-step 3: Vintage not yet set ────────────────────────
+    if state.profile.monthly_income is not None:
+        needs_vintage = False
+        if state.profile.employment_type == EmploymentType.SALARIED and state.profile.years_at_current_job is None:
+            needs_vintage = True
+        elif state.profile.employment_type in (EmploymentType.SELF_EMPLOYED, EmploymentType.BUSINESS_OWNER) and state.profile.years_in_business is None:
+            needs_vintage = True
+            
+        if needs_vintage:
+            years = _try_parse_number(user_input)
+            if years is not None and years >= 0:
+                if state.profile.employment_type == EmploymentType.SALARIED:
+                    state.profile.years_at_current_job = int(years)
+                else:
+                    state.profile.years_in_business = int(years)
+                
+                _update_completeness(state)
+                state.current_phase = "existing_debts"
+                
+                ack = _generate_ack(
+                    "occupation vintage",
+                    f"{int(years)} years",
+                    state.profile.intent.value if state.profile.intent else None,
+                )
+                _add_bot_message(state, content=ack)
+                _add_to_history(state, "assistant", ack)
+                _ask_existing_debts(state)
+            else:
+                _add_bot_message(
+                    state,
+                    content="Please enter the number of years as a valid number.",
+                )
+                _ask_occupation_vintage(state)
 
     return state
 
@@ -1332,7 +1500,7 @@ def extract_credit_score_node(state: AdvisoryState) -> AdvisoryState:
         band = CreditScoreBand.FAIR
     elif cleaned in ("4", "4.") or "poor" in cleaned or "low" in cleaned or "bad" in cleaned:
         band = CreditScoreBand.POOR
-    elif cleaned in ("5", "5.") or "unknown" in cleaned or "don't know" in cleaned or "dont know" in cleaned or "not sure" in cleaned:
+    elif cleaned in ("5", "5.") or "unknown" in cleaned or "don't know" in cleaned or "dont know" in cleaned or "not sure" in cleaned or "no idea" in cleaned:
         band = CreditScoreBand.UNKNOWN
 
     if not band:
@@ -1367,6 +1535,13 @@ def extract_credit_score_node(state: AdvisoryState) -> AdvisoryState:
                 except (ValueError, TypeError):
                     pass
             if not band and result.get("credit_score_band"):
+                band_map = {
+                    "poor": CreditScoreBand.POOR,
+                    "fair": CreditScoreBand.FAIR,
+                    "good": CreditScoreBand.GOOD,
+                    "excellent": CreditScoreBand.EXCELLENT,
+                    "unknown": CreditScoreBand.UNKNOWN,
+                }
                 band = band_map.get(result["credit_score_band"])
 
     if band:
@@ -1616,7 +1791,7 @@ def extract_co_applicant_node(state: AdvisoryState) -> AdvisoryState:
     # If co-applicant said yes but we don't have their income yet,
     # we could ask — but to keep the flow short, we skip for MVP
     _update_completeness(state)
-    state.current_phase = "urgency"
+    state.current_phase = "preferred_emi"
 
     ack_val = "Yes" if state.profile.has_co_applicant else "No"
     if state.profile.co_applicant_income:
@@ -1629,10 +1804,173 @@ def extract_co_applicant_node(state: AdvisoryState) -> AdvisoryState:
     )
     _add_bot_message(state, content=ack)
     _add_to_history(state, "assistant", ack)
-    _ask_urgency(state)
+
+    msg = "Which repayment goal matters most to you?"
+    _add_bot_message(
+        state,
+        content=msg,
+        ui_component={
+            "type": UIComponentType.MCQ.value,
+            "options": [
+                {"label": "Lowest monthly EMI", "value": "lowest"},
+                {"label": "Pay the least total interest (Fast repayment)", "value": "fast_repayment"},
+                {"label": "Balanced EMI & tenure", "value": "balanced"},
+                {"label": "Keep flexibility for future prepayments", "value": "flexible"},
+            ],
+        },
+        field_target="preferred_emi",
+    )
+    _add_to_history(state, "assistant", msg)
 
     return state
 
+
+# ═══════════════════════════════════════════════════════════════════════
+#  NODE: EXTRACT PREFERRED EMI
+# ═══════════════════════════════════════════════════════════════════════
+
+def extract_preferred_emi_node(state: AdvisoryState) -> AdvisoryState:
+    """Extract preferred EMI option."""
+    user_input = state.current_user_input
+    _add_to_history(state, "user", user_input)
+    state.turn_count += 1
+
+    from app.schemas.profile import PreferredEMI
+
+    lower = user_input.strip().lower()
+    emi = None
+
+    if "lowest" in lower:
+        emi = PreferredEMI.LOWEST
+    elif "balance" in lower:
+        emi = PreferredEMI.BALANCED
+    elif "fast" in lower or "least" in lower:
+        emi = PreferredEMI.FAST_REPAYMENT
+    elif "flexib" in lower:
+        emi = PreferredEMI.FLEXIBLE
+    else:
+        # Ask LLM fallback
+        system_prompt = (
+            "Extract preferred EMI option from the user's input.\n"
+            "Return EXACTLY one of: lowest, balanced, fast_repayment, flexible.\n"
+            "If unclear, return 'unclear'."
+        )
+        response = _call_llm(system_prompt, user_input)
+        ans = response.strip().lower()
+        if ans in ("lowest", "balanced", "fast_repayment", "flexible"):
+            emi = PreferredEMI(ans)
+
+    if emi:
+        state.profile.preferred_emi = emi
+        _update_completeness(state)
+        state.current_phase = "interest_type"
+
+        msg = "Got it! What type of interest rate do you prefer?"
+        _add_bot_message(
+            state,
+            content=msg,
+            ui_component={
+                "type": UIComponentType.MCQ.value,
+                "options": [
+                    {"label": "Fixed", "value": "fixed"},
+                    {"label": "Floating", "value": "floating"},
+                    {"label": "Not sure", "value": "not_sure"},
+                ],
+            },
+            field_target="interest_type",
+        )
+        _add_to_history(state, "assistant", msg)
+    else:
+        msg = "Which repayment goal matters most to you?"
+        _add_bot_message(
+            state,
+            content=msg,
+            ui_component={
+                "type": UIComponentType.MCQ.value,
+                "options": [
+                    {"label": "Lowest monthly EMI", "value": "lowest"},
+                    {"label": "Pay the least total interest (Fast repayment)", "value": "fast_repayment"},
+                    {"label": "Balanced EMI & tenure", "value": "balanced"},
+                    {"label": "Keep flexibility for future prepayments", "value": "flexible"},
+                ],
+            },
+            field_target="preferred_emi",
+        )
+        _add_to_history(state, "assistant", msg)
+
+    return state
+
+# ═══════════════════════════════════════════════════════════════════════
+#  NODE: EXTRACT INTEREST TYPE
+# ═══════════════════════════════════════════════════════════════════════
+
+def extract_interest_type_node(state: AdvisoryState) -> AdvisoryState:
+    """Extract preferred interest type."""
+    user_input = state.current_user_input
+    _add_to_history(state, "user", user_input)
+    state.turn_count += 1
+
+    from app.schemas.profile import InterestType
+
+    lower = user_input.strip().lower()
+    int_type = None
+
+    if "fixed" in lower:
+        int_type = InterestType.FIXED
+    elif "float" in lower:
+        int_type = InterestType.FLOATING
+    elif "not sure" in lower or "don't know" in lower:
+        int_type = InterestType.NOT_SURE
+    else:
+        # Ask LLM fallback
+        system_prompt = (
+            "Extract preferred interest type from the user's input.\n"
+            "Return EXACTLY one of: fixed, floating, not_sure.\n"
+            "If unclear, return 'unclear'."
+        )
+        response = _call_llm(system_prompt, user_input)
+        ans = response.strip().lower()
+        if ans in ("fixed", "floating", "not_sure"):
+            int_type = InterestType(ans)
+
+    if int_type:
+        state.profile.interest_type = int_type
+        _update_completeness(state)
+        state.current_phase = "urgency"
+
+        msg = "Almost done! When are you planning to take this loan?"
+        _add_bot_message(
+            state,
+            content=msg,
+            ui_component={
+                "type": UIComponentType.MCQ.value,
+                "options": [
+                    {"label": "Immediately", "value": "immediate"},
+                    {"label": "Within 3 Months", "value": "within_3_months"},
+                    {"label": "Just exploring", "value": "exploring"},
+                ],
+            },
+            field_target="urgency",
+        )
+        _add_to_history(state, "assistant", msg)
+    else:
+        msg = "Please select an interest type preference:"
+        _add_bot_message(
+            state,
+            content=msg,
+            ui_component={
+                "type": UIComponentType.MCQ.value,
+                "options": [
+                    {"label": "Fixed", "value": "fixed"},
+                    {"label": "Floating", "value": "floating"},
+                    {"label": "Not sure", "value": "not_sure"},
+                ],
+            },
+            field_target="interest_type",
+        )
+        _add_to_history(state, "assistant", msg)
+
+    return state
 
 # ═══════════════════════════════════════════════════════════════════════
 #  NODE: EXTRACT URGENCY

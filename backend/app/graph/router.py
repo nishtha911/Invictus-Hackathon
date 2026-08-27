@@ -58,6 +58,21 @@ def route_after_loan_type_details(state: AdvisoryState) -> str:
     """
     intent = state.profile.intent
 
+    # ── Home sub-flow: check if all steps are done ──
+    if intent and intent.value == "home_loan":
+        details = state.profile.home_loan_details
+        if details:
+            if details.property_value is None:
+                return "extract_loan_type_details"
+            if details.down_payment is None:
+                return "extract_loan_type_details"
+            if details.property_location is None:
+                return "extract_loan_type_details"
+            if details.is_first_property is None:
+                return "extract_loan_type_details"
+            if details.property_status is None:
+                return "extract_loan_type_details"
+
     # ── Vehicle sub-flow: check if all steps are done ──
     if intent and intent.value == "vehicle_loan":
         details = state.profile.vehicle_loan_details
@@ -112,6 +127,13 @@ def route_after_income_employment(state: AdvisoryState) -> str:
         return "extract_income_employment"
     if state.profile.monthly_income is None:
         return "extract_income_employment"
+    
+    from app.schemas.profile import EmploymentType
+    if state.profile.employment_type == EmploymentType.SALARIED and state.profile.years_at_current_job is None:
+        return "extract_income_employment"
+    if state.profile.employment_type in (EmploymentType.SELF_EMPLOYED, EmploymentType.BUSINESS_OWNER) and state.profile.years_in_business is None:
+        return "extract_income_employment"
+
     return "extract_existing_debts"
 
 def route_after_existing_debts(state: AdvisoryState) -> str:
@@ -161,10 +183,22 @@ def route_after_tenure(state: AdvisoryState) -> str:
     return "extract_tenure"
 
 def route_after_co_applicant(state: AdvisoryState) -> str:
-    """After co-applicant, go to urgency."""
+    """After co-applicant, go to preferred EMI."""
     if state.profile.has_co_applicant is not None:
-        return "extract_urgency"
+        return "extract_preferred_emi"
     return "extract_co_applicant"
+
+def route_after_preferred_emi(state: AdvisoryState) -> str:
+    """After EMI, go to interest type."""
+    if state.profile.preferred_emi is not None:
+        return "extract_interest_type"
+    return "extract_preferred_emi"
+
+def route_after_interest_type(state: AdvisoryState) -> str:
+    """After interest type, go to urgency."""
+    if state.profile.interest_type is not None:
+        return "extract_urgency"
+    return "extract_interest_type"
 
 def route_after_urgency(state: AdvisoryState) -> str:
     """After urgency, check completeness and either finish or loop back."""
@@ -220,6 +254,8 @@ def master_router(state: AdvisoryState) -> str:
         "age": "extract_age",
         "tenure": "extract_tenure",
         "co_applicant": "extract_co_applicant",
+        "preferred_emi": "extract_preferred_emi",
+        "interest_type": "extract_interest_type",
         "urgency": "extract_urgency",
         "complete": "completion",
     }
@@ -259,6 +295,12 @@ def _route_by_missing_fields(state: AdvisoryState) -> str:
         return "extract_loan_amount"
     if profile.employment_type is None or profile.monthly_income is None:
         return "extract_income_employment"
+    
+    from app.schemas.profile import EmploymentType
+    if profile.employment_type == EmploymentType.SALARIED and profile.years_at_current_job is None:
+        return "extract_income_employment"
+    if profile.employment_type in (EmploymentType.SELF_EMPLOYED, EmploymentType.BUSINESS_OWNER) and profile.years_in_business is None:
+        return "extract_income_employment"
     if profile.has_existing_loans is None:
         return "extract_existing_debts"
     if profile.credit_score_band is None:
@@ -269,6 +311,10 @@ def _route_by_missing_fields(state: AdvisoryState) -> str:
         return "extract_tenure"
     if profile.has_co_applicant is None:
         return "extract_co_applicant"
+    if profile.preferred_emi is None:
+        return "extract_preferred_emi"
+    if profile.interest_type is None:
+        return "extract_interest_type"
     if profile.urgency is None:
         return "extract_urgency"
 

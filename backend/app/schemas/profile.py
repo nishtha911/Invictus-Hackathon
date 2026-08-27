@@ -39,6 +39,17 @@ class Urgency(str, Enum):
     WITHIN_3_MONTHS = "within_3_months"
     EXPLORING = "exploring"
 
+class PreferredEMI(str, Enum):
+    LOWEST = "lowest"
+    BALANCED = "balanced"
+    FAST_REPAYMENT = "fast_repayment"
+    FLEXIBLE = "flexible"
+
+class InterestType(str, Enum):
+    FIXED = "fixed"
+    FLOATING = "floating"
+    NOT_SURE = "not_sure"
+
 class UserType(str, Enum):
     GUEST = "guest"
     EXISTING_CUSTOMER = "existing_customer"
@@ -79,7 +90,6 @@ class PersonalLoanDetails(BaseModel):
 
 class BusinessLoanDetails(BaseModel):
     business_type: Optional[str] = Field(None, description="Type of business")
-    years_in_business: Optional[int] = Field(None, description="Years of operation")
     annual_turnover: Optional[float] = Field(None, description="Annual turnover in INR")
 
 # ── Core Profile ──────────────────────────────────────────────────────
@@ -95,6 +105,7 @@ class ProfileData(BaseModel):
         None, description="government | private | mnc | startup (salaried only)"
     )
     years_at_current_job: Optional[int] = Field(None, description="Salaried: tenure at job")
+    years_in_business: Optional[int] = Field(None, description="Years in business")
     requested_loan_amount: Optional[float] = Field(None, description="Desired loan in INR")
     preferred_tenure_months: Optional[int] = Field(None, description="Preferred repayment period")
     existing_emi_obligations: Optional[float] = Field(
@@ -110,6 +121,8 @@ class ProfileData(BaseModel):
     has_co_applicant: Optional[bool] = None
     co_applicant_income: Optional[float] = Field(None, description="Co-applicant income in INR")
     has_collateral: Optional[bool] = None
+    preferred_emi: Optional[PreferredEMI] = None
+    interest_type: Optional[InterestType] = None
 
     # Loan-type-specific details
     home_loan_details: Optional[HomeLoanDetails] = None
@@ -117,6 +130,14 @@ class ProfileData(BaseModel):
     education_loan_details: Optional[EducationLoanDetails] = None
     personal_loan_details: Optional[PersonalLoanDetails] = None
     business_loan_details: Optional[BusinessLoanDetails] = None
+
+    @property
+    def occupation_vintage(self) -> Optional[int]:
+        if self.employment_type == EmploymentType.SALARIED:
+            return self.years_at_current_job
+        elif self.employment_type in (EmploymentType.SELF_EMPLOYED, EmploymentType.BUSINESS_OWNER):
+            return self.years_in_business
+        return None
 
 class ExtractionMeta(BaseModel):
     completeness_pct: int = Field(0, ge=0, le=100)

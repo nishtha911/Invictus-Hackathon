@@ -77,26 +77,32 @@ CORE_FIELDS = [
     "intent",
     "monthly_income",
     "employment_type",
+    "occupation_vintage",
     "requested_loan_amount",
     "existing_emi_obligations",
     "credit_score_band",
     "urgency",
     "age",
+    "preferred_emi",
+    "interest_type",
 ]
 
 # Weight of each core field (total = 100 after normalization)
 FIELD_WEIGHTS: dict[str, float] = {
     "name": 5,
     "intent": 10,
-    "monthly_income": 15,
+    "monthly_income": 10,
     "employment_type": 10,
-    "requested_loan_amount": 15,
+    "occupation_vintage": 5,
+    "requested_loan_amount": 10,
     "preferred_tenure_months": 5,
     "existing_emi_obligations": 10,
     "has_existing_loans": 5,
     "credit_score_band": 10,
     "urgency": 5,
     "age": 5,
+    "preferred_emi": 5,
+    "interest_type": 5,
     "has_co_applicant": 5,
 }
 
@@ -120,7 +126,6 @@ LOAN_TYPE_BONUS_FIELDS: dict[LoanIntent, list[str]] = {
         "personal_loan_details.purpose",
     ],
     LoanIntent.BUSINESS_LOAN: [
-        "business_loan_details.years_in_business",
         "business_loan_details.annual_turnover",
     ],
 }
