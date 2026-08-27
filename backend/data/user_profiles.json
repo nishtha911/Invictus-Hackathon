@@ -1,0 +1,116 @@
+[
+  {
+    "session_id": "d7706648-c2e5-49dc-af7c-16de738864e4",
+    "user_type": "guest",
+    "profile": {
+      "name": "Mishti",
+      "intent": "personal_loan",
+      "monthly_income": 2500000.0,
+      "employment_type": "salaried",
+      "employer_type": null,
+      "years_at_current_job": 36,
+      "years_in_business": null,
+      "requested_loan_amount": 2500000.0,
+      "preferred_tenure_months": 84,
+      "existing_emi_obligations": 2500000.0,
+      "has_existing_loans": true,
+      "credit_score_band": "excellent",
+      "credit_score_numeric": null,
+      "urgency": "within_3_months",
+      "age": 60,
+      "has_co_applicant": true,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "preferred_emi": "fast_repayment",
+      "interest_type": "fixed",
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": {
+        "purpose": "wedding"
+      },
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 100,
+      "turns_taken": 17,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T13:28:19.903693",
+      "fields_filled": [
+        "name",
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "occupation_vintage",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "existing_emi_obligations",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "preferred_emi",
+        "interest_type",
+        "has_co_applicant",
+        "personal_loan_details.purpose"
+      ],
+      "fields_remaining": []
+    }
+  },
+  {
+    "session_id": "9126c3cb-4098-4169-b9f7-fe612a4cbfed",
+    "user_type": "guest",
+    "profile": {
+      "name": "Mr. Bhupendar jogi",
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "years_in_business": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "preferred_emi": null,
+      "interest_type": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 14,
+      "turns_taken": 2,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T13:28:19.903829",
+      "fields_filled": [
+        "name",
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "occupation_vintage",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "preferred_emi",
+        "interest_type",
+        "has_co_applicant"
+      ]
+    }
+  }
+]

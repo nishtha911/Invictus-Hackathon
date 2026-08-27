@@ -1,12 +1,21 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
+.venv/
+venv/
+ENV/
 
 # Next.js build output
 .next/
 frontend/.next/
 out/
 frontend/out/
+
+# Python cache & artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Environment files
 .env
@@ -15,6 +24,7 @@ frontend/out/
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+*.env
 
 # Logs
 npm-debug.log*
