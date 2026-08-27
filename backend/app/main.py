@@ -44,9 +44,42 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+import json
+
 # ── In-memory session store ───────────────────────────────────────────
 # Key: session_id, Value: AdvisoryState
 SESSION_STORE: dict[str, AdvisoryState] = {}
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+PROFILES_FILE = DATA_DIR / "user_profiles.json"
+
+def _save_profiles_to_disk():
+    """Save all current session profiles to a JSON file to persist the numerical details as digits."""
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        profiles_list = []
+        for sid, state in SESSION_STORE.items():
+            pct, filled, remaining = compute_completeness(state.profile)
+            extracted = ExtractedProfile(
+                session_id=state.session_id,
+                user_type=state.user_type,
+                profile=state.profile,
+                extraction_meta=ExtractionMeta(
+                    completeness_pct=pct,
+                    turns_taken=state.turn_count,
+                    model=get_settings().GROQ_MODEL,
+                    extracted_at=datetime.utcnow(),
+                    fields_filled=filled,
+                    fields_remaining=remaining,
+                ),
+            ).model_dump(mode="json")
+            profiles_list.append(extracted)
+        
+        with open(PROFILES_FILE, "w", encoding="utf-8") as f:
+            json.dump(profiles_list, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"Failed to save profiles to disk: {e}")
+
 
 # ── App lifecycle ──────────────────────────────────────────────────────
 
@@ -188,6 +221,7 @@ async def start_chat(user_type: str = "guest"):
 
         # Store session
         SESSION_STORE[session_id] = result_state
+        _save_profiles_to_disk()
 
         response = _state_to_response(result_state)
         logger.info(
@@ -245,6 +279,7 @@ async def send_message(request: ChatRequest):
 
         # Store updated session
         SESSION_STORE[session_id] = result_state
+        _save_profiles_to_disk()
 
         response = _state_to_response(result_state)
 
@@ -276,6 +311,7 @@ async def send_message(request: ChatRequest):
             }
         ]
         SESSION_STORE[session_id] = state
+        _save_profiles_to_disk()
         return _state_to_response(state)
 
 def _run_next_node(state: AdvisoryState) -> AdvisoryState:
@@ -397,6 +433,7 @@ async def delete_session(session_id: str):
     """Delete a chat session."""
     if session_id in SESSION_STORE:
         del SESSION_STORE[session_id]
+        _save_profiles_to_disk()
         return {"status": "deleted", "session_id": session_id}
     raise HTTPException(status_code=404, detail="Session not found.")
 

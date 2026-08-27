@@ -22,6 +22,7 @@ from langgraph.graph import StateGraph, END
 from app.graph.state import AdvisoryState
 from app.graph.nodes import (
     greeting_node,
+    extract_name_node,
     extract_loan_type_node,
     extract_loan_type_details_node,
     extract_loan_amount_node,
@@ -36,6 +37,7 @@ from app.graph.nodes import (
 )
 from app.graph.router import (
     route_after_greeting,
+    route_after_name,
     route_after_loan_type,
     route_after_loan_type_details,
     route_after_loan_amount,
@@ -96,6 +98,7 @@ def build_advisory_graph() -> StateGraph:
 
     # ── Register all nodes ─────────────────────────────────────────────
     graph.add_node("greeting", greeting_node)
+    graph.add_node("extract_name", extract_name_node)
     graph.add_node("extract_loan_type", extract_loan_type_node)
     graph.add_node("extract_loan_type_details", extract_loan_type_details_node)
     graph.add_node("extract_loan_amount", extract_loan_amount_node)
@@ -119,6 +122,15 @@ def build_advisory_graph() -> StateGraph:
         "greeting",
         route_after_greeting,
         {
+            "extract_name": "extract_name",
+        },
+    )
+
+    graph.add_conditional_edges(
+        "extract_name",
+        route_after_name,
+        {
+            "extract_name": "extract_name",
             "extract_loan_type": "extract_loan_type",
         },
     )

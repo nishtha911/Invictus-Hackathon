@@ -509,33 +509,76 @@ def _build_completion_summary(state: AdvisoryState) -> str:
 # ═══════════════════════════════════════════════════════════════════════
 
 def greeting_node(state: AdvisoryState) -> AdvisoryState:
-    """First node — welcomes the user and asks loan type."""
-    state.current_phase = "loan_type"
+    """First node — welcomes the user and asks for their name."""
+    state.current_phase = "name"
     state.turn_count += 1
 
     welcome = (
         "Welcome! 👋 I'm your AI loan advisor. I'll help you find the best loan "
         "options tailored to your needs. This will take about 2 minutes.\n\n"
-        "Let's start — what type of loan are you looking for?"
+        "Before we begin, could you please tell me your full name?"
     )
 
     _add_bot_message(
         state,
         content=welcome,
         ui_component={
-            "type": UIComponentType.MCQ.value,
-            "options": [
-                {"label": "🏠 Home Loan", "value": "home_loan"},
-                {"label": "🚗 Vehicle Loan", "value": "vehicle_loan"},
-                {"label": "💰 Personal Loan", "value": "personal_loan"},
-                {"label": "🎓 Education Loan", "value": "education_loan"},
-                {"label": "🏢 Business Loan", "value": "business_loan"},
-            ],
+            "type": UIComponentType.TEXT_INPUT.value,
+            "placeholder": "Enter your name",
         },
-        field_target="intent",
+        field_target="name",
     )
 
     _add_to_history(state, "assistant", welcome)
+    return state
+
+# ═══════════════════════════════════════════════════════════════════════
+#  NODE: EXTRACT NAME
+# ═══════════════════════════════════════════════════════════════════════
+
+def extract_name_node(state: AdvisoryState) -> AdvisoryState:
+    """Extract the user's name and ask for loan type."""
+    user_input = state.current_user_input
+    _add_to_history(state, "user", user_input)
+    state.turn_count += 1
+
+    name = user_input.strip()
+    if name:
+        state.profile.name = name
+        _update_completeness(state)
+        state.current_phase = "loan_type"
+        
+        ack = f"Nice to meet you, {name}! Let's start — what type of loan are you looking for?"
+        _add_bot_message(
+            state,
+            content=ack,
+            ui_component={
+                "type": UIComponentType.MCQ.value,
+                "options": [
+                    {"label": "🏠 Home Loan", "value": "home_loan"},
+                    {"label": "🚗 Vehicle Loan", "value": "vehicle_loan"},
+                    {"label": "💰 Personal Loan", "value": "personal_loan"},
+                    {"label": "🎓 Education Loan", "value": "education_loan"},
+                    {"label": "🏢 Business Loan", "value": "business_loan"},
+                ],
+            },
+            field_target="intent",
+        )
+        _add_to_history(state, "assistant", ack)
+    else:
+        # Ask again if empty
+        msg = "I didn't quite catch that. Could you please tell me your name?"
+        _add_bot_message(
+            state,
+            content=msg,
+            ui_component={
+                "type": UIComponentType.TEXT_INPUT.value,
+                "placeholder": "Enter your name",
+            },
+            field_target="name",
+        )
+        _add_to_history(state, "assistant", msg)
+
     return state
 
 # ═══════════════════════════════════════════════════════════════════════

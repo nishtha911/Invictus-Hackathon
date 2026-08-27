@@ -1,0 +1,298 @@
+[
+  {
+    "session_id": "baeb04b5-309d-4389-8645-190d17bef535",
+    "user_type": "guest",
+    "profile": {
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 10,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632249",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "188f04bd-a0cc-43de-ba98-3152061dd72c",
+    "user_type": "guest",
+    "profile": {
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 10,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632348",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "51712331-4cc2-4d1f-95dc-1dda1c00b8a3",
+    "user_type": "guest",
+    "profile": {
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 10,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632367",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "3895d991-8617-46b5-b3e6-653b3ff22ab5",
+    "user_type": "guest",
+    "profile": {
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 10,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632386",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "6ade2f33-a642-4582-a10e-69dda2fa8a88",
+    "user_type": "guest",
+    "profile": {
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 10,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632401",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "f9542b4b-6629-44aa-9308-f8eb6f8e61e0",
+    "user_type": "guest",
+    "profile": {
+      "intent": "home_loan",
+      "monthly_income": 2500000.0,
+      "employment_type": "salaried",
+      "employer_type": null,
+      "years_at_current_job": null,
+      "requested_loan_amount": 2500000.0,
+      "preferred_tenure_months": 144,
+      "existing_emi_obligations": 2500000.0,
+      "has_existing_loans": true,
+      "credit_score_band": "poor",
+      "credit_score_numeric": null,
+      "urgency": "within_3_months",
+      "age": 19,
+      "has_co_applicant": false,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "home_loan_details": {
+        "property_value": null,
+        "down_payment": null,
+        "property_location": null,
+        "is_first_property": null,
+        "property_status": null
+      },
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 90,
+      "turns_taken": 19,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-27T10:35:03.632427",
+      "fields_filled": [
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "existing_emi_obligations",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "has_co_applicant"
+      ],
+      "fields_remaining": [
+        "home_loan_details.property_value",
+        "home_loan_details.down_payment"
+      ]
+    }
+  }
+]

@@ -4,9 +4,11 @@
  */
 
 // Determine API base URL
-const API_BASE = window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")
-  ? window.location.origin
-  : "http://localhost:8000";
+// Determine API base URL
+// If running via Live Server or file://, point directly to the backend port 8080.
+const API_BASE = window.location.port === "8080" 
+  ? window.location.origin 
+  : "http://localhost:8080";
 
 // App State
 let sessionId = null;

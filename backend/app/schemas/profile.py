@@ -87,6 +87,7 @@ class BusinessLoanDetails(BaseModel):
 class ProfileData(BaseModel):
     """The extracted customer profile — the contract between Pod 1 and Pod 2."""
 
+    name: Optional[str] = Field(None, description="Customer's full name")
     intent: Optional[LoanIntent] = None
     monthly_income: Optional[float] = Field(None, description="Monthly income in INR")
     employment_type: Optional[EmploymentType] = None

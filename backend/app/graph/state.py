@@ -73,6 +73,7 @@ class AdvisoryState(BaseModel):
 
 # Core fields every loan type needs
 CORE_FIELDS = [
+    "name",
     "intent",
     "monthly_income",
     "employment_type",
@@ -85,7 +86,8 @@ CORE_FIELDS = [
 
 # Weight of each core field (total = 100 after normalization)
 FIELD_WEIGHTS: dict[str, float] = {
-    "intent": 15,
+    "name": 5,
+    "intent": 10,
     "monthly_income": 15,
     "employment_type": 10,
     "requested_loan_amount": 15,

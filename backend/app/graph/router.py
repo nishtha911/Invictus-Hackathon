@@ -25,8 +25,14 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════════════════
 
 def route_after_greeting(state: AdvisoryState) -> str:
-    """After greeting, always go to loan type extraction."""
-    return "extract_loan_type"
+    """After greeting, always go to name extraction."""
+    return "extract_name"
+
+def route_after_name(state: AdvisoryState) -> str:
+    """After name, go to loan type if name is extracted, else re-ask name."""
+    if state.profile.name is not None:
+        return "extract_loan_type"
+    return "extract_name"
 
 def route_after_loan_type(state: AdvisoryState) -> str:
     """
@@ -204,6 +210,7 @@ def master_router(state: AdvisoryState) -> str:
 
     phase_to_node = {
         "greeting": "greeting",
+        "name": "extract_name",
         "loan_type": "extract_loan_type",
         "loan_type_details": "extract_loan_type_details",
         "loan_amount": "extract_loan_amount",
@@ -218,7 +225,6 @@ def master_router(state: AdvisoryState) -> str:
     }
 
     next_node = phase_to_node.get(phase)
-
     if next_node:
         logger.debug(
             f"Session {state.session_id}: phase={phase} → node={next_node} "
@@ -233,6 +239,10 @@ def master_router(state: AdvisoryState) -> str:
     )
     return _route_by_missing_fields(state)
 
+# ═══════════════════════════════════════════════════════════════════════
+#  FALLBACK ROUTER
+# ═══════════════════════════════════════════════════════════════════════
+
 def _route_by_missing_fields(state: AdvisoryState) -> str:
     """
     Fallback router: look at which fields are still empty
@@ -240,6 +250,8 @@ def _route_by_missing_fields(state: AdvisoryState) -> str:
     """
     profile = state.profile
 
+    if profile.name is None:
+        return "extract_name"
     if profile.intent is None:
         return "extract_loan_type"
     if profile.requested_loan_amount is None:
