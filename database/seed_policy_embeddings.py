@@ -10,9 +10,8 @@ from supabase import create_client, Client
 from sentence_transformers import SentenceTransformer
 
 # 1. SETUP SUPABASE CLIENT
-# Replace with your actual Supabase URL and service_role / anon key
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://psclpghrsoxelzmebovj.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzY2xwZ2hyc294ZWx6bWVib3ZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Nzg0Mjk5OSwiZXhwIjoyMTAzNDE4OTk5fQ.bX5_2_CwIqTPPNkNUUJhGtAxaS-5PWaSkEXiez1oeWg")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "supabase_key")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
