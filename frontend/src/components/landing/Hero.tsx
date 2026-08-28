@@ -10,7 +10,7 @@ export function Hero() {
     <section className="relative overflow-hidden bg-[#F5F7FA] py-12 sm:py-16 lg:py-20 border-b border-[#E2E8F0]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-          {/* Left Column: Clean Messaging */}
+          {/* Left Column: Clean Financial Messaging */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -23,20 +23,20 @@ export function Hero() {
             </p>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#081C2D] leading-[1.15]">
-              Finance Your Next Step With Confidence.
+            <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-extrabold tracking-tight text-[#081C2D] leading-[1.12]">
+              Finance Your Next Step with Confidence.
             </h1>
 
             {/* Supporting Copy */}
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-              Explore suitable loan options for your home, car, business, or gold with clear guidance, transparent recommendations, and a simpler borrowing experience.
+              DhanSetu helps you explore suitable home, vehicle, business and gold loan options through a guided digital experience designed to make borrowing easier to understand.
             </p>
 
             {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-3.5">
               <Link
                 href="/#loans"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>Explore Loans</span>
                 <ArrowRight className="h-4 w-4" />
@@ -44,14 +44,14 @@ export function Hero() {
 
               <Link
                 href="/#how-it-works"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-3 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.02] cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>How DhanSetu Works</span>
               </Link>
             </div>
           </motion.div>
 
-          {/* Right Column: Real Lifestyle Photography */}
+          {/* Right Column: Lifestyle Photography */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -61,7 +61,7 @@ export function Hero() {
             <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-[#E2E8F0] shadow-md bg-white">
               <Image
                 src="/images/dhansetu-family-loans.jpg"
-                alt="Indian family celebrating home ownership and financial progress with DhanSetu"
+                alt="Family planning financial milestones with DhanSetu"
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"

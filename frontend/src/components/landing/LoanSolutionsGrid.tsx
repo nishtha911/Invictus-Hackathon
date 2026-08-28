@@ -17,7 +17,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function LoanSolutionsGrid() {
   return (
-    <section id="loans" className="scroll-mt-20 py-16 sm:py-20 bg-white border-t border-[#E2E8F0]">
+    <section id="loans" className="scroll-mt-24 py-16 sm:py-20 bg-white border-t border-[#E2E8F0]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
@@ -26,12 +26,12 @@ export function LoanSolutionsGrid() {
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
             Financing Options for Every Milestone
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600">
             Compare structured loan options with verified eligibility limits and transparent banking terms.
           </p>
         </div>
 
-        {/* 6 Loan Category Cards Grid */}
+        {/* Loan Category Cards Grid */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {LOAN_PURPOSES.map((item, index) => {
             const Icon = iconMap[item.icon] || Home;
@@ -41,18 +41,18 @@ export function LoanSolutionsGrid() {
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
+                transition={{ duration: 0.35, delay: index * 0.05 }}
               >
                 <Link
                   href={`/advisor?intent=${item.intentKey}`}
-                  className="group bank-card-interactive p-6 sm:p-7 flex flex-col justify-between h-full"
+                  className="group bank-card-interactive p-6 sm:p-7 flex flex-col justify-between h-full bg-[#F5F7FA] border border-[#E2E8F0] hover:bg-white transition-all"
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F7FA] text-[#1F7A63] border border-[#E2E8F0] group-hover:bg-[#1F7A63] group-hover:text-white transition-colors">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0] group-hover:bg-[#1F7A63] group-hover:text-white transition-colors shadow-2xs">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <span className="rounded-full bg-[#F5F7FA] px-2.5 py-0.5 text-[11px] font-medium text-slate-600 border border-[#E2E8F0]">
+                      <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-medium text-slate-600 border border-[#E2E8F0]">
                         {item.badge}
                       </span>
                     </div>
@@ -60,7 +60,7 @@ export function LoanSolutionsGrid() {
                     <h3 className="mt-4 text-lg font-bold text-[#081C2D] group-hover:text-[#1F7A63] transition-colors">
                       {item.label}
                     </h3>
-                    <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
+                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
                       {item.description}
                     </p>
 

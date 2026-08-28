@@ -15,7 +15,7 @@ import {
   Clock,
   Lock,
   LayoutDashboard,
-  RotateCcw,
+  Home,
 } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { submitLead } from "@/lib/api/leads";
@@ -132,9 +132,9 @@ export default function LeadCapturePage() {
                 REF: {submittedLead.lead_id}
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
-                Request Submitted Successfully
+                Request Submitted
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                 A retail lending specialist will contact you during your preferred{" "}
                 <strong className="text-[#081C2D]">{submittedLead.lead_data.preferred_contact_time}</strong> window.
               </p>
@@ -177,10 +177,10 @@ export default function LeadCapturePage() {
                   resetDemo();
                   router.push("/");
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-[#F5F7FA] transition-colors cursor-pointer"
               >
-                <RotateCcw className="h-4 w-4" />
-                <span>Return to Home</span>
+                <Home className="h-4 w-4 text-slate-500" />
+                <span>Return Home</span>
               </button>
 
               <button
@@ -289,7 +289,7 @@ export default function LeadCapturePage() {
                       key={t.id}
                       type="button"
                       onClick={() => handleSelectTime(t.id as "Morning" | "Afternoon" | "Evening")}
-                      className={`rounded-xl border p-2.5 text-center transition-all ${
+                      className={`rounded-xl border p-2.5 text-center transition-all cursor-pointer ${
                         preferredTime === t.id
                           ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
                           : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
@@ -320,7 +320,7 @@ export default function LeadCapturePage() {
                   <span>Submitting Lead...</span>
                 ) : (
                   <>
-                    <span>Submit Interest & Request Callback</span>
+                    <span>Request a Callback</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

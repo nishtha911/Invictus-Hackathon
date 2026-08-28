@@ -9,11 +9,8 @@ export const BRAND = {
   subtext: "Explore suitable loan options for your home, car, business, or gold with clear guidance, transparent recommendations, and a simpler borrowing experience.",
 };
 
-export const API_ENDPOINTS = {
-  extractProfile: "/api/v1/extract-profile",
-  recommendLoans: "/api/v1/recommend-loans",
-  leads: "/api/v1/leads",
-};
+import { API_ENDPOINTS } from "./api/endpoints";
+export { API_ENDPOINTS };
 
 export const LOAN_PURPOSES = [
   {

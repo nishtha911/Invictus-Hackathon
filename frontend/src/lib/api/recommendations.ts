@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { API_ENDPOINTS } from "../constants";
+import { API_ENDPOINTS } from "./endpoints";
 import { ProfileIntake, RecommendLoansResponse } from "../types/contracts";
 import { generateMockRecommendations } from "../mocks/recommendations";
 

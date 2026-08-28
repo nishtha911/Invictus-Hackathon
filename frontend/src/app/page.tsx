@@ -2,8 +2,8 @@ import { Hero } from "@/components/landing/Hero";
 import { LoanSolutionsGrid } from "@/components/landing/LoanSolutionsGrid";
 import { LoanInfoSection } from "@/components/landing/LoanInfoSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { AboutSection } from "@/components/landing/AboutSection";
 import { TrustSection } from "@/components/landing/TrustSection";
+import { AboutSection } from "@/components/landing/AboutSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 
 export default function HomePage() {
@@ -13,8 +13,8 @@ export default function HomePage() {
       <LoanSolutionsGrid />
       <LoanInfoSection />
       <HowItWorksSection />
-      <AboutSection />
       <TrustSection />
+      <AboutSection />
       <FinalCtaSection />
     </main>
   );

@@ -8,9 +8,11 @@
 
     --navy: #081C2D;
     --navy-hover: #0D263D;
+    --navy-surface: #0E2438;
     --emerald: #1F7A63;
     --emerald-hover: #186350;
     --emerald-light: #E8F5F1;
+    --emerald-tint: #F0FDF9;
     --soft-white: #F5F7FA;
     --cool-gray: #9AA3A8;
     --gray-border: #E2E8F0;
@@ -62,33 +64,38 @@ body {
   min-height: 100vh;
 }
 
+/* Section scroll offset for fixed navbar */
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
 /* Clean Banking Card & Panels */
 .bank-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.05), 0 1px 2px -1px rgba(8, 28, 45, 0.05);
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04), 0 1px 2px -1px rgba(8, 28, 45, 0.04);
   transition: all 0.2s ease-in-out;
 }
 
 .bank-card-interactive {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bank-card-interactive:hover {
   border-color: #1F7A63;
-  box-shadow: 0 10px 25px -5px rgba(8, 28, 45, 0.08), 0 8px 10px -6px rgba(8, 28, 45, 0.04);
+  box-shadow: 0 8px 20px -4px rgba(8, 28, 45, 0.07), 0 4px 8px -3px rgba(8, 28, 45, 0.04);
   transform: translateY(-2px);
 }
 
 .bank-card-selected {
   background-color: #F0FDF9;
   border: 1.5px solid #1F7A63;
-  border-radius: 1rem;
+  border-radius: 0.875rem;
 }
 
 /* Standardized Button Utility Classes */
@@ -97,12 +104,12 @@ body {
   color: #FFFFFF;
   font-weight: 600;
   border-radius: 0.625rem;
-  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
 }
 
 .btn-emerald:hover {
   background-color: #186350;
-  box-shadow: 0 4px 12px rgba(31, 122, 99, 0.25);
+  box-shadow: 0 4px 12px rgba(31, 122, 99, 0.22);
 }
 
 .btn-navy-outline {
@@ -131,6 +138,15 @@ body {
 .btn-secondary-neutral:hover {
   background-color: #F8FAFC;
   border-color: #CBD5E1;
+}
+
+/* Accessible focus visible rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #1F7A63;
+  outline-offset: 2px;
 }
 
 /* Subtle Scrollbar */

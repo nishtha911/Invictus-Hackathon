@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { API_ENDPOINTS } from "../constants";
+import { API_ENDPOINTS } from "./endpoints";
 import { ExtractedProfileData, ProfileIntake } from "../types/contracts";
 
 export async function extractProfile(payload: ProfileIntake): Promise<{ status: string; data: ExtractedProfileData }> {

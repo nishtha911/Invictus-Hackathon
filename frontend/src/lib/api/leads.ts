@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { API_ENDPOINTS } from "../constants";
+import { API_ENDPOINTS } from "./endpoints";
 import { LeadCapturePayload, LeadResponse } from "../types/contracts";
 import { generateMockLeadResponse } from "../mocks/leads";
 

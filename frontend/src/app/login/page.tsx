@@ -70,16 +70,16 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="mx-auto max-w-5xl w-full"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left Column: Brand & Lifestyle Context (5 cols) */}
+          {/* Left Column: Brand & Service Context (5 cols) */}
           <div className="lg:col-span-5 bg-[#081C2D] text-white rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-lg">
             <div className="space-y-6">
               <div className="space-y-1.5">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#1F7A63] font-mono">
-                  Existing Customer Portal
+                  Customer Portal
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
                   {BRAND.name}

@@ -18,66 +18,66 @@ const LOAN_DETAILS = [
     title: "Home Loan",
     intentKey: "home_loan",
     icon: Home,
-    bestFor: "Buying a ready flat, constructing a villa, purchasing a residential plot, or renovating an existing home.",
+    bestFor: "Property purchase, home construction, structural renovation, or residential plot acquisition.",
     considerations: [
-      "Repayment tenures typically range between 15 to 30 years to minimize monthly EMI burdens.",
-      "Requires clear title deeds, property legal verification, and building sanction approvals.",
-      "Eligible for income tax deductions under Section 24(b) for interest and Section 80C for principal.",
+      "Repayment tenures from 15 to 30 years to maintain manageable monthly EMIs.",
+      "Requires clear title documentation, property valuation, and local authority approvals.",
+      "Eligible for income tax deductions under Section 24(b) and Section 80C.",
     ],
   },
   {
     title: "Car Loan",
     intentKey: "vehicle_loan",
     icon: Car,
-    bestFor: "Financing new passenger cars, certified pre-owned vehicles, electric vehicles (EVs), and two-wheelers.",
+    bestFor: "Financing new passenger cars, certified pre-owned vehicles, and electric vehicles (EVs).",
     considerations: [
-      "Tenures generally span 3 to 7 years with hypothecation endorsed on vehicle registration (RC).",
-      "Special subsidized interest rate concessions and zero processing fee tiers for electric vehicles.",
-      "Offers up to 90%–100% on-road financing depending on credit score and model.",
+      "Tenures typically span 3 to 7 years with hypothecation on vehicle registration.",
+      "Concession tiers and streamlined processing available for electric vehicles.",
+      "Financing up to 90%–100% on-road value depending on credit score and model.",
     ],
   },
   {
     title: "Business Loan",
     intentKey: "business_loan",
     icon: Briefcase,
-    bestFor: "Managing operational working capital, purchasing machinery, expanding store footprints, or stocking seasonal inventory.",
+    bestFor: "Working capital management, machinery purchase, facility expansion, and inventory financing.",
     considerations: [
-      "Collateral-free sanctions available under CGTMSE guarantee schemes up to prescribed limits.",
-      "Underwriting is driven by GST return filings, annual turnover consistency, and bank statement cash flows.",
-      "Flexible overdraft and term credit facilities tailored to business cash-flow cycles.",
+      "Collateral-free sanctions available under credit guarantee schemes up to prescribed limits.",
+      "Underwriting based on GST filings, annual turnover consistency, and cash flows.",
+      "Flexible term loans and overdraft structures tailored to business revenue cycles.",
     ],
   },
   {
     title: "Gold Loan",
     intentKey: "gold_loan",
     icon: Coins,
-    bestFor: "Immediate emergency liquidity, bridge financing, or agricultural inputs secured against pledged gold jewelry.",
+    bestFor: "Short-term liquidity needs secured against hallmarked gold jewelry.",
     considerations: [
-      "High LTV (Loan-to-Value) up to 75% based on daily spot market bullion prices.",
-      "Fast disbursals in under 30 minutes with minimal income documentation required.",
-      "Pledged gold is securely insured and stored in bank-grade high-security vault custody.",
+      "Loan-to-Value (LTV) up to 75% linked to daily spot market bullion rates.",
+      "Rapid disbursals with minimal income documentation requirements.",
+      "Pledged gold is insured and maintained in high-security bank vault custody.",
     ],
   },
   {
     title: "Personal Loan",
     intentKey: "personal_loan",
     icon: UserCheck,
-    bestFor: "Multi-purpose immediate personal needs such as medical procedures, weddings, travel, or consolidating high-interest debt.",
+    bestFor: "Multi-purpose immediate personal financing such as medical expenses or debt consolidation.",
     considerations: [
-      "100% unsecured credit with no requirement for collateral or property mortgages.",
-      "Tenures range between 1 to 5 years with fixed predictable EMIs.",
-      "Sanction and disbursal can occur within hours for pre-verified salaried professionals.",
+      "Unsecured financing requiring no collateral or property hypothecation.",
+      "Predictable fixed EMIs across 1 to 5 year repayment durations.",
+      "Rapid eligibility evaluation for pre-verified salaried professionals.",
     ],
   },
   {
     title: "Education Loan",
     intentKey: "education_loan",
     icon: GraduationCap,
-    bestFor: "Undergraduate and postgraduate degree programs at accredited universities in India and overseas.",
+    bestFor: "Undergraduate and postgraduate degree programs in India and abroad.",
     considerations: [
-      "Includes a course moratorium period (duration of study + 6 to 12 months) before full EMI repayment commences.",
-      "Covers 100% of tuition fees, accommodation, books, and living expenses.",
-      "Entire interest paid qualifies for uncapped tax deductions under Section 80E for up to 8 consecutive years.",
+      "Includes course moratorium period (duration of study + 6 to 12 months) before full EMI.",
+      "Comprehensive coverage for tuition fees, accommodation, and study materials.",
+      "Interest paid qualifies for tax deductions under Section 80E for up to 8 years.",
     ],
   },
 ];
@@ -94,7 +94,7 @@ export function LoanInfoSection() {
             Explore Loan Options
           </h2>
           <p className="text-sm text-slate-600">
-            Understand the purpose, typical use, and key considerations for each type of loan before starting your application journey.
+            Understand the purpose, typical use, and key considerations for each type of loan before starting your application.
           </p>
         </div>
 
@@ -107,12 +107,12 @@ export function LoanInfoSection() {
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                transition={{ duration: 0.35, delay: idx * 0.05 }}
                 className="bank-card p-6 sm:p-7 bg-white flex flex-col justify-between"
               >
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#1F7A63]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#1F7A63] shadow-2xs">
                       <Icon className="h-5 w-5" />
                     </div>
                     <h3 className="text-base font-bold text-[#081C2D]">{loan.title}</h3>

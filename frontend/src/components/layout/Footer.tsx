@@ -65,8 +65,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#trust" className="hover:text-white transition-colors">
-                  Trust & Verification
+                <Link href="/#why-dhansetu" className="hover:text-white transition-colors">
+                  Why DhanSetu
                 </Link>
               </li>
               <li>

@@ -15,24 +15,24 @@ export function HowItWorksSection() {
       number: "02",
       icon: FileText,
       title: "Tell Us About Yourself",
-      description: "Share your monthly income, employment profile, and target repayment timeline in a 2-minute guided flow.",
+      description: "Share your monthly income, employment profile, and target repayment timeline in a guided flow.",
     },
     {
       number: "03",
       icon: CheckCircle2,
-      title: "Get Suitable Loan Options",
-      description: "Our deterministic engine calculates exact EMIs, verified eligibility limits, and policy-grounded terms.",
+      title: "Explore Suitable Options",
+      description: "Review calculated EMIs, verified eligibility limits, and policy-grounded terms.",
     },
     {
       number: "04",
       icon: PhoneCall,
       title: "Connect With a Specialist",
-      description: "Submit a prioritized request to connect directly with a dedicated retail lending officer.",
+      description: "Submit a request to connect directly with a dedicated retail lending officer.",
     },
   ];
 
   return (
-    <section id="how-it-works" className="scroll-mt-20 py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
+    <section id="how-it-works" className="scroll-mt-24 py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
@@ -42,7 +42,7 @@ export function HowItWorksSection() {
             How DhanSetu Works
           </h2>
           <p className="text-sm text-slate-600">
-            DhanSetu simplifies loan discovery through a guided digital experience.
+            DhanSetu simplifies loan discovery through a guided digital experience designed for clarity and confidence.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ export function HowItWorksSection() {
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                transition={{ duration: 0.35, delay: idx * 0.08 }}
                 className="bank-card p-6 sm:p-7 bg-[#F5F7FA] border border-[#E2E8F0] flex flex-col justify-between"
               >
                 <div>
@@ -64,7 +64,7 @@ export function HowItWorksSection() {
                     <span className="text-3xl font-extrabold font-mono text-slate-300">
                       {step.number}
                     </span>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0] shadow-2xs">
                       <Icon className="h-5 w-5" />
                     </div>
                   </div>

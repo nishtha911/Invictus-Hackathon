@@ -12,7 +12,7 @@ export function FinalCtaSection() {
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="text-center max-w-3xl mx-auto space-y-6"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-[#1F7A63]/20 px-3.5 py-1 text-xs font-semibold text-[#4ade80] border border-[#1F7A63]/30">
@@ -30,7 +30,7 @@ export function FinalCtaSection() {
           <div className="pt-3 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/advisor"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01]"
             >
               <span>Start Loan Advisory</span>
               <ArrowRight className="h-4 w-4" />
@@ -38,7 +38,7 @@ export function FinalCtaSection() {
 
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-800/80 hover:bg-slate-800 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-800/80 hover:bg-slate-800 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:scale-[1.01]"
             >
               <User className="h-4 w-4 text-slate-400" />
               <span>Customer Login</span>

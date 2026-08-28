@@ -59,7 +59,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#081C2D] text-white border-b border-[#0f2c44] shadow-sm">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo Left */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A63] text-white font-bold text-lg shadow-xs group-hover:bg-[#28967b] transition-colors">
@@ -81,7 +81,9 @@ export function Navbar() {
             {/* 1. Home */}
             <Link
               href="/"
-              className={`hover:text-white transition-colors ${pathname === "/" ? "text-white font-semibold" : "text-slate-300"}`}
+              className={`hover:text-white transition-colors ${
+                pathname === "/" ? "text-white font-semibold" : "text-slate-300"
+              }`}
             >
               Home
             </Link>
@@ -100,6 +102,7 @@ export function Navbar() {
                   loansDropdownOpen ? "text-white font-semibold" : "text-slate-300"
                 }`}
                 aria-expanded={loansDropdownOpen}
+                aria-haspopup="true"
               >
                 <span>Loans</span>
                 <ChevronDown
@@ -116,7 +119,7 @@ export function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[460px] rounded-2xl bg-white p-3 text-slate-800 shadow-2xl border border-[#E2E8F0] grid grid-cols-2 gap-1.5"
+                    className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[460px] rounded-2xl bg-white p-3 text-slate-800 shadow-2xl border border-[#E2E8F0] grid grid-cols-2 gap-1.5 z-50"
                   >
                     {LOAN_PURPOSES.map((loan) => {
                       const IconComp = LOAN_ICONS[loan.icon] || Home;
@@ -145,7 +148,7 @@ export function Navbar() {
                     })}
 
                     <div className="col-span-2 mt-1 pt-2 border-t border-[#E2E8F0] flex items-center justify-between px-2 text-[11px]">
-                      <span className="text-slate-500">Need personal guidance?</span>
+                      <span className="text-slate-500">Need personalized exploration?</span>
                       <Link
                         href="/#loans"
                         onClick={() => setLoansDropdownOpen(false)}
@@ -175,7 +178,7 @@ export function Navbar() {
               About Us
             </Link>
 
-            {/* 5. Bank Dashboard (Subtly distinct internal feature) */}
+            {/* 5. Bank Dashboard */}
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
@@ -213,7 +216,7 @@ export function Navbar() {
           {/* Login Button (Solid Emerald) */}
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
           >
             <User className="h-3.5 w-3.5" />
             <span>Login</span>
@@ -252,7 +255,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setMobileLoansOpen(!mobileLoansOpen)}
-                className="flex items-center justify-between w-full py-1 text-slate-200 hover:text-white text-left font-semibold"
+                className="flex items-center justify-between w-full py-1 text-slate-200 hover:text-white text-left font-semibold cursor-pointer"
               >
                 <span>Loans</span>
                 <ChevronDown
@@ -271,7 +274,7 @@ export function Navbar() {
                         key={loan.id}
                         href={`/advisor?intent=${loan.intentKey}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2.5 py-1 text-xs text-slate-300 hover:text-white"
+                        className="flex items-center gap-2.5 py-1.5 text-xs text-slate-300 hover:text-white"
                       >
                         <IconComp className="h-3.5 w-3.5 text-[#4ade80]" />
                         <span>{loan.label}</span>

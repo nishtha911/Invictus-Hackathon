@@ -53,7 +53,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
       } else {
         onCompleteJourney();
       }
-    }, 250);
+    }, 200);
   };
 
   const handlePrev = () => {
@@ -66,7 +66,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
     <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm">
       {/* Existing Customer Demo Ribbon if active */}
       {userType === "existing" && selectedCustomer && (
-        <div className="mb-5 rounded-lg border border-emerald-200 bg-[#F0FDF4] px-3.5 py-2 flex items-center justify-between text-xs text-[#081C2D]">
+        <div className="mb-5 rounded-xl border border-emerald-200 bg-[#F0FDF4] px-4 py-2.5 flex items-center justify-between text-xs text-[#081C2D]">
           <span>
             Prefilled with customer context: <strong>{selectedCustomer.name}</strong> ({selectedCustomer.employer})
           </span>
@@ -95,9 +95,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           {currentStepIndex === 0 && "Select your funding purpose to match with policy-compliant categories."}
           {currentStepIndex === 1 && "Employment stability helps determine risk grading and loan limits."}
           {currentStepIndex === 2 && "Calculates your debt-service ratio (FOIR) to prevent over-leveraging."}
-          {currentStepIndex === 3 && "Move the slider or pick quick chips to adjust requested principal."}
+          {currentStepIndex === 3 && "Adjust requested borrowing principal to match your milestone."}
           {currentStepIndex === 4 && "Longer tenures reduce monthly EMI; shorter tenures save overall interest."}
-          {currentStepIndex === 5 && "Existing EMIs help us compute exact net disposable borrowing limit."}
+          {currentStepIndex === 5 && "Existing EMIs help compute your exact net disposable borrowing limit."}
           {currentStepIndex === 6 && "A higher credit tier unlocks prime benchmark interest concessions."}
           {currentStepIndex === 7 && "Helps us prioritize immediate disbursal workflows and sanction letters."}
         </p>
@@ -214,7 +214,8 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   Net Monthly Income
                 </span>
                 <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
-                  {formatINR(profile.income || 120000)}
+                  {formatINR(profile.income || 120000)}{" "}
+                  <span className="text-base font-normal text-slate-500">per month</span>
                 </span>
               </div>
 
@@ -227,7 +228,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={5000}
                   value={profile.income || 120000}
                   onChange={(e) => updateProfile({ income: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>₹25,000/mo</span>
@@ -243,7 +244,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={amt}
                     type="button"
                     onClick={() => updateProfile({ income: amt })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.income === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -282,7 +283,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={100000}
                   value={profile.loan_amount || 4500000}
                   onChange={(e) => updateProfile({ loan_amount: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>₹1 Lakh</span>
@@ -298,7 +299,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={amt}
                     type="button"
                     onClick={() => updateProfile({ loan_amount: amt })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.loan_amount === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -340,7 +341,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={1}
                   value={profile.tenure_years || 20}
                   onChange={(e) => updateProfile({ tenure_years: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>1 Year</span>
@@ -356,7 +357,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={yr}
                     type="button"
                     onClick={() => updateProfile({ tenure_years: yr })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.tenure_years === yr
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -395,7 +396,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={emi}
                     type="button"
                     onClick={() => updateProfile({ existing_emi: emi })}
-                    className={`rounded-xl border p-3 text-center transition-all ${
+                    className={`rounded-xl border p-3 text-center transition-all cursor-pointer ${
                       profile.existing_emi === emi
                         ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
                         : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"

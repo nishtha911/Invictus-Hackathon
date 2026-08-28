@@ -1,9 +1,11 @@
 "use client";
 
-import { CheckCircle2, ShieldCheck, ArrowRight, BookOpen, Layers } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, ShieldCheck, ArrowRight, BookOpen, Layers, ChevronDown } from "lucide-react";
 import { RecommendedLoan } from "@/lib/types/contracts";
 import { formatINR } from "@/lib/utils/currency";
 import { VerifiedBadge } from "../shared/VerifiedBadge";
+import { motion, AnimatePresence } from "motion/react";
 
 interface BestMatchHeroCardProps {
   loan: RecommendedLoan;
@@ -18,16 +20,18 @@ export function BestMatchHeroCard({
   onOpenTrustModal,
   onOpenCompare,
 }: BestMatchHeroCardProps) {
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+
   return (
     <div className="bank-card p-6 sm:p-9 bg-white border border-[#E2E8F0] shadow-sm">
       {/* Top Match Ribbon */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-[#E2E8F0]">
         <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 rounded-md bg-[#E8F5F1] px-3 py-1 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
-            Recommended
+            Best Match
           </span>
           <span className="text-xs font-medium text-slate-500">
-            {loan.match_score}% profile match
+            {loan.match_score}% Profile Match
           </span>
         </div>
 
@@ -37,9 +41,9 @@ export function BestMatchHeroCard({
         </div>
       </div>
 
-      {/* Title & Core Terms */}
+      {/* Title & Core Financial Terms */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Col: Loan Name & Rates */}
+        {/* Left Column: Loan Name, Financial Terms & Why It Suits You (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63] font-mono">
@@ -83,11 +87,11 @@ export function BestMatchHeroCard({
             </div>
           </div>
 
-          {/* Why This Matches You */}
+          {/* Customer-Facing Heading: Why this option may suit you */}
           <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#081C2D] flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-[#1F7A63]" />
-              Why this loan suits you
+              Why this option may suit you
             </h4>
             <ul className="space-y-2 text-xs text-slate-600">
               {loan.bullet_points.map((pt, idx) => (
@@ -100,13 +104,13 @@ export function BestMatchHeroCard({
           </div>
         </div>
 
-        {/* Right Col: AI Reasoning & Policy Citations */}
+        {/* Right Column: Reasoning, Policy Citations & Actions (5 cols) */}
         <div className="lg:col-span-5 space-y-5 flex flex-col justify-between h-full">
-          {/* AI Explanation Box */}
+          {/* Explanation Box */}
           <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D] flex items-center gap-1.5">
-                AI Advisory Reasoning
+              <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                Advisory Assessment
               </span>
               <button
                 onClick={onOpenTrustModal}
@@ -120,25 +124,53 @@ export function BestMatchHeroCard({
               &quot;{loan.reasoning}&quot;
             </p>
 
-            {/* Policy Citations */}
-            {loan.policy_citations && loan.policy_citations.length > 0 && (
-              <div className="pt-3 border-t border-[#E2E8F0] space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+            {/* Technical Details Accordion */}
+            <div className="pt-3 border-t border-[#E2E8F0]">
+              <button
+                type="button"
+                onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+                className="w-full flex items-center justify-between text-[11px] font-semibold text-slate-600 hover:text-[#081C2D] transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-1">
                   <BookOpen className="h-3 w-3 text-[#1F7A63]" />
-                  Retrieved Policy Clauses
+                  How this recommendation was prepared
                 </span>
-                {loan.policy_citations.map((cite, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg bg-white p-2.5 border border-[#E2E8F0] text-[11px] text-slate-600 leading-relaxed"
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-slate-400 transition-transform ${
+                    showTechnicalDetails ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showTechnicalDetails && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pt-2.5 space-y-2 text-[11px] text-slate-600"
                   >
-                    <span className="font-semibold text-[#081C2D] font-mono">{cite.clause_id}</span> ·{" "}
-                    <span className="text-slate-500 font-medium">{cite.policy_name}: </span>
-                    <span>{cite.text}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                      Computed with deterministic math using verified retail lending circulars and active repo benchmark spreads.
+                    </p>
+                    {loan.policy_citations && loan.policy_citations.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        {loan.policy_citations.map((cite, i) => (
+                          <div
+                            key={i}
+                            className="rounded-lg bg-white p-2.5 border border-[#E2E8F0] text-[11px] text-slate-600 leading-relaxed"
+                          >
+                            <span className="font-semibold text-[#081C2D] font-mono">{cite.clause_id}</span> ·{" "}
+                            <span className="text-slate-500 font-medium">{cite.policy_name}: </span>
+                            <span>{cite.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Action CTAs */}
