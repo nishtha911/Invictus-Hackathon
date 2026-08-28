@@ -13,9 +13,15 @@ function calculateEMI(principal: number, annualRate: number, tenureMonths: numbe
 
 export function generateMockRecommendations(profile: ProfileIntake): RecommendLoansResponse {
   const intent = profile.intent || "Home Loan";
-  const amount = profile.loan_amount && profile.loan_amount > 0 ? profile.loan_amount : intent === "Home Loan" ? 4500000 : 800000;
+  const amount = profile.loan_amount && profile.loan_amount > 0 
+    ? profile.loan_amount 
+    : intent === "Home Loan" 
+    ? 4500000 
+    : intent === "Gold Loan" 
+    ? 300000 
+    : 800000;
   const income = profile.income && profile.income > 0 ? profile.income : 120000;
-  const tenureYears = profile.tenure_years || (intent === "Home Loan" ? 20 : 5);
+  const tenureYears = profile.tenure_years || (intent === "Home Loan" ? 20 : intent === "Gold Loan" ? 2 : 5);
   const tenureMonths = tenureYears * 12;
 
   let recommendations: RecommendedLoan[] = [];
@@ -128,6 +134,76 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
     ];
+  } else if (intent === "Gold Loan") {
+    recommendations = [
+      {
+        loan_id: "GL-SOVEREIGN-501",
+        name: "Sovereign Gold Express",
+        category: "Gold Loan",
+        tag: "BEST MATCH",
+        match_score: 97,
+        interest_rate: 8.95,
+        min_amount: 25000,
+        max_amount: 2500000,
+        tenure_months: Math.min(tenureMonths, 24),
+        estimated_emi: calculateEMI(amount, 8.95, Math.min(tenureMonths, 24)),
+        processing_fee_pct: 0.2,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Instant liquidity backed by physical gold jewelry with competitive per-gram valuations and insured bank vault safety.",
+        bullet_points: [
+          "Up to 75% LTV on hallmarked 22K/24K gold jewelry",
+          "Disbursal in under 30 minutes with minimal income documentation",
+          "Free secure insurance coverage in bank branch vault",
+          "Flexible interest-only bullet repayment schemes available",
+        ],
+        policy_citations: [
+          {
+            policy_name: "Gold Collateral Lending Policy 2025",
+            clause_id: "GL-LTV-1.2",
+            text: "RBI-compliant 75% loan-to-value ceiling with spot market bullion price reference.",
+          },
+        ],
+        features: [
+          "30-minute branch disbursal",
+          "Zero income proof required up to ₹5 Lakhs",
+          "Free high-security vault custody",
+          "Bullet or monthly EMI options",
+        ],
+      },
+      {
+        loan_id: "GL-FLEXI-502",
+        name: "Gold Overdraft Line",
+        category: "Gold Loan",
+        tag: "PAY INTEREST ON USE",
+        match_score: 91,
+        interest_rate: 9.45,
+        min_amount: 100000,
+        max_amount: 5000000,
+        tenure_months: Math.min(tenureMonths, 36),
+        estimated_emi: calculateEMI(amount, 9.45, Math.min(tenureMonths, 36)),
+        processing_fee_pct: 0.35,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Credit line backed by pledged gold allowing you to withdraw whenever required and pay interest only on the utilized sum.",
+        bullet_points: [
+          "Revolving credit limit linked to UPI and debit card",
+          "Interest charged strictly on daily utilized amount",
+        ],
+        policy_citations: [
+          {
+            policy_name: "Overdraft Collateral Regulations",
+            clause_id: "OD-GL-3.0",
+            text: "Annual renewal facility with zero part-prepayment penalties.",
+          },
+        ],
+        features: [
+          "ATM withdrawal enabled",
+          "Repay principal anytime without charges",
+          "Multi-year credit line",
+        ],
+      },
+    ];
   } else if (intent === "Personal Loan") {
     recommendations = [
       {
@@ -196,12 +272,11 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
     ];
-  } else {
-    // Default / Vehicle / Business
+  } else if (intent === "Vehicle Loan") {
     recommendations = [
       {
         loan_id: "VL-DRIVEPLUS-301",
-        name: "DrivePlus Vehicle Loan",
+        name: "DrivePlus Auto Loan",
         category: "Vehicle Loan",
         tag: "BEST MATCH",
         match_score: 93,
@@ -233,11 +308,46 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
       {
+        loan_id: "VL-GREEN-302",
+        name: "Green Mobility EV Loan",
+        category: "Vehicle Loan",
+        tag: "GREEN SPECIAL",
+        match_score: 89,
+        interest_rate: 8.60,
+        min_amount: 400000,
+        max_amount: 4000000,
+        tenure_months: Math.min(tenureMonths, 84),
+        estimated_emi: calculateEMI(amount, 8.60, Math.min(tenureMonths, 84)),
+        processing_fee_pct: 0.25,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Subsidized interest rates and zero processing fees for electric 4-wheelers and commercial fleet upgrades.",
+        bullet_points: [
+          "Discounted interest rates for certified zero-emission vehicles",
+          "Free battery warranty protection tie-up",
+        ],
+        policy_citations: [
+          {
+            policy_name: "Green Energy Lending Initiative",
+            clause_id: "EV-1.1",
+            text: "Zero processing fee on all EV models recognized under government green subsidy guidelines.",
+          },
+        ],
+        features: [
+          "Zero processing fee",
+          "Special charging infrastructure financing",
+        ],
+      },
+    ];
+  } else {
+    // Default / Business Loan / Education Loan
+    recommendations = [
+      {
         loan_id: "BIZ-GROWTH-401",
         name: "Enterprise Growth Credit",
         category: "Business Loan",
         tag: "COLLATERAL-FREE",
-        match_score: 87,
+        match_score: 92,
         interest_rate: 11.75,
         min_amount: 500000,
         max_amount: 7500000,
@@ -262,6 +372,38 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
           "GST data integration",
           "Bullet repayment option for working capital",
           "CGTMSE cover eligible",
+        ],
+      },
+      {
+        loan_id: "EDU-GLOBAL-601",
+        name: "Global Scholar Loan",
+        category: "Education Loan",
+        tag: "TAX SAVER SEC 80E",
+        match_score: 88,
+        interest_rate: 9.25,
+        min_amount: 500000,
+        max_amount: 8000000,
+        tenure_months: 84,
+        estimated_emi: calculateEMI(amount, 9.25, 84),
+        processing_fee_pct: 0.5,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Moratorium support covering entire course duration plus 1 year grace period before EMI repayment begins.",
+        bullet_points: [
+          "100% tuition + living expenses covered",
+          "100% tax deduction on interest paid under Section 80E",
+        ],
+        policy_citations: [
+          {
+            policy_name: "Priority Sector Education Guidelines",
+            clause_id: "EDU-4.0",
+            text: "No collateral required for recognized Tier-1 universities up to ₹40 Lakhs.",
+          },
+        ],
+        features: [
+          "Course + 1 year moratorium",
+          "Global university tie-ups",
+          "Pre-visa sanction letter",
         ],
       },
     ];

@@ -1,39 +1,38 @@
-import { MessageSquare, Cpu, Database, CheckCircle2 } from "lucide-react";
+"use client";
+
+import { CheckCircle2, FileText, Filter, PhoneCall } from "lucide-react";
+import { motion } from "motion/react";
 
 export function HowItWorksSection() {
   const steps = [
     {
       number: "01",
-      icon: MessageSquare,
-      title: "Conversational Intake",
-      description: "Quick multiple-choice options and intuitive sliders capture your loan requirements in under two minutes.",
-      tag: "Interactive Intake",
+      icon: Filter,
+      title: "Choose Your Loan Need",
+      description: "Select your financing goal across home, car, business, gold, personal, or education credit.",
     },
     {
       number: "02",
-      icon: Cpu,
-      title: "Context Extraction",
-      description: "Structures your intent, disposable income, FOIR capacity and preferred repayment timeframe.",
-      tag: "Profile Signals",
+      icon: FileText,
+      title: "Tell Us About Yourself",
+      description: "Share your monthly income, employment profile, and target repayment timeline in a 2-minute guided flow.",
     },
     {
       number: "03",
-      icon: Database,
-      title: "Deterministic Matching",
-      description: "Bank-grade rule engines evaluate live catalogue criteria and compute exact, verified EMI obligations.",
-      tag: "Rule Engine",
+      icon: CheckCircle2,
+      title: "Get Suitable Loan Options",
+      description: "Our deterministic engine calculates exact EMIs, verified eligibility limits, and policy-grounded terms.",
     },
     {
       number: "04",
-      icon: CheckCircle2,
-      title: "Grounded Explanation",
-      description: "Clear, policy-cited explanations detail why the recommended product fits your financial profile.",
-      tag: "Zero Hallucination",
+      icon: PhoneCall,
+      title: "Connect With a Specialist",
+      description: "Submit a prioritized request to connect directly with a dedicated retail lending officer.",
     },
   ];
 
   return (
-    <section id="how-it-works" className="py-16 sm:py-20 border-t border-[#E2E8F0] bg-[#F5F7FA]">
+    <section id="how-it-works" className="scroll-mt-20 py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
@@ -42,25 +41,30 @@ export function HowItWorksSection() {
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
             How DhanSetu Works
           </h2>
-          <p className="text-sm text-slate-500">
-            A clear, transparent process connecting your loan requirements with bank underwriting policies.
+          <p className="text-sm text-slate-600">
+            DhanSetu simplifies loan discovery through a guided digital experience.
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step) => {
+        {/* 4 Steps Grid */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          {steps.map((step, idx) => {
             const Icon = step.icon;
             return (
-              <div
+              <motion.div
                 key={step.number}
-                className="bank-card p-6 flex flex-col justify-between"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className="bank-card p-6 sm:p-7 bg-[#F5F7FA] border border-[#E2E8F0] flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold font-mono text-slate-300">
+                    <span className="text-3xl font-extrabold font-mono text-slate-300">
                       {step.number}
                     </span>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F0FDF4] text-[#1F7A63] border border-emerald-100">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0]">
                       <Icon className="h-5 w-5" />
                     </div>
                   </div>
@@ -68,17 +72,15 @@ export function HowItWorksSection() {
                   <h3 className="mt-5 text-base font-bold text-[#081C2D]">
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+                  <p className="mt-2 text-xs text-slate-600 leading-relaxed">
                     {step.description}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-3.5 border-t border-[#E2E8F0]">
-                  <span className="text-[11px] font-semibold text-[#1F7A63] bg-[#F0FDF4] px-2.5 py-1 rounded-md border border-emerald-100 inline-block">
-                    {step.tag}
-                  </span>
+                <div className="mt-6 pt-3.5 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] font-semibold text-[#1F7A63]">
+                  <span>Step {idx + 1} of 4</span>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

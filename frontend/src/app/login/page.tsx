@@ -13,6 +13,7 @@ import { loginCustomer } from "@/lib/api/auth";
 import { useJourneyStore } from "@/store/journey-store";
 import { DEMO_CUSTOMERS } from "@/lib/mocks/customers";
 import { toast } from "sonner";
+import { motion } from "motion/react";
 
 const loginSchema = z.object({
   name: z.string().min(2, "Please enter your full name (minimum 2 characters)"),
@@ -66,7 +67,12 @@ export default function LoginPage() {
 
   return (
     <main className="flex-1 bg-[#F5F7FA] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="mx-auto max-w-5xl w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="mx-auto max-w-5xl w-full"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Left Column: Brand & Lifestyle Context (5 cols) */}
           <div className="lg:col-span-5 bg-[#081C2D] text-white rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-lg">
@@ -84,7 +90,7 @@ export default function LoginPage() {
               </div>
 
               <p className="text-xs text-slate-300 leading-relaxed">
-                Log in to access your pre-evaluated credit band, review customized loan terms, and fast-track your home, car, or business loan application.
+                Log in to access your pre-evaluated credit band, review customized loan terms, and fast-track your home, car, business, or gold loan application.
               </p>
 
               <div className="space-y-3 pt-2">
@@ -176,7 +182,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer disabled:opacity-60"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer disabled:opacity-60 hover:scale-[1.01]"
                 >
                   {isSubmitting ? (
                     <span>Verifying Profile...</span>
@@ -200,7 +206,7 @@ export default function LoginPage() {
                       key={c.id}
                       type="button"
                       onClick={() => handleQuickSelectDemo(c)}
-                      className="text-left p-2.5 rounded-lg border border-[#E2E8F0] bg-[#F5F7FA] hover:border-[#1F7A63] hover:bg-emerald-50/40 transition-all text-xs"
+                      className="text-left p-2.5 rounded-lg border border-[#E2E8F0] bg-[#F5F7FA] hover:border-[#1F7A63] hover:bg-emerald-50/40 transition-all text-xs cursor-pointer"
                     >
                       <span className="font-semibold text-[#081C2D] block truncate">{c.name}</span>
                       <span className="text-[10px] text-slate-500 block truncate">{c.employment_type}</span>
@@ -222,7 +228,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </main>
   );
 }

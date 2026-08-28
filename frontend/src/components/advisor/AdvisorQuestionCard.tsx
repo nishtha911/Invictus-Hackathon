@@ -7,6 +7,7 @@ import {
   Car,
   Briefcase,
   GraduationCap,
+  Coins,
   ArrowRight,
   ArrowLeft,
   Check,
@@ -24,6 +25,7 @@ const purposeIcons: Record<string, React.ComponentType<{ className?: string }>> 
   "Personal Loan": User,
   "Vehicle Loan": Car,
   "Business Loan": Briefcase,
+  "Gold Loan": Coins,
   "Education Loan": GraduationCap,
 };
 

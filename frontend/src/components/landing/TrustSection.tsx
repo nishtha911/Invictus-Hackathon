@@ -4,15 +4,22 @@ import { useState } from "react";
 import Link from "next/link";
 import { ShieldCheck, Lock, CheckCircle2, Award, ArrowRight } from "lucide-react";
 import { TrustModal } from "../shared/TrustModal";
+import { motion } from "motion/react";
 
 export function TrustSection() {
   const [showTrustModal, setShowTrustModal] = useState(false);
 
   return (
     <>
-      <section id="trust" className="py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
+      <section id="trust" className="scroll-mt-20 py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-8 sm:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-8 sm:p-12"
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-8 space-y-4">
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] px-3 py-1 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
@@ -57,7 +64,7 @@ export function TrustSection() {
               <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3">
                 <button
                   onClick={() => setShowTrustModal(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#081C2D] bg-transparent px-5 py-3 text-xs sm:text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#081C2D] bg-transparent px-5 py-3 text-xs sm:text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer hover:scale-[1.02]"
                 >
                   <Award className="h-4 w-4" />
                   <span>View Verification Matrix</span>
@@ -65,14 +72,14 @@ export function TrustSection() {
 
                 <Link
                   href="/advisor"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-5 py-3 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-5 py-3 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.02]"
                 >
                   <span>Explore Loan Options</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
