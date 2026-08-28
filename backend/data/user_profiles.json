@@ -1,0 +1,62 @@
+[
+  {
+    "session_id": "ce9e477a-ea35-4c5d-96a1-dae8c270b5e8",
+    "user_type": "guest",
+    "profile": {
+      "name": "Mr. Rishikesh Sir",
+      "intent": "business_loan",
+      "monthly_income": 2500000.0,
+      "employment_type": "business_owner",
+      "employer_type": null,
+      "years_at_current_job": null,
+      "years_in_business": 36,
+      "requested_loan_amount": 5000000.0,
+      "preferred_tenure_months": 60,
+      "existing_emi_obligations": 5000000.0,
+      "has_existing_loans": true,
+      "credit_score_band": "excellent",
+      "credit_score_numeric": null,
+      "urgency": "immediate",
+      "age": 30,
+      "has_co_applicant": true,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "preferred_emi": "lowest",
+      "interest_type": "floating",
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": {
+        "business_type": null,
+        "annual_turnover": null
+      }
+    },
+    "extraction_meta": {
+      "completeness_pct": 91,
+      "turns_taken": 16,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-28T05:17:05.117386",
+      "fields_filled": [
+        "name",
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "occupation_vintage",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "existing_emi_obligations",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "preferred_emi",
+        "interest_type",
+        "has_co_applicant"
+      ],
+      "fields_remaining": [
+        "business_loan_details.annual_turnover"
+      ]
+    }
+  }
+]
