@@ -54,10 +54,11 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 PROFILES_FILE = DATA_DIR / "user_profiles.json"
 
 def _save_profiles_to_disk():
-    """Save all current session profiles to a JSON file to persist the numerical details as digits."""
+    """Save all current session profiles to a JSON file and sync to Supabase."""
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         profiles_list = []
+        db_rows = []
         for sid, state in SESSION_STORE.items():
             pct, filled, remaining = compute_completeness(state.profile)
             extracted = ExtractedProfile(
@@ -74,9 +75,56 @@ def _save_profiles_to_disk():
                 ),
             ).model_dump(mode="json")
             profiles_list.append(extracted)
+            
+            profile_data = extracted.get("profile", {})
+            meta_data = extracted.get("extraction_meta", {})
+            db_rows.append({
+                "session_id": extracted.get("session_id"),
+                "user_type": extracted.get("user_type", "guest"),
+                "applicant_name": profile_data.get("name"),
+                "intent": profile_data.get("intent"),
+                "age": profile_data.get("age"),
+                "monthly_income": profile_data.get("monthly_income"),
+                "employment_type": profile_data.get("employment_type"),
+                "requested_loan_amount": profile_data.get("requested_loan_amount"),
+                "preferred_tenure_months": profile_data.get("preferred_tenure_months"),
+                "existing_emi_obligations": profile_data.get("existing_emi_obligations", 0.0),
+                "has_existing_loans": profile_data.get("has_existing_loans", False),
+                "credit_score_band": profile_data.get("credit_score_band", "unknown"),
+                "urgency": profile_data.get("urgency", "exploring"),
+                "completeness_pct": meta_data.get("completeness_pct", 0),
+                "turns_taken": meta_data.get("turns_taken", 0)
+            })
         
         with open(PROFILES_FILE, "w", encoding="utf-8") as f:
             json.dump(profiles_list, f, indent=2, ensure_ascii=False)
+            
+        if db_rows:
+            import httpx
+            import threading
+            
+            SUPABASE_URL = "https://psclpghrsoxelzmebovj.supabase.co"
+            SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzY2xwZ2hyc294ZWx6bWVib3ZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Nzg0Mjk5OSwiZXhwIjoyMTAzNDE4OTk5fQ.bX5_2_CwIqTPPNkNUUJhGtAxaS-5PWaSkEXiez1oeWg"
+            
+            def sync_to_db():
+                try:
+                    with httpx.Client() as client:
+                        client.post(
+                            f"{SUPABASE_URL}/rest/v1/customer_profiles",
+                            headers={
+                                "apikey": SUPABASE_KEY,
+                                "Authorization": f"Bearer {SUPABASE_KEY}",
+                                "Content-Type": "application/json",
+                                "Prefer": "resolution=merge-duplicates"
+                            },
+                            json=db_rows,
+                            timeout=5.0
+                        )
+                except Exception as e:
+                    logger.error(f"Supabase sync failed: {e}")
+                    
+            threading.Thread(target=sync_to_db, daemon=True).start()
+
     except Exception as e:
         logger.error(f"Failed to save profiles to disk: {e}")
 
