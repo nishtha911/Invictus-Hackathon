@@ -494,6 +494,69 @@ async def delete_session(session_id: str):
         return {"status": "deleted", "session_id": session_id}
     raise HTTPException(status_code=404, detail="Session not found.")
 
+@app.get("/api/recommendations/{session_id}")
+async def get_recommendations(session_id: str):
+    """
+    Generate and return loan recommendations based on the extracted profile.
+    """
+    from app.services.database import fetch_loan_products, get_grounded_policy_chunks
+    from app.services.scoring_engine import evaluate_product_match
+    from app.services.guardrails import verify_explanation_hallucination
+    from app.schemas.scoring import ExtractedProfilePayload, ProfileData, ExtractionMeta
+
+    state = SESSION_STORE.get(session_id)
+    if state is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session {session_id} not found.",
+        )
+    
+    pct, filled, remaining = compute_completeness(state.profile)
+    
+    # Defaults in case of incomplete extraction for testing
+    payload = ExtractedProfilePayload(
+        session_id=session_id,
+        user_type=state.user_type.value,
+        profile=ProfileData(
+            intent=state.profile.intent or "personal_loan",
+            monthly_income=state.profile.monthly_income or 50000.0,
+            employment_type=state.profile.employment_type or "salaried",
+            requested_loan_amount=state.profile.requested_loan_amount or 1000000.0,
+            preferred_tenure_months=state.profile.preferred_tenure_months or 60,
+            existing_emi_obligations=state.profile.existing_emi_obligations or 0.0,
+            credit_score_band=state.profile.credit_score_band or "good",
+            urgency=state.profile.urgency or "exploring"
+        ),
+        extraction_meta=ExtractionMeta(
+            completeness_pct=pct,
+            turns_taken=state.turn_count
+        )
+    )
+    
+    products = fetch_loan_products(category=payload.profile.intent)
+    
+    scored_recommendations = []
+    for prod in products:
+        rec = evaluate_product_match(payload, prod)
+        policy_data = get_grounded_policy_chunks(
+            product_id=rec.product_id,
+            user_query="prepayment charges and eligibility rules",
+            top_k=2
+        )
+        sample_llm_text = (
+            f"You are eligible for {rec.product_name} at {rec.computed_terms.interest_rate_pct}% interest rate. "
+            f"Your monthly EMI is ₹{rec.computed_terms.estimated_emi:,.2f}."
+        )
+        rec.ai_explanation = verify_explanation_hallucination(
+            llm_explanation_text=sample_llm_text,
+            computed_terms=rec.computed_terms,
+            grounded_chunk_ids=policy_data.get("grounded_on_chunk_ids", [])
+        )
+        scored_recommendations.append(rec)
+
+    scored_recommendations.sort(key=lambda x: x.match_score, reverse=True)
+    return {"recommendations": [rec.model_dump() for rec in scored_recommendations]}
+
 
 # ── Mount Frontend Static Files ────────────────────────────────────────
 frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
