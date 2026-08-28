@@ -278,7 +278,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
       employment_type: profile.employment_type || "Salaried",
     },
     explanation_meta: {
-      model: "LoanSense Policy-Grounded GenAI Model",
+      model: "DhanSetu Policy-Grounded Underwriting Model",
       numbers_verified: true,
       rule_engine_verified: true,
       policy_grounded: true,

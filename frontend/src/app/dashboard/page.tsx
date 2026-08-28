@@ -62,38 +62,38 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="flex-1 bg-[#040612] py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
+    <main className="flex-1 bg-[#F5F7FA] py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* Dashboard Operational Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-white/8">
+        {/* Dashboard Header */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-indigo-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-indigo-300 border border-indigo-500/30">
-                BANK SALES INTELLIGENCE
+              <span className="rounded bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-mono font-bold text-[#1F7A63] border border-emerald-100">
+                RETAIL LENDING INTELLIGENCE
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 text-xs text-[#1F7A63] font-medium">
+                <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
                 Live Underwriting Sync
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
               Retail Lending Command Center
             </h1>
-            <p className="text-xs text-slate-400">
-              AI-scored inbound borrower applications prioritized for loan sanction officers.
+            <p className="text-xs sm:text-sm text-slate-500">
+              Scored inbound borrower applications prioritized for retail loan sanction officers.
             </p>
           </div>
 
           {/* Action Tools */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-slate-300 font-mono">
-              <Calendar className="h-3.5 w-3.5 text-cyan-400" />
+            <div className="flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-slate-600 font-mono">
+              <Calendar className="h-3.5 w-3.5 text-[#1F7A63]" />
               <span>Last 7 Days</span>
             </div>
 
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-white/8 hover:text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#081C2D] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Export</span>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
             <button
               onClick={loadData}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/30 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
               <span>Refresh</span>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
         <LeadsTable leads={leads} onSelectLead={(lead) => setSelectedLead(lead)} />
       </div>
 
-      {/* AI Lead Intelligence Drawer */}
+      {/* Lead Intelligence Drawer */}
       <LeadDetailDrawer
         lead={selectedLead}
         onClose={() => setSelectedLead(null)}

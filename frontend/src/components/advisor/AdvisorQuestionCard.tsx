@@ -9,7 +9,6 @@ import {
   GraduationCap,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   Check,
   CreditCard,
   Building2,
@@ -44,7 +43,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
   } = useJourneyStore();
 
   const handleNext = () => {
-    setIsExtracting(true, "Updating structured financial profile...");
+    setIsExtracting(true, "Evaluating structured financial profile...");
     setTimeout(() => {
       setIsExtracting(false);
       if (currentStepIndex < ADVISOR_STEPS.length - 1) {
@@ -62,24 +61,25 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/10 bg-[#080e26]/85 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+    <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm">
       {/* Existing Customer Demo Ribbon if active */}
       {userType === "existing" && selectedCustomer && (
-        <div className="mb-4 rounded-lg border border-cyan-500/30 bg-cyan-950/40 px-3 py-1.5 flex items-center justify-between text-xs text-cyan-300">
+        <div className="mb-5 rounded-lg border border-emerald-200 bg-[#F0FDF4] px-3.5 py-2 flex items-center justify-between text-xs text-[#081C2D]">
           <span>
-            Prefilled with demo profile of <strong>{selectedCustomer.name}</strong> ({selectedCustomer.employer})
+            Prefilled with customer context: <strong>{selectedCustomer.name}</strong> ({selectedCustomer.employer})
           </span>
-          <span className="font-mono text-[10px] bg-cyan-500/20 px-1.5 py-0.5 rounded">DEMO CONTEXT</span>
+          <span className="font-mono text-[10px] bg-[#1F7A63] text-white px-2 py-0.5 rounded font-semibold">
+            CUSTOMER PROFILE
+          </span>
         </div>
       )}
 
       {/* Step Header */}
       <div className="mb-6 space-y-1.5">
-        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Question {currentStepIndex + 1} of {ADVISOR_STEPS.length}</span>
+        <div className="text-xs font-semibold text-[#1F7A63] uppercase tracking-wider">
+          Question {currentStepIndex + 1} of {ADVISOR_STEPS.length}
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#081C2D]">
           {currentStepIndex === 0 && "What type of loan are you looking for?"}
           {currentStepIndex === 1 && "What is your primary employment type?"}
           {currentStepIndex === 2 && "What is your approximate monthly take-home income?"}
@@ -89,8 +89,8 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           {currentStepIndex === 6 && "How would you describe your credit profile?"}
           {currentStepIndex === 7 && "When do you plan to avail this loan?"}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400">
-          {currentStepIndex === 0 && "Choose your funding purpose to match with policy-compliant categories."}
+        <p className="text-xs sm:text-sm text-slate-500">
+          {currentStepIndex === 0 && "Select your funding purpose to match with policy-compliant categories."}
           {currentStepIndex === 1 && "Employment stability helps determine risk grading and loan limits."}
           {currentStepIndex === 2 && "Calculates your debt-service ratio (FOIR) to prevent over-leveraging."}
           {currentStepIndex === 3 && "Move the slider or pick quick chips to adjust requested principal."}
@@ -128,25 +128,25 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     }}
                     className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
                       isSelected
-                        ? "border-indigo-500 bg-indigo-950/50 ring-1 ring-indigo-500 shadow-lg shadow-indigo-500/20"
-                        : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
                     }`}
                   >
                     <div
                       className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
                         isSelected
-                          ? "bg-indigo-500 text-white"
-                          : "bg-indigo-500/15 border border-indigo-500/30 text-indigo-400"
+                          ? "bg-[#1F7A63] text-white"
+                          : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="overflow-hidden">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white text-sm">{item.label}</span>
-                        {isSelected && <Check className="h-4 w-4 text-emerald-400" />}
+                        <span className="font-semibold text-[#081C2D] text-sm">{item.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{item.description}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
                     </div>
                   </div>
                 );
@@ -171,25 +171,25 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ employment_type: emp.id })}
                     className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
                       isSelected
-                        ? "border-indigo-500 bg-indigo-950/50 ring-1 ring-indigo-500 shadow-lg shadow-indigo-500/20"
-                        : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
                     }`}
                   >
                     <div
                       className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
                         isSelected
-                          ? "bg-indigo-500 text-white"
-                          : "bg-indigo-500/15 border border-indigo-500/30 text-indigo-400"
+                          ? "bg-[#1F7A63] text-white"
+                          : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
                       }`}
                     >
                       <Building2 className="h-4 w-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white text-sm">{emp.label}</span>
-                        {isSelected && <Check className="h-4 w-4 text-emerald-400" />}
+                        <span className="font-semibold text-[#081C2D] text-sm">{emp.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{emp.subtext}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{emp.subtext}</p>
                     </div>
                   </div>
                 );
@@ -207,11 +207,11 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               className="space-y-6"
             >
               {/* Display Value */}
-              <div className="text-center rounded-2xl border border-indigo-500/30 bg-indigo-950/30 p-5">
-                <span className="text-xs text-slate-400 block uppercase tracking-wider font-semibold">
+              <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
+                <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Net Monthly Income
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-white font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
                   {formatINR(profile.income || 120000)}
                 </span>
               </div>
@@ -225,9 +225,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={5000}
                   value={profile.income || 120000}
                   onChange={(e) => updateProfile({ income: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>₹25,000/mo</span>
                   <span>₹2.5 Lakhs</span>
                   <span>₹5.0 Lakhs+</span>
@@ -243,8 +243,8 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ income: amt })}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
                       profile.income === amt
-                        ? "border-indigo-500 bg-indigo-600 text-white font-bold"
-                        : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+                        ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
+                        : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
                     }`}
                   >
                     {formatINR(amt, true)}
@@ -263,11 +263,11 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               exit={{ opacity: 0, x: -15 }}
               className="space-y-6"
             >
-              <div className="text-center rounded-2xl border border-cyan-500/30 bg-cyan-950/30 p-5">
-                <span className="text-xs text-slate-400 block uppercase tracking-wider font-semibold">
+              <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
+                <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Required Borrowing Amount
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-cyan-300 font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
                   {formatINR(profile.loan_amount || 4500000)}
                 </span>
               </div>
@@ -280,9 +280,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={100000}
                   value={profile.loan_amount || 4500000}
                   onChange={(e) => updateProfile({ loan_amount: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>₹1 Lakh</span>
                   <span>₹50 Lakhs</span>
                   <span>₹1.0 Cr</span>
@@ -298,8 +298,8 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ loan_amount: amt })}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
                       profile.loan_amount === amt
-                        ? "border-cyan-500 bg-cyan-600 text-white font-bold"
-                        : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+                        ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
+                        : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
                     }`}
                   >
                     {formatINR(amt, true)}
@@ -318,13 +318,13 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               exit={{ opacity: 0, x: -15 }}
               className="space-y-6"
             >
-              <div className="text-center rounded-2xl border border-indigo-500/30 bg-indigo-950/30 p-5">
-                <span className="text-xs text-slate-400 block uppercase tracking-wider font-semibold">
+              <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
+                <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Repayment Duration
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-white font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
                   {profile.tenure_years || 20} Years
-                  <span className="text-sm font-normal text-slate-400 ml-2">
+                  <span className="text-sm font-normal text-slate-500 ml-2">
                     ({(profile.tenure_years || 20) * 12} Monthly EMIs)
                   </span>
                 </span>
@@ -338,9 +338,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   step={1}
                   value={profile.tenure_years || 20}
                   onChange={(e) => updateProfile({ tenure_years: parseInt(e.target.value, 10) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  className="w-full h-2 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
                   <span>1 Year</span>
                   <span>10 Years</span>
                   <span>20 Years</span>
@@ -356,8 +356,8 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ tenure_years: yr })}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all ${
                       profile.tenure_years === yr
-                        ? "border-indigo-500 bg-indigo-600 text-white font-bold"
-                        : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+                        ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
+                        : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
                     }`}
                   >
                     {yr} Yrs
@@ -376,11 +376,11 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               exit={{ opacity: 0, x: -15 }}
               className="space-y-6"
             >
-              <div className="text-center rounded-2xl border border-indigo-500/30 bg-indigo-950/30 p-5">
-                <span className="text-xs text-slate-400 block uppercase tracking-wider font-semibold">
+              <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
+                <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Current Monthly Outflow
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-white font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
                   {profile.existing_emi && profile.existing_emi > 0
                     ? formatINR(profile.existing_emi)
                     : "₹0 (Zero Active Loans)"}
@@ -395,11 +395,11 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ existing_emi: emi })}
                     className={`rounded-xl border p-3 text-center transition-all ${
                       profile.existing_emi === emi
-                        ? "border-indigo-500 bg-indigo-950/60 text-white font-bold ring-1 ring-indigo-500"
-                        : "border-white/10 bg-white/4 text-slate-300 hover:border-white/20"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                     }`}
                   >
-                    <span className="text-xs block text-slate-400">
+                    <span className="text-xs block text-slate-500">
                       {emi === 0 ? "No Active EMI" : "Existing EMI"}
                     </span>
                     <span className="text-sm font-mono mt-0.5 block">{formatINR(emi)}</span>
@@ -426,25 +426,25 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ credit_band: band.id })}
                     className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-950/40 ring-1 ring-emerald-500 shadow-lg shadow-emerald-500/20"
-                        : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
                     }`}
                   >
                     <div
                       className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
                         isSelected
-                          ? "bg-emerald-500 text-white"
-                          : "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                          ? "bg-[#1F7A63] text-white"
+                          : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
                       }`}
                     >
                       <CreditCard className="h-4 w-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white text-sm">{band.label}</span>
-                        {isSelected && <Check className="h-4 w-4 text-emerald-400" />}
+                        <span className="font-semibold text-[#081C2D] text-sm">{band.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{band.subtext}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{band.subtext}</p>
                     </div>
                   </div>
                 );
@@ -469,26 +469,26 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ urgency: urg.id })}
                     className={`cursor-pointer rounded-xl border p-4 transition-all flex items-center justify-between ${
                       isSelected
-                        ? "border-indigo-500 bg-indigo-950/50 ring-1 ring-indigo-500 shadow-lg shadow-indigo-500/20"
-                        : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
                           isSelected
-                            ? "bg-indigo-500 text-white"
-                            : "bg-indigo-500/15 border border-indigo-500/30 text-indigo-400"
+                            ? "bg-[#1F7A63] text-white"
+                            : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
                         }`}
                       >
                         <Calendar className="h-4 w-4" />
                       </div>
                       <div>
-                        <span className="font-semibold text-white text-sm block">{urg.label}</span>
-                        <span className="text-xs text-slate-400">{urg.subtext}</span>
+                        <span className="font-semibold text-[#081C2D] text-sm block">{urg.label}</span>
+                        <span className="text-xs text-slate-500">{urg.subtext}</span>
                       </div>
                     </div>
-                    {isSelected && <Check className="h-5 w-5 text-emerald-400" />}
+                    {isSelected && <Check className="h-5 w-5 text-[#1F7A63]" />}
                   </div>
                 );
               })}
@@ -498,14 +498,14 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
       </div>
 
       {/* Navigation Footer */}
-      <div className="mt-8 pt-5 border-t border-white/8 flex items-center justify-between">
+      <div className="mt-8 pt-5 border-t border-[#E2E8F0] flex items-center justify-between">
         <button
           onClick={handlePrev}
           disabled={currentStepIndex === 0}
-          className={`inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-xs font-semibold transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] px-4 py-2.5 text-xs font-semibold transition-colors ${
             currentStepIndex === 0
-              ? "opacity-30 cursor-not-allowed text-slate-600"
-              : "text-slate-300 hover:bg-white/5 hover:text-white cursor-pointer"
+              ? "opacity-30 cursor-not-allowed text-slate-400"
+              : "text-[#081C2D] hover:bg-[#F5F7FA] cursor-pointer"
           }`}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -514,7 +514,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
 
         <button
           onClick={handleNext}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white hover:from-indigo-500 hover:to-cyan-500 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all cursor-pointer"
         >
           <span>{currentStepIndex === ADVISOR_STEPS.length - 1 ? "Find My Matches" : "Next Question"}</span>
           <ArrowRight className="h-4 w-4" />

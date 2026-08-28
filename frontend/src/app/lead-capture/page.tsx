@@ -8,7 +8,6 @@ import * as z from "zod";
 import { motion } from "motion/react";
 import {
   CheckCircle2,
-  Sparkles,
   ArrowRight,
   Phone,
   Mail,
@@ -85,7 +84,7 @@ export default function LeadCapturePage() {
 
   const onSubmit = async (data: LeadFormValues) => {
     setIsSubmitting(true);
-    toast.loading("Scoring lead & preparing AI Sales Briefing...", { id: "lead" });
+    toast.loading("Scoring lead & preparing underwriter briefing...", { id: "lead" });
 
     try {
       const response = await submitLead({
@@ -117,56 +116,53 @@ export default function LeadCapturePage() {
   // SUCCESS STATE SCREEN
   if (submittedLead) {
     return (
-      <main className="flex-1 bg-mesh-gradient py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 bg-[#F5F7FA] py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.96, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="rounded-3xl border border-emerald-500/30 bg-[#080e28] p-6 sm:p-10 shadow-2xl space-y-8"
+            className="bank-card p-6 sm:p-10 bg-white border border-[#E2E8F0] shadow-sm space-y-8"
           >
             {/* Success Header */}
-            <div className="text-center space-y-3 pb-6 border-b border-white/8">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30">
-                <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+            <div className="text-center space-y-3 pb-6 border-b border-[#E2E8F0]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E8F5F1] text-[#1F7A63]">
+                <CheckCircle2 className="h-7 w-7" />
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-0.5 text-xs font-mono font-bold text-emerald-300 border border-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F5F1] px-3 py-0.5 text-xs font-mono font-bold text-[#1F7A63] border border-emerald-100">
                 REF: {submittedLead.lead_id}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                You&apos;re all set! Request Submitted.
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+                Request Submitted Successfully
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
-                A dedicated lending specialist will contact you during your preferred{" "}
-                <strong className="text-white">{submittedLead.lead_data.preferred_contact_time}</strong> window.
+              <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                A retail lending specialist will contact you during your preferred{" "}
+                <strong className="text-[#081C2D]">{submittedLead.lead_data.preferred_contact_time}</strong> window.
               </p>
             </div>
 
-            {/* Scored Lead AI Intelligence Card (Architecture Demonstration) */}
-            <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-b from-indigo-950/40 to-[#070b20] p-6 space-y-4">
+            {/* Scored Lead Intelligence Card */}
+            <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cyan-400" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-                    GenAI Lead Qualification Output
-                  </span>
-                </div>
-                <span className="rounded bg-emerald-500/20 px-2.5 py-1 text-xs font-mono font-bold text-emerald-300 border border-emerald-500/40">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                  Application Underwriting Summary
+                </span>
+                <span className="rounded-md bg-[#E8F5F1] px-2.5 py-1 text-xs font-mono font-bold text-[#1F7A63] border border-emerald-100">
                   {submittedLead.scoring.score_band} · {submittedLead.scoring.lead_score}/100
                 </span>
               </div>
 
-              <div className="rounded-xl bg-black/40 p-4 border border-white/6 text-xs text-slate-300 leading-relaxed italic">
+              <div className="rounded-lg bg-white p-4 border border-[#E2E8F0] text-xs text-slate-600 leading-relaxed italic">
                 &quot;{submittedLead.scoring.ai_agent_briefing}&quot;
               </div>
 
               <div className="space-y-2 pt-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
                   Scoring Factors Captured:
                 </span>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
                   {submittedLead.scoring.key_scoring_factors.map((f, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63] mt-1.5 shrink-0" />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -174,14 +170,14 @@ export default function LeadCapturePage() {
               </div>
             </div>
 
-            {/* Actions for judges & users */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/8">
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#E2E8F0]">
               <button
                 onClick={() => {
                   resetDemo();
                   router.push("/");
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/4 px-5 py-3 text-xs font-semibold text-slate-300 hover:bg-white/8 hover:text-white transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#F5F7FA] transition-colors cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span>Return to Home</span>
@@ -189,10 +185,10 @@ export default function LeadCapturePage() {
 
               <button
                 onClick={() => router.push("/dashboard")}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-xl shadow-cyan-600/30 hover:from-cyan-500 hover:to-indigo-500 transition-all cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#081C2D] hover:bg-[#0D263D] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all cursor-pointer"
               >
                 <LayoutDashboard className="h-4 w-4" />
-                <span>Open Bank Sales Dashboard — Demo</span>
+                <span>Open Sales Dashboard (Demo)</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -204,48 +200,47 @@ export default function LeadCapturePage() {
 
   // DEFAULT FORM VIEW
   return (
-    <main className="flex-1 bg-mesh-gradient py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
+    <main className="flex-1 bg-[#F5F7FA] py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column: Contact Form (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-950/40 px-3 py-0.5 text-xs font-semibold text-indigo-300">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-                <span>Step 5: Priority Application Intake</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
+                Priority Application Intake
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
                 Request an Advisory Callback
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Provide your contact details so our lending team can verify documentation and initiate digital sanction.
+              <p className="text-xs sm:text-sm text-slate-500">
+                Provide your contact details so our lending team can verify documentation and initiate sanction.
               </p>
             </div>
 
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="rounded-3xl border border-white/10 bg-[#080e26]/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-5"
+              className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm space-y-5"
             >
               {/* Full Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5 text-indigo-400" />
+                <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-[#1F7A63]" />
                   Full Legal Name
                 </label>
                 <input
                   {...register("name")}
                   placeholder="e.g. Rahul Sharma"
-                  className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                 />
-                {errors.name && <p className="text-xs text-rose-400">{errors.name.message}</p>}
+                {errors.name && <p className="text-xs text-rose-600">{errors.name.message}</p>}
               </div>
 
               {/* Phone & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Phone */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5 text-cyan-400" />
+                  <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 text-[#1F7A63]" />
                     Mobile Number (10 digits)
                   </label>
                   <div className="relative">
@@ -256,32 +251,32 @@ export default function LeadCapturePage() {
                       {...register("phone")}
                       placeholder="9820144520"
                       maxLength={10}
-                      className="w-full rounded-xl border border-white/10 bg-black/40 pl-12 pr-4 py-3 text-sm font-mono text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-colors"
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] pl-12 pr-4 py-3 text-sm font-mono text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                     />
                   </div>
-                  {errors.phone && <p className="text-xs text-rose-400">{errors.phone.message}</p>}
+                  {errors.phone && <p className="text-xs text-rose-600">{errors.phone.message}</p>}
                 </div>
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5 text-indigo-400" />
-                    Work / Personal Email
+                  <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-[#1F7A63]" />
+                    Email Address
                   </label>
                   <input
                     {...register("email")}
                     type="email"
                     placeholder="name@example.com"
-                    className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                   />
-                  {errors.email && <p className="text-xs text-rose-400">{errors.email.message}</p>}
+                  {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
                 </div>
               </div>
 
               {/* Preferred Contact Time */}
               <div className="space-y-2 pt-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-emerald-400" />
+                <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-[#1F7A63]" />
                   Preferred Callback Window
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -296,22 +291,22 @@ export default function LeadCapturePage() {
                       onClick={() => handleSelectTime(t.id as "Morning" | "Afternoon" | "Evening")}
                       className={`rounded-xl border p-2.5 text-center transition-all ${
                         preferredTime === t.id
-                          ? "border-cyan-400 bg-cyan-950/50 text-white font-bold ring-1 ring-cyan-400"
-                          : "border-white/10 bg-white/4 text-slate-400 hover:border-white/20"
+                          ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
+                          : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                       }`}
                     >
                       <span className="text-xs block font-semibold">{t.label}</span>
-                      <span className="text-[10px] text-slate-400 block font-mono">{t.time}</span>
+                      <span className="text-[10px] text-slate-500 block font-mono">{t.time}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Security & Disclaimer */}
-              <div className="rounded-xl border border-white/6 bg-white/2 p-3 text-[11px] text-slate-400 flex items-start gap-2.5">
-                <Lock className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3 text-[11px] text-slate-500 flex items-start gap-2.5">
+                <Lock className="h-4 w-4 text-[#1F7A63] shrink-0 mt-0.5" />
                 <span>
-                  No credit score impact at this stage. Your information is encrypted and transmitted directly to the underwriting queue.
+                  No credit bureau impact at this stage. Your information is encrypted and transmitted directly to underwriting.
                 </span>
               </div>
 
@@ -319,10 +314,10 @@ export default function LeadCapturePage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:from-indigo-500 hover:to-cyan-500 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <span>Transmitting & Scoring Lead...</span>
+                  <span>Submitting Lead...</span>
                 ) : (
                   <>
                     <span>Submit Interest & Request Callback</span>
@@ -335,63 +330,63 @@ export default function LeadCapturePage() {
 
           {/* Right Column: Selected Product Summary (5 cols) */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="rounded-3xl border border-indigo-500/30 bg-gradient-to-b from-[#0e163a] to-[#070c22] p-6 sm:p-7 shadow-2xl backdrop-blur-xl space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-white/8">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 font-mono">
+            <div className="bank-card p-6 sm:p-7 bg-white border border-[#E2E8F0] shadow-sm space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1F7A63] font-mono">
                   Selected Product
                 </span>
-                <span className="rounded bg-indigo-500/20 px-2 py-0.5 text-[10px] font-mono text-indigo-300">
+                <span className="rounded-md bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-semibold text-[#1F7A63]">
                   {activeLoan.match_score}% Match
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white">{activeLoan.name}</h3>
-                <p className="text-xs text-slate-400 mt-1">{activeLoan.category}</p>
+                <h3 className="text-xl font-bold text-[#081C2D]">{activeLoan.name}</h3>
+                <p className="text-xs text-slate-500 mt-1">{activeLoan.category}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="rounded-xl border border-white/8 bg-black/30 p-3">
-                  <span className="text-[10px] text-slate-400 block">Requested Loan</span>
-                  <span className="text-base font-bold text-white font-mono">
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
+                  <span className="text-[10px] text-slate-500 block">Requested Loan</span>
+                  <span className="text-base font-bold text-[#081C2D] font-mono">
                     {formatINR(profile.loan_amount || 4500000)}
                   </span>
                 </div>
-                <div className="rounded-xl border border-white/8 bg-black/30 p-3">
-                  <span className="text-[10px] text-slate-400 block">Estimated EMI</span>
-                  <span className="text-base font-bold text-emerald-400 font-mono">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
+                  <span className="text-[10px] text-slate-500 block">Estimated EMI</span>
+                  <span className="text-base font-bold text-[#1F7A63] font-mono">
                     {formatINR(activeLoan.estimated_emi)}
                   </span>
                 </div>
-                <div className="rounded-xl border border-white/8 bg-black/30 p-3">
-                  <span className="text-[10px] text-slate-400 block">Interest Rate</span>
-                  <span className="text-sm font-bold text-white font-mono">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
+                  <span className="text-[10px] text-slate-500 block">Interest Rate</span>
+                  <span className="text-sm font-bold text-[#081C2D] font-mono">
                     {activeLoan.interest_rate.toFixed(2)}% p.a.
                   </span>
                 </div>
-                <div className="rounded-xl border border-white/8 bg-black/30 p-3">
-                  <span className="text-[10px] text-slate-400 block">Tenure</span>
-                  <span className="text-sm font-bold text-white font-mono">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
+                  <span className="text-[10px] text-slate-500 block">Tenure</span>
+                  <span className="text-sm font-bold text-[#081C2D] font-mono">
                     {profile.tenure_years || 20} Years
                   </span>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-white/6 space-y-2">
-                <span className="text-[11px] font-semibold text-slate-300 block">
+              <div className="pt-2 border-t border-[#E2E8F0] space-y-2">
+                <span className="text-[11px] font-semibold text-[#081C2D] block">
                   Included Benefits:
                 </span>
-                <ul className="space-y-1.5 text-xs text-slate-400">
+                <ul className="space-y-1.5 text-xs text-slate-600">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#1F7A63] shrink-0" />
                     <span>48-hour digital sanction in principle</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#1F7A63] shrink-0" />
                     <span>Doorstep documentation assistance</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#1F7A63] shrink-0" />
                     <span>Zero prepayment penalty option</span>
                   </li>
                 </ul>

@@ -149,7 +149,7 @@ export const useJourneyStore = create<JourneyState>()(
         }),
     }),
     {
-      name: "loansense-journey-storage",
+      name: "dhansetu-journey-storage",
       storage: createJSONStorage(() => (typeof window !== "undefined" ? window.localStorage : dummyStorage)),
     }
   )

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, ArrowRight, XCircle } from "lucide-react";
+import { ArrowRight, XCircle } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { BestMatchHeroCard } from "@/components/recommendations/BestMatchHeroCard";
 import { LoanCardItem } from "@/components/recommendations/LoanCardItem";
@@ -52,32 +52,31 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <main className="flex-1 bg-mesh-gradient py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
+    <main className="flex-1 bg-[#F5F7FA] py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-10">
         {/* Top Header Summary */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/8 pb-6">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-950/40 px-3 py-0.5 text-xs font-semibold text-indigo-300">
-              <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              <span>Step 4: Personalized Lending Evaluation</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Your personalized matches are ready.
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
+              Personalized Lending Evaluation
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+              Your Personalized Recommendations
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Evaluated against live bank policies, debt-service limits, and benchmark repo rates.
+            <p className="text-xs sm:text-sm text-slate-500">
+              Evaluated against bank lending criteria, debt-service limits, and benchmark repo rates.
             </p>
           </div>
 
           {/* Profile Summary Pill */}
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-[#080e26] p-3 text-xs font-mono text-slate-300">
-            <span className="text-white font-bold">{profile.intent || "Home Loan"}</span>
-            <span className="text-slate-600">·</span>
-            <span className="text-cyan-300">{formatINR(profile.loan_amount || 4500000, true)}</span>
-            <span className="text-slate-600">·</span>
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs font-mono text-slate-600 shadow-2xs">
+            <span className="text-[#081C2D] font-bold">{profile.intent || "Home Loan"}</span>
+            <span className="text-slate-300">·</span>
+            <span className="text-[#1F7A63] font-semibold">{formatINR(profile.loan_amount || 4500000, true)}</span>
+            <span className="text-slate-300">·</span>
             <span>{profile.tenure_years || 20} Yrs</span>
-            <span className="text-slate-600">·</span>
-            <span className="text-emerald-400">{profile.employment_type || "Salaried"}</span>
+            <span className="text-slate-300">·</span>
+            <span className="text-slate-600">{profile.employment_type || "Salaried"}</span>
           </div>
         </div>
 
@@ -96,14 +95,14 @@ export default function RecommendationsPage() {
           <div className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white">Alternative Qualified Options</h3>
-                <p className="text-xs text-slate-400">
-                  Additional policy-compatible products matching your credit band.
+                <h3 className="text-lg font-bold text-[#081C2D]">Alternative Qualified Options</h3>
+                <p className="text-xs text-slate-500">
+                  Additional policy-compatible products matching your credit profile.
                 </p>
               </div>
               <button
                 onClick={() => setShowCompareDrawer(true)}
-                className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="text-xs font-semibold text-[#1F7A63] hover:underline transition-colors cursor-pointer"
               >
                 Compare all ({activeRecommendations.length})
               </button>
@@ -121,21 +120,21 @@ export default function RecommendationsPage() {
           </div>
         )}
 
-        {/* 3. Interest Decision Section (Architecture Requirement) */}
-        <div className="rounded-3xl border border-white/10 bg-gradient-to-r from-[#0a102a] to-[#070b1e] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+        {/* 3. Interest Decision Section */}
+        <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-base sm:text-lg font-bold text-white">
-              Would you like to proceed with a loan application?
+            <h3 className="text-base sm:text-lg font-bold text-[#081C2D]">
+              Would you like to proceed with this loan application?
             </h3>
-            <p className="text-xs text-slate-400">
-              Select <strong>&quot;I&apos;m Interested&quot;</strong> to request a prioritized callback with pre-filled terms, or <strong>&quot;Not Right Now&quot;</strong> to end your session.
+            <p className="text-xs text-slate-500">
+              Select <strong>&quot;I&apos;m Interested&quot;</strong> to request a prioritized advisory callback with pre-filled terms, or <strong>&quot;Not Right Now&quot;</strong> to end your session.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleNotInterested}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-white/8 hover:text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#F5F7FA] transition-colors cursor-pointer"
             >
               <XCircle className="h-4 w-4 text-slate-400" />
               <span>Not Right Now</span>
@@ -143,7 +142,7 @@ export default function RecommendationsPage() {
 
             <button
               onClick={() => handleSelectInterested(bestMatch)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-600/30 hover:from-indigo-500 hover:to-cyan-500 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all cursor-pointer"
             >
               <span>I&apos;m Interested</span>
               <ArrowRight className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Check } from "lucide-react";
 
 interface VerifiedBadgeProps {
   type?: "calculation" | "policy" | "ai";
@@ -10,11 +10,11 @@ export function VerifiedBadge({ type = "calculation", label, size = "sm" }: Veri
   if (type === "calculation") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 font-medium text-emerald-300 shadow-sm ${
+        className={`inline-flex items-center gap-1 rounded-md border border-emerald-100 bg-[#E8F5F1] font-semibold text-[#1F7A63] ${
           size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
         }`}
       >
-        <CheckCircle2 className={size === "sm" ? "h-3 w-3 text-emerald-400" : "h-3.5 w-3.5 text-emerald-400"} />
+        <CheckCircle2 className={size === "sm" ? "h-3 w-3 text-[#1F7A63]" : "h-3.5 w-3.5 text-[#1F7A63]"} />
         <span>{label || "Verified Calculation"}</span>
       </span>
     );
@@ -23,11 +23,11 @@ export function VerifiedBadge({ type = "calculation", label, size = "sm" }: Veri
   if (type === "policy") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-950/40 font-medium text-cyan-300 shadow-sm ${
+        className={`inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F5F7FA] font-semibold text-slate-700 ${
           size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
         }`}
       >
-        <ShieldCheck className={size === "sm" ? "h-3 w-3 text-cyan-400" : "h-3.5 w-3.5 text-cyan-400"} />
+        <ShieldCheck className={size === "sm" ? "h-3 w-3 text-[#1F7A63]" : "h-3.5 w-3.5 text-[#1F7A63]"} />
         <span>{label || "Policy Grounded"}</span>
       </span>
     );
@@ -35,12 +35,12 @@ export function VerifiedBadge({ type = "calculation", label, size = "sm" }: Veri
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-950/40 font-medium text-indigo-300 shadow-sm ${
+      className={`inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F5F7FA] font-semibold text-slate-700 ${
         size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
       }`}
     >
-      <Sparkles className={size === "sm" ? "h-3 w-3 text-indigo-400" : "h-3.5 w-3.5 text-indigo-400"} />
-      <span>{label || "AI Explanation"}</span>
+      <Check className={size === "sm" ? "h-3 w-3 text-[#1F7A63]" : "h-3.5 w-3.5 text-[#1F7A63]"} />
+      <span>{label || "Verified Terms"}</span>
     </span>
   );
 }

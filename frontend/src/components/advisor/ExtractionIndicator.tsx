@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Sparkles, Cpu } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface ExtractionIndicatorProps {
   message?: string;
@@ -19,11 +19,10 @@ export function ExtractionIndicator({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-3 py-1 text-[11px] font-medium text-cyan-300 shadow-sm backdrop-blur-md"
+      className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-[#F0FDF4] px-3 py-1 text-[11px] font-medium text-[#1F7A63]"
     >
-      <Cpu className="h-3.5 w-3.5 text-cyan-400 animate-spin" style={{ animationDuration: "3s" }} />
+      <Loader2 className="h-3.5 w-3.5 text-[#1F7A63] animate-spin" />
       <span>{message}</span>
-      <Sparkles className="h-3 w-3 text-cyan-400" />
     </motion.div>
   );
 }

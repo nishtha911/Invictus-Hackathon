@@ -10,7 +10,7 @@ export interface JourneyStep {
 
 export const ADVISOR_STEPS: JourneyStep[] = [
   { id: "purpose", title: "Loan Purpose", field: "intent" },
-  { id: "employment", title: "Employment", field: "employment_type" },
+  { id: "employment", title: "Employment Type", field: "employment_type" },
   { id: "income", title: "Monthly Income", field: "income" },
   { id: "loan_amount", title: "Loan Amount", field: "loan_amount" },
   { id: "tenure", title: "Preferred Tenure", field: "tenure_years" },
@@ -30,15 +30,27 @@ export function AdvisorJourneyRail({
   onSelectStep,
   completedSteps,
 }: AdvisorJourneyRailProps) {
+  const progressPct = Math.round(((currentStepIndex + 1) / ADVISOR_STEPS.length) * 100);
+
   return (
-    <aside className="w-full space-y-4">
-      <div className="flex items-center justify-between pb-2 border-b border-white/8">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-          Advisory Journey
-        </h3>
-        <span className="text-[11px] font-mono text-indigo-400 font-semibold">
-          Step {Math.min(currentStepIndex + 1, ADVISOR_STEPS.length)} of {ADVISOR_STEPS.length}
-        </span>
+    <aside className="bank-card p-5 space-y-4">
+      <div className="space-y-2 pb-3 border-b border-[#E2E8F0]">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            Advisory Progress
+          </h3>
+          <span className="text-xs font-mono font-bold text-[#081C2D]">
+            {progressPct}%
+          </span>
+        </div>
+
+        {/* Solid Emerald Progress Bar */}
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#E2E8F0]">
+          <div
+            className="h-full rounded-full bg-[#1F7A63] transition-all duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
       </div>
 
       <nav className="space-y-1">
@@ -52,27 +64,29 @@ export function AdvisorJourneyRail({
               onClick={() => onSelectStep(idx)}
               className={`w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all text-left ${
                 isCurrent
-                  ? "bg-indigo-600/20 text-white border border-indigo-500/40 shadow-sm"
+                  ? "bg-[#F0FDF4] text-[#081C2D] border border-[#1F7A63] font-bold"
                   : isDone
-                  ? "text-slate-300 hover:bg-white/4 hover:text-white"
-                  : "text-slate-400 hover:bg-white/3"
+                  ? "text-[#081C2D] hover:bg-[#F5F7FA]"
+                  : "text-slate-400 hover:bg-[#F5F7FA]"
               }`}
             >
               <div className="flex items-center gap-2.5">
                 {isDone ? (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#1F7A63] shrink-0" />
                 ) : isCurrent ? (
-                  <div className="h-4 w-4 rounded-full border-2 border-indigo-400 bg-indigo-500/20 flex items-center justify-center">
-                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-300 animate-ping" />
+                  <div className="h-4 w-4 rounded-full border-2 border-[#1F7A63] bg-emerald-50 flex items-center justify-center">
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#1F7A63]" />
                   </div>
                 ) : (
-                  <Circle className="h-4 w-4 text-slate-600 shrink-0" />
+                  <Circle className="h-4 w-4 text-slate-300 shrink-0" />
                 )}
-                <span className={isCurrent ? "font-bold text-white" : ""}>{step.title}</span>
+                <span className={isCurrent ? "font-bold text-[#081C2D]" : ""}>
+                  {step.title}
+                </span>
               </div>
 
               {isCurrent && (
-                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63]" />
               )}
             </button>
           );

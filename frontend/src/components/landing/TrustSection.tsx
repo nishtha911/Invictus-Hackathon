@@ -1,68 +1,75 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ShieldCheck, Lock, CheckCircle2, Award, ArrowRight } from "lucide-react";
 import { TrustModal } from "../shared/TrustModal";
-import { UserTypeModal } from "../shared/UserTypeModal";
 
 export function TrustSection() {
   const [showTrustModal, setShowTrustModal] = useState(false);
-  const [showUserModal, setShowUserModal] = useState(false);
 
   return (
     <>
-      <section id="trust" className="py-16 sm:py-24 border-t border-white/6 bg-[#040612] relative overflow-hidden">
+      <section id="trust" className="py-16 sm:py-20 border-t border-[#E2E8F0] bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-[#0a1028] to-cyan-950/40 p-8 sm:p-12 relative shadow-2xl">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-8 sm:p-12">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-8 space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3 py-1 text-xs font-semibold text-emerald-300">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  <span>Enterprise Grade Safety Architecture</span>
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] px-3 py-1 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
+                  <ShieldCheck className="h-4 w-4 text-[#1F7A63]" />
+                  <span>Enterprise Security Architecture</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
                   Bank-Grade Trust. Zero Hallucination Math.
                 </h2>
 
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-                  Unlike generic conversational bots, LoanSense AI delegates every EMI calculation, interest rate computation, and eligibility assessment to deterministic bank-approved rule engines.
+                <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
+                  DhanSetu delegates every EMI calculation, interest computation, and debt-service eligibility check to deterministic, bank-approved rule engines.
                 </p>
 
                 <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-5 w-5 text-[#1F7A63] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xs font-semibold text-white">Deterministic EMI Formula</h4>
-                      <p className="text-[11px] text-slate-400">Strict mathematical execution for principal, tenure & rates.</p>
+                      <h4 className="text-xs font-semibold text-[#081C2D]">
+                        Deterministic EMI Calculations
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Mathematical execution for principal, interest rates, and loan tenure.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">
-                    <Lock className="h-5 w-5 text-cyan-400 shrink-0 mt-0.5" />
+                    <Lock className="h-5 w-5 text-[#1F7A63] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xs font-semibold text-white">Policy Grounded RAG</h4>
-                      <p className="text-[11px] text-slate-400">Explanations tied directly to verified lending circulars.</p>
+                      <h4 className="text-xs font-semibold text-[#081C2D]">
+                        Policy-Grounded Reasoning
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Explanations directly tied to verified retail lending circulars.
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="lg:col-span-4 flex flex-col gap-3">
+              <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3">
                 <button
                   onClick={() => setShowTrustModal(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-500/40 bg-indigo-950/60 px-5 py-3 text-xs sm:text-sm font-semibold text-indigo-200 hover:bg-indigo-900/60 hover:text-white transition-all shadow-lg"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#081C2D] bg-transparent px-5 py-3 text-xs sm:text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer"
                 >
-                  <Award className="h-4 w-4 text-indigo-400" />
+                  <Award className="h-4 w-4" />
                   <span>View Verification Matrix</span>
                 </button>
 
-                <button
-                  onClick={() => setShowUserModal(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 px-5 py-3 text-xs sm:text-sm font-semibold text-white hover:from-indigo-500 hover:to-indigo-400 shadow-xl shadow-indigo-600/30 transition-all cursor-pointer"
+                <Link
+                  href="/advisor"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-5 py-3 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all"
                 >
-                  <span>Start AI Advisory</span>
+                  <span>Explore Loan Options</span>
                   <ArrowRight className="h-4 w-4" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -70,7 +77,6 @@ export function TrustSection() {
       </section>
 
       <TrustModal open={showTrustModal} onClose={() => setShowTrustModal(false)} />
-      <UserTypeModal open={showUserModal} onClose={() => setShowUserModal(false)} />
     </>
   );
 }

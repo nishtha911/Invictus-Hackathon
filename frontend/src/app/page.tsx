@@ -5,7 +5,7 @@ import { TrustSection } from "@/components/landing/TrustSection";
 
 export default function HomePage() {
   return (
-    <main className="flex-1 flex flex-col bg-mesh-gradient">
+    <main className="flex-1 flex flex-col bg-[#F5F7FA]">
       <Hero />
       <LoanSolutionsGrid />
       <HowItWorksSection />

@@ -7,7 +7,7 @@ export function generateMockLeadResponse(payload: LeadCapturePayload): LeadRespo
   return {
     status: "success",
     lead_id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
-    message: "Lead captured and scored successfully by GenAI Advisory Pipeline",
+    message: "Lead captured and scored successfully by Underwriting Advisory Pipeline",
     created_at: new Date().toISOString(),
     lead_data: payload,
     scoring: {
