@@ -8,9 +8,11 @@ import {
   RecommendedLoan,
   UserType,
 } from "../lib/types/contracts";
+import { ChatMessage } from "../lib/api/chat";
 
 export interface JourneyState {
   sessionId: string;
+  backendSessionId: string | null;  // Real session ID from the LangGraph backend
   userType: UserType | null;
   selectedCustomer: DemoCustomer | null;
   profile: ProfileIntake;
@@ -22,6 +24,8 @@ export interface JourneyState {
   currentStepIndex: number;
   isExtracting: boolean;
   extractionStatusMessage: string;
+  chatMessages: ChatMessage[];  // Live chat history from backend
+  currentQuestion: ChatMessage | null;  // The latest question to display
 
   // Actions
   setUserType: (type: UserType, customer?: DemoCustomer) => void;
@@ -33,6 +37,9 @@ export interface JourneyState {
   setAnswer: (key: string, value: string | number | boolean) => void;
   setStepIndex: (index: number) => void;
   setIsExtracting: (extracting: boolean, status?: string) => void;
+  setBackendSessionId: (id: string) => void;
+  appendChatMessages: (messages: ChatMessage[]) => void;
+  setCurrentQuestion: (msg: ChatMessage | null) => void;
   resetDemo: () => void;
 }
 
@@ -58,6 +65,7 @@ export const useJourneyStore = create<JourneyState>()(
   persist(
     (set) => ({
       sessionId: `SESSION-${Date.now()}`,
+      backendSessionId: null,
       userType: null,
       selectedCustomer: null,
       profile: { ...initialProfile },
@@ -69,6 +77,8 @@ export const useJourneyStore = create<JourneyState>()(
       currentStepIndex: 0,
       isExtracting: false,
       extractionStatusMessage: "Understanding your requirements...",
+      chatMessages: [],
+      currentQuestion: null,
 
       setUserType: (type, customer) =>
         set((state) => {
@@ -131,10 +141,15 @@ export const useJourneyStore = create<JourneyState>()(
       setStepIndex: (index) => set({ currentStepIndex: index }),
       setIsExtracting: (extracting, status = "Understanding your requirements...") =>
         set({ isExtracting: extracting, extractionStatusMessage: status }),
+      setBackendSessionId: (id) => set({ backendSessionId: id }),
+      appendChatMessages: (messages) =>
+        set((state) => ({ chatMessages: [...state.chatMessages, ...messages] })),
+      setCurrentQuestion: (msg) => set({ currentQuestion: msg }),
 
       resetDemo: () =>
         set({
           sessionId: `SESSION-${Date.now()}`,
+          backendSessionId: null,
           userType: null,
           selectedCustomer: null,
           profile: { ...initialProfile },
@@ -146,6 +161,8 @@ export const useJourneyStore = create<JourneyState>()(
           currentStepIndex: 0,
           isExtracting: false,
           extractionStatusMessage: "Understanding your requirements...",
+          chatMessages: [],
+          currentQuestion: null,
         }),
     }),
     {
