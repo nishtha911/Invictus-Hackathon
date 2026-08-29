@@ -51,13 +51,16 @@ function AdvisorContent() {
     toast.loading("Querying Loan Catalogue & evaluating bank policies...", { id: "matching" });
 
     try {
-      // Persist the slider-based profile before navigation. The Knowledge Base
-      // later reads this by session ID, so the user does not need to re-enter it.
+      const response = await fetchLoanRecommendations(profile);
+      setRecommendations(response.recommended_loans);
+
+      // Save only after fresh recommendations are available. Persisting before
+      // this point could carry an old loan selection into a new advisory run.
       try {
         await saveKnowledgeBaseContext(sessionId, {
           user_type: userType || profile.user_type,
           profile,
-          selected_loan: selectedLoan,
+          selected_loan: response.recommended_loans[0] || null,
           customer_context: selectedCustomer,
         });
       } catch (contextError) {
@@ -65,8 +68,7 @@ function AdvisorContent() {
         // RAG page also sends this in-memory profile as a one-time fallback.
         console.warn("Unable to save Knowledge Base context.", contextError);
       }
-      const response = await fetchLoanRecommendations(profile);
-      setRecommendations(response.recommended_loans);
+
       toast.success("Found policy-matched loan recommendations!", { id: "matching" });
       router.push("/recommendations");
     } catch (err: unknown) {

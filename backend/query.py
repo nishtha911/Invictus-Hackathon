@@ -132,7 +132,40 @@ Rules you MUST follow:
 3. Format your response beautifully using Markdown: use bolding for key parameters, bullet points for lists, and headers if organizing multiple points.
 4. Structure the response to be highly readable, conversational, and clear, like a helpful bank support assistant.
 5. If multiple policies or values apply, clearly state them and mention the source document they come from.
-6. Ensure all numbers, interest rates, and loan amounts match the retrieved excerpts exactly. Do not assume or extrapolate details not in the excerpts."""
+6. Policy figures, rates, limits, and requirements must match the retrieved excerpts exactly. Values in the "Verified Advisory Profile" are user-supplied facts and may be repeated, but you must not invent a calculation or a missing profile value.
+7. Use every relevant field from the Verified Advisory Profile. Never say a field is "not provided" when it appears there. If the credit field is "Not Sure / New to Credit", say the credit score is unknown and state that any policy score threshold cannot yet be confirmed.
+8. Never write "assumed", infer eligibility from employment or income alone, or claim the user is eligible unless every policy criterion required for that claim is both present in the profile and satisfied. Clearly identify outstanding checks.
+9. When the profile has a requested tenure, mention it for eligibility, tenure, or product-fit questions. Compare it with a policy tenure limit only when that limit appears in a retrieved excerpt."""
+
+
+def _profile_for_prompt(profile: dict | None) -> dict:
+    """Normalize saved and direct frontend profile formats for the LLM."""
+    if not isinstance(profile, dict):
+        return {}
+
+    loan_profile = profile.get("profile", profile)
+    if not isinstance(loan_profile, dict):
+        loan_profile = {}
+
+    normalized = {
+        "user_type": profile.get("user_type", loan_profile.get("user_type", "new")),
+        "loan_profile": loan_profile,
+    }
+
+    selected_loan = profile.get("selected_loan")
+    # Ignore a stale product from a previous journey. It must not influence a
+    # Vehicle Loan answer merely because it was once a Home Loan best match.
+    if (
+        isinstance(selected_loan, dict)
+        and selected_loan.get("category") == loan_profile.get("intent")
+    ):
+        normalized["selected_loan"] = selected_loan
+
+    customer_context = profile.get("customer_context")
+    if isinstance(customer_context, dict):
+        normalized["customer_context"] = customer_context
+
+    return normalized
 
 
 def answer(query: str, loan_category: str = None, top_k: int = 5, profile: dict = None) -> Dict[str, Any]:
@@ -161,8 +194,12 @@ def answer(query: str, loan_category: str = None, top_k: int = 5, profile: dict 
     context = "\n\n---\n\n".join(context_parts)
 
     profile_context = ""
-    if profile:
-        profile_context = f"User Profile / Context:\n{json.dumps(profile, indent=2)}\n\n(Use this context to personalize your answer if applicable.)\n\n"
+    normalized_profile = _profile_for_prompt(profile)
+    if normalized_profile:
+        profile_context = (
+            "Verified Advisory Profile (treat these as facts, not policy excerpts):\n"
+            f"{json.dumps(normalized_profile, indent=2)}\n\n"
+        )
 
     user_message = f"{profile_context}Retrieved policy excerpts:\n\n{context}\n\nQuestion: {query}"
 

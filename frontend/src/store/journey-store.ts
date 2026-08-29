@@ -83,6 +83,7 @@ export const useJourneyStore = create<JourneyState>()(
             };
             return {
               ...state,
+              sessionId: `SESSION-${Date.now()}`,
               userType: type,
               selectedCustomer: customer,
               profile: {
@@ -98,18 +99,25 @@ export const useJourneyStore = create<JourneyState>()(
                 tenure_years: 20,
                 urgency: "Immediate (Within 7 Days)",
               },
+              recommendations: [],
+              selectedLoan: null,
+              submittedLead: null,
               answers: existingAnswers,
               currentStepIndex: 3,
             };
           }
           return {
             ...state,
+            sessionId: `SESSION-${Date.now()}`,
             userType: type,
             selectedCustomer: null,
             profile: {
               ...initialProfile,
               user_type: "new",
             },
+            recommendations: [],
+            selectedLoan: null,
+            submittedLead: null,
             answers: {},
             currentStepIndex: 0,
           };

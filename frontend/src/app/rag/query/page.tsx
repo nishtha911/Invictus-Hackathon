@@ -180,7 +180,10 @@ function parseInlineMarkdown(text: string) {
 
 function buildSuggestedQuestions(context: KnowledgeBaseContext): string[] {
   const { profile, selected_loan: selectedLoan, user_type: userType } = context
-  const loanName = selectedLoan?.name || profile.intent || 'selected loan'
+  // Do not display a product from a previous journey when it belongs to a
+  // different loan category than the active profile.
+  const matchingSelectedLoan = selectedLoan?.category === profile.intent ? selectedLoan : null
+  const loanName = matchingSelectedLoan?.name || profile.intent || 'selected loan'
   const loanCategory = profile.intent || 'loan'
   const incomeQuestion = profile.income
     ? `How does my monthly income of ₹${profile.income.toLocaleString('en-IN')} relate to ${loanCategory} eligibility criteria?`
