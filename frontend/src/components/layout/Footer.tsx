@@ -118,12 +118,8 @@ export function Footer() {
         </div>
 
         {/* Footer Bottom */}
-        <div className="border-t border-[#0f2c44] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+        <div className="border-t border-[#0f2c44] pt-6 flex items-center justify-between text-[11px] text-slate-400">
           <p>© 2026 DhanSetu. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span>Branch: <code className="text-[#4ade80] font-mono">pod4-frontend</code></span>
-            <span>Bank-Grade Security</span>
-          </div>
         </div>
       </div>
     </footer>

@@ -3,7 +3,6 @@ import { PersonalisedIntakeSection } from "@/components/landing/PersonalisedInta
 import { LoanInfoSection } from "@/components/landing/LoanInfoSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { AboutSection } from "@/components/landing/AboutSection";
-import { LoanShowcaseSection } from "@/components/landing/LoanShowcaseSection";
 
 export default function HomePage() {
   return (
@@ -22,9 +21,6 @@ export default function HomePage() {
 
       {/* 5. Combined About DhanSetu & Trust Section */}
       <AboutSection />
-
-      {/* 6. Bottom Navy Animated Loan Showcase Section */}
-      <LoanShowcaseSection />
     </main>
   );
 }
