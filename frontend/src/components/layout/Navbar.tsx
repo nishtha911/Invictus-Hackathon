@@ -88,7 +88,7 @@ export function Navbar() {
               Home
             </Link>
 
-            {/* 2. Loans Dropdown */}
+            {/* 2. Personalised Loans Dropdown */}
             <div
               className="relative"
               ref={dropdownRef}
@@ -104,7 +104,7 @@ export function Navbar() {
                 aria-expanded={loansDropdownOpen}
                 aria-haspopup="true"
               >
-                <span>Loans</span>
+                <span>Personalised Loans</span>
                 <ChevronDown
                   className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${
                     loansDropdownOpen ? "rotate-180 text-white" : ""
@@ -150,7 +150,7 @@ export function Navbar() {
                     <div className="col-span-2 mt-1 pt-2 border-t border-[#E2E8F0] flex items-center justify-between px-2 text-[11px]">
                       <span className="text-slate-500">Need personalized exploration?</span>
                       <Link
-                        href="/#loans"
+                        href="/#loan-information"
                         onClick={() => setLoansDropdownOpen(false)}
                         className="font-semibold text-[#1F7A63] hover:underline"
                       >
@@ -250,14 +250,14 @@ export function Navbar() {
               Home
             </Link>
 
-            {/* Mobile Loans Accordion */}
+            {/* Mobile Personalised Loans Accordion */}
             <div className="border-y border-slate-700/60 py-2 space-y-2">
               <button
                 type="button"
                 onClick={() => setMobileLoansOpen(!mobileLoansOpen)}
                 className="flex items-center justify-between w-full py-1 text-slate-200 hover:text-white text-left font-semibold cursor-pointer"
               >
-                <span>Loans</span>
+                <span>Personalised Loans</span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform duration-200 ${
                     mobileLoansOpen ? "rotate-180 text-white" : "text-slate-400"

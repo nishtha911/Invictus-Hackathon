@@ -35,7 +35,7 @@ export function Hero() {
             {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-3.5">
               <Link
-                href="/#loans"
+                href="/#loan-information"
                 className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>Explore Loans</span>

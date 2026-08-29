@@ -62,11 +62,10 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
                   {lead.id}
                 </span>
                 <span
-                  className={`rounded-md px-2.5 py-0.5 text-[11px] font-bold font-mono border ${
-                    lead.score_band === "HOT LEAD"
+                  className={`rounded-md px-2.5 py-0.5 text-[11px] font-bold font-mono border ${lead.score_band === "HOT LEAD"
                       ? "border-emerald-200 bg-[#E8F5F1] text-[#1F7A63]"
                       : "border-slate-200 bg-[#F5F7FA] text-slate-700"
-                  }`}
+                    }`}
                 >
                   {lead.score_band} · {lead.lead_score}/100
                 </span>

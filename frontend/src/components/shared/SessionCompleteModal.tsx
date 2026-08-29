@@ -54,7 +54,7 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
             Thank you for exploring your loan options with <strong>{BRAND.name}</strong>. Your session is securely closed without capturing personal contact details.
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            You can start another advisory session whenever you are ready to explore or apply.
+            You can start another personalised loan session whenever you are ready to explore or apply.
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">

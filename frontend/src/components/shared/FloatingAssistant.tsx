@@ -1,61 +1,45 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { MessageCircle, X, Send, ArrowRight, ShieldCheck } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { extractProfile } from "@/lib/api/advisor";
+import {
+  ChatMessage,
+  SuggestedAction,
+  getInitialBotState,
+  sendChatMessage,
+} from "@/lib/api/chatbot";
 import { motion, AnimatePresence } from "motion/react";
-
-interface ChatMessage {
-  id: string;
-  sender: "bot" | "user";
-  text: string;
-  options?: { label: string; action: () => void }[];
-}
 
 export function FloatingAssistant() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, updateProfile, setExtractedData } = useJourneyStore();
+  const { sessionId, profile, updateProfile, setExtractedData } = useJourneyStore();
+  const [, startTransition] = useTransition();
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const idCounter = useRef(1);
 
   // Do NOT show chatbot on sales dashboard
   const isDashboard = pathname.startsWith("/dashboard");
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      sender: "bot",
-      text: "Hello! Welcome to DhanSetu. I can assist you in finding suitable home, car, business, or gold loan options tailored to your needs.",
-      options: [
-        {
-          label: "Home Loan",
-          action: () => handleSelectCategory("Home Loan", "home_loan"),
-        },
-        {
-          label: "Car Loan",
-          action: () => handleSelectCategory("Vehicle Loan", "vehicle_loan"),
-        },
-        {
-          label: "Business Loan",
-          action: () => handleSelectCategory("Business Loan", "business_loan"),
-        },
-        {
-          label: "Gold Loan",
-          action: () => handleSelectCategory("Gold Loan", "gold_loan"),
-        },
-        {
-          label: "How does DhanSetu work?",
-          action: () => handleHowItWorks(),
-        },
-      ],
-    },
-  ]);
+  // Load dynamic initial state from chatbot service
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const initial = getInitialBotState();
+    return [
+      {
+        id: "initial-msg-1",
+        sender: "bot",
+        text: initial.text,
+        suggestedActions: initial.suggestedActions,
+      },
+    ];
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -65,89 +49,75 @@ export function FloatingAssistant() {
     if (isOpen) {
       scrollToBottom();
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isTyping]);
 
   if (isDashboard) {
     return null;
   }
 
-  const handleHowItWorks = () => {
+  const handleActionClick = async (action: SuggestedAction) => {
+    idCounter.current += 1;
+    const userMsgId = `usr-${idCounter.current}`;
     const userMsg: ChatMessage = {
-      id: String(Date.now()),
+      id: userMsgId,
       sender: "user",
-      text: "How does DhanSetu work?",
+      text: action.label,
     };
-
     setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true);
 
-    setTimeout(() => {
-      setIsTyping(false);
-      const botMsg: ChatMessage = {
-        id: String(Date.now() + 1),
-        sender: "bot",
-        text: "DhanSetu follows a simple 4-step process: 1) Choose your loan goal, 2) Complete a quick 2-minute profile intake, 3) Receive verified EMI calculations & matched products, and 4) Connect directly with a retail lending officer.",
-        options: [
-          {
-            label: "Explore Process on Page",
-            action: () => {
-              setIsOpen(false);
-              router.push("/#how-it-works");
-            },
-          },
-          {
-            label: "Start Advisory Now",
-            action: () => {
-              setIsOpen(false);
-              router.push("/advisor");
-            },
-          },
-        ],
-      };
-      setMessages((prev) => [...prev, botMsg]);
-    }, 400);
-  };
-
-  const handleSelectCategory = async (category: string, intentKey: string) => {
-    updateProfile({ intent: category });
-
-    const userMsg: ChatMessage = {
-      id: String(Date.now()),
-      sender: "user",
-      text: `I am interested in a ${category}.`,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true);
-
-    try {
-      const res = await extractProfile({
-        ...profile,
-        intent: category,
-      });
-      setExtractedData(res.data);
-    } catch {
-      // Graceful fallback
+    if (action.actionType === "navigate" && action.payload) {
+      setIsOpen(false);
+      router.push(action.payload);
+      return;
     }
 
-    setTimeout(() => {
+    if (action.actionType === "advisor" && action.payload) {
+      updateProfile({ intent: action.payload });
+      setIsOpen(false);
+      router.push(`/advisor?intent=${action.payload}`);
+      return;
+    }
+
+    if (action.actionType === "intent" && action.payload) {
+      updateProfile({ intent: action.label });
+      startTransition(async () => {
+        try {
+          const ext = await extractProfile({ ...profile, intent: action.label });
+          if (ext && ext.data) setExtractedData(ext.data);
+        } catch {
+          // Graceful fallback
+        }
+      });
+    }
+
+    // Query service for dynamic followup
+    setIsTyping(true);
+    try {
+      const res = await sendChatMessage(action.label, sessionId, { profile, selectedAction: action });
+      idCounter.current += 1;
       setIsTyping(false);
       const botMsg: ChatMessage = {
-        id: String(Date.now() + 1),
+        id: res.message_id || `bot-${idCounter.current}`,
         sender: "bot",
-        text: `Great choice. We offer competitive rates and policy-grounded terms for ${category}. Would you like to explore structured pre-eligibility in our interactive advisor?`,
-        options: [
-          {
-            label: `Launch ${category} Advisor`,
-            action: () => {
-              setIsOpen(false);
-              router.push(`/advisor?intent=${intentKey}`);
-            },
-          },
-        ],
+        text: res.reply,
+        suggestedActions: res.suggested_actions,
       };
       setMessages((prev) => [...prev, botMsg]);
-    }, 400);
+    } catch {
+      idCounter.current += 1;
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `bot-${idCounter.current}`,
+          sender: "bot",
+          text: "I am ready to help you explore our structured loan options. Would you like to check pre-eligibility in our advisor?",
+          suggestedActions: [
+            { id: "act_adv", label: "Launch Personalised Advisor", actionType: "navigate", payload: "/advisor" },
+          ],
+        },
+      ]);
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -157,8 +127,9 @@ export function FloatingAssistant() {
     const userText = inputValue.trim();
     setInputValue("");
 
+    idCounter.current += 1;
     const userMsg: ChatMessage = {
-      id: String(Date.now()),
+      id: `usr-${idCounter.current}`,
       sender: "user",
       text: userText,
     };
@@ -166,55 +137,32 @@ export function FloatingAssistant() {
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Contextual response based on user input
-    setTimeout(() => {
+    try {
+      const res = await sendChatMessage(userText, sessionId, { profile });
+      idCounter.current += 1;
       setIsTyping(false);
-      const lower = userText.toLowerCase();
-      let replyText =
-        "Thank you for reaching out. DhanSetu evaluates verified banking policies and exact debt-service ratios for transparent lending decisions.";
-      const options: { label: string; action: () => void }[] = [
-        {
-          label: "Launch Advisor",
-          action: () => {
-            setIsOpen(false);
-            router.push("/advisor");
-          },
-        },
-        {
-          label: "View All Loan Types",
-          action: () => {
-            setIsOpen(false);
-            router.push("/#loans");
-          },
-        },
-      ];
-
-      if (lower.includes("home") || lower.includes("house") || lower.includes("flat") || lower.includes("plot")) {
-        replyText =
-          "We offer Prime Home Loans with tenures up to 30 years and competitive benchmark interest rates. Let's calculate your exact EMI in the advisor.";
-      } else if (lower.includes("car") || lower.includes("vehicle") || lower.includes("auto") || lower.includes("ev")) {
-        replyText =
-          "Our Vehicle Loans cover new cars, pre-owned cars, and EV financing with flexible repayment tenures up to 7 years.";
-      } else if (lower.includes("business") || lower.includes("msme") || lower.includes("working capital")) {
-        replyText =
-          "We provide collateral-free working capital and MSME term loans designed for rapid growth and minimal documentation.";
-      } else if (lower.includes("gold") || lower.includes("jewelry") || lower.includes("jewellery")) {
-        replyText =
-          "Our Gold Loans provide immediate liquidity with up to 75% LTV on hallmarked jewelry, zero income proof up to ₹5L, and 30-minute disbursals.";
-      } else if (lower.includes("how") || lower.includes("work") || lower.includes("process")) {
-        replyText =
-          "DhanSetu provides a 4-step guided digital loan discovery journey: select your need, share your income, get deterministic EMI options, and connect with a retail loan officer.";
-      }
-
       const botMsg: ChatMessage = {
-        id: String(Date.now() + 1),
+        id: res.message_id || `bot-${idCounter.current}`,
         sender: "bot",
-        text: replyText,
-        options,
+        text: res.reply,
+        suggestedActions: res.suggested_actions,
       };
-
       setMessages((prev) => [...prev, botMsg]);
-    }, 500);
+    } catch {
+      idCounter.current += 1;
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `bot-${idCounter.current}`,
+          sender: "bot",
+          text: "Thank you. DhanSetu evaluates deterministic banking policies for all loan categories. Would you like to explore suitable options?",
+          suggestedActions: [
+            { id: "act_adv", label: "Explore Personalised Loans", actionType: "navigate", payload: "/#loan-information" },
+          ],
+        },
+      ]);
+    }
   };
 
   return (
@@ -244,7 +192,7 @@ export function FloatingAssistant() {
           >
             {/* Header */}
             <div className="bg-[#081C2D] px-5 py-4 text-white flex items-center justify-between">
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 text-left">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
                   <h3 className="text-sm font-bold tracking-tight">DhanSetu Assistant</h3>
@@ -252,6 +200,7 @@ export function FloatingAssistant() {
                 <p className="text-[11px] text-slate-300">How can we help with your loan journey?</p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label="Close chat"
                 className="rounded-lg p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
@@ -270,7 +219,7 @@ export function FloatingAssistant() {
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-xl px-3.5 py-2.5 leading-relaxed ${
+                    className={`max-w-[85%] rounded-xl px-3.5 py-2.5 leading-relaxed text-left ${
                       msg.sender === "user"
                         ? "bg-[#1F7A63] text-white rounded-br-none"
                         : "bg-white text-[#081C2D] border border-[#E2E8F0] shadow-2xs rounded-bl-none"
@@ -279,14 +228,15 @@ export function FloatingAssistant() {
                     {msg.text}
                   </div>
 
-                  {/* Quick Action Options */}
-                  {msg.options && msg.options.length > 0 && (
+                  {/* Quick Action Options (Dynamically rendered from service response) */}
+                  {msg.suggestedActions && msg.suggestedActions.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5 max-w-[95%]">
-                      {msg.options.map((opt, idx) => (
+                      {msg.suggestedActions.map((opt) => (
                         <button
-                          key={idx}
-                          onClick={opt.action}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#081C2D] hover:border-[#1F7A63] hover:bg-emerald-50/50 hover:text-[#1F7A63] transition-colors shadow-2xs cursor-pointer"
+                          key={opt.id}
+                          type="button"
+                          onClick={() => handleActionClick(opt)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#081C2D] hover:border-[#1F7A63] hover:bg-emerald-50/50 hover:text-[#1F7A63] transition-colors shadow-2xs cursor-pointer text-left"
                         >
                           <span>{opt.label}</span>
                           <ArrowRight className="h-3 w-3" />

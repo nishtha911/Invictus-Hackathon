@@ -19,10 +19,10 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Column 2: Loans */}
+          {/* Column 2: Personalised Loans */}
           <div>
             <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
-              Loans
+              Personalised Loans
             </h4>
             <ul className="space-y-2 text-slate-300">
               <li>
@@ -45,6 +45,16 @@ export function Footer() {
                   Gold Loan
                 </Link>
               </li>
+              <li>
+                <Link href="/advisor?intent=personal_loan" className="hover:text-white transition-colors">
+                  Personal Loan
+                </Link>
+              </li>
+              <li>
+                <Link href="/advisor?intent=education_loan" className="hover:text-white transition-colors">
+                  Education Loan
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -55,23 +65,28 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-slate-300">
               <li>
+                <Link href="/#personalised-loans" className="hover:text-white transition-colors">
+                  Personalised Intake
+                </Link>
+              </li>
+              <li>
+                <Link href="/#loan-information" className="hover:text-white transition-colors">
+                  Loan Information
+                </Link>
+              </li>
+              <li>
                 <Link href="/#how-it-works" className="hover:text-white transition-colors">
                   How DhanSetu Works
                 </Link>
               </li>
               <li>
                 <Link href="/#about" className="hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/#why-dhansetu" className="hover:text-white transition-colors">
-                  Why DhanSetu
+                  About DhanSetu
                 </Link>
               </li>
               <li>
                 <Link href="/advisor" className="hover:text-white transition-colors">
-                  Loan Advisor
+                  Interactive Advisor
                 </Link>
               </li>
             </ul>
@@ -94,7 +109,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#loans" className="hover:text-white transition-colors">
+                <Link href="/#loan-information" className="hover:text-white transition-colors">
                   Explore All Categories
                 </Link>
               </li>
