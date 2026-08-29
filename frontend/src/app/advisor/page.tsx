@@ -9,6 +9,7 @@ import { AdvisorProfileRail } from "@/components/advisor/AdvisorProfileRail";
 import { ExtractionIndicator } from "@/components/advisor/ExtractionIndicator";
 import { useJourneyStore } from "@/store/journey-store";
 import { fetchLoanRecommendations } from "@/lib/api/recommendations";
+import { saveKnowledgeBaseContext } from "@/knowledge-base-api";
 import { LOAN_PURPOSES } from "@/lib/constants";
 import { toast } from "sonner";
 
@@ -19,6 +20,10 @@ function AdvisorContent() {
     currentStepIndex,
     setStepIndex,
     profile,
+    sessionId,
+    userType,
+    selectedCustomer,
+    selectedLoan,
     updateProfile,
     setRecommendations,
     isExtracting,
@@ -46,6 +51,20 @@ function AdvisorContent() {
     toast.loading("Querying Loan Catalogue & evaluating bank policies...", { id: "matching" });
 
     try {
+      // Persist the slider-based profile before navigation. The Knowledge Base
+      // later reads this by session ID, so the user does not need to re-enter it.
+      try {
+        await saveKnowledgeBaseContext(sessionId, {
+          user_type: userType || profile.user_type,
+          profile,
+          selected_loan: selectedLoan,
+          customer_context: selectedCustomer,
+        });
+      } catch (contextError) {
+        // Recommendations can still use mock mode during UI development. The
+        // RAG page also sends this in-memory profile as a one-time fallback.
+        console.warn("Unable to save Knowledge Base context.", contextError);
+      }
       const response = await fetchLoanRecommendations(profile);
       setRecommendations(response.recommended_loans);
       toast.success("Found policy-matched loan recommendations!", { id: "matching" });

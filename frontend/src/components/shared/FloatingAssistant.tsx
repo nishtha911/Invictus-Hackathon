@@ -166,12 +166,21 @@ export function FloatingAssistant() {
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Contextual response based on user input
-    setTimeout(() => {
-      setIsTyping(false);
-      const lower = userText.toLowerCase();
-      let replyText =
-        "Thank you for reaching out. DhanSetu evaluates verified banking policies and exact debt-service ratios for transparent lending decisions.";
+    try {
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const res = await fetch(`${apiBase}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userText, top_k: 3, profile: profile }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Backend error: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
       const options: { label: string; action: () => void }[] = [
         {
           label: "Launch Advisor",
@@ -189,32 +198,24 @@ export function FloatingAssistant() {
         },
       ];
 
-      if (lower.includes("home") || lower.includes("house") || lower.includes("flat") || lower.includes("plot")) {
-        replyText =
-          "We offer Prime Home Loans with tenures up to 30 years and competitive benchmark interest rates. Let's calculate your exact EMI in the advisor.";
-      } else if (lower.includes("car") || lower.includes("vehicle") || lower.includes("auto") || lower.includes("ev")) {
-        replyText =
-          "Our Vehicle Loans cover new cars, pre-owned cars, and EV financing with flexible repayment tenures up to 7 years.";
-      } else if (lower.includes("business") || lower.includes("msme") || lower.includes("working capital")) {
-        replyText =
-          "We provide collateral-free working capital and MSME term loans designed for rapid growth and minimal documentation.";
-      } else if (lower.includes("gold") || lower.includes("jewelry") || lower.includes("jewellery")) {
-        replyText =
-          "Our Gold Loans provide immediate liquidity with up to 75% LTV on hallmarked jewelry, zero income proof up to ₹5L, and 30-minute disbursals.";
-      } else if (lower.includes("how") || lower.includes("work") || lower.includes("process")) {
-        replyText =
-          "DhanSetu provides a 4-step guided digital loan discovery journey: select your need, share your income, get deterministic EMI options, and connect with a retail loan officer.";
-      }
-
       const botMsg: ChatMessage = {
         id: String(Date.now() + 1),
         sender: "bot",
-        text: replyText,
+        text: data.answer || "I couldn't generate an answer for that.",
         options,
       };
 
       setMessages((prev) => [...prev, botMsg]);
-    }, 500);
+    } catch (error) {
+      const botMsg: ChatMessage = {
+        id: String(Date.now() + 1),
+        sender: "bot",
+        text: "I am having trouble connecting to my knowledge base right now. Please try again later.",
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (

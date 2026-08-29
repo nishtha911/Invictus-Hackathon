@@ -2,8 +2,33 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Send, Bot, User, BookOpen, ChevronDown, ChevronUp, Sparkles, Loader2 } from 'lucide-react'
+import { useJourneyStore } from '@/store/journey-store'
+import { getKnowledgeBaseContext, KnowledgeBaseContext, queryKnowledgeBase } from '@/knowledge-base-api'
 
 const CATEGORIES = ['All', 'Education Loan', 'Home Loan', 'Personal Loan', 'Vehicle Loan', 'Business Loan', 'Other']
+let messageSequence = 0
+
+function createMessageId() {
+  messageSequence += 1
+  return `${Date.now()}-${messageSequence}`
+}
+
+interface SourceChunk {
+  doc_name: string
+  loan_category: string
+  section: string
+  page_number: number
+  similarity: number
+  content?: string
+}
+
+interface ChatMessage {
+  id: string
+  sender: 'bot' | 'user'
+  text: string
+  sources?: SourceChunk[]
+  isError?: boolean
+}
 
 // Helper functions for lightweight Markdown parsing
 function renderHTMLTable(rows: string[][]) {
@@ -14,7 +39,7 @@ function renderHTMLTable(rows: string[][]) {
   // Header row
   const headers = rows[0];
   html += '<thead class="bg-gray-50"><tr>';
-  for (let h of headers) {
+  for (const h of headers) {
     html += `<th class="px-3 py-2 text-left font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200">${parseInlineMarkdown(h)}</th>`;
   }
   html += '</tr></thead>';
@@ -26,7 +51,7 @@ function renderHTMLTable(rows: string[][]) {
   
   for (let r = startIdx; r < rows.length; r++) {
     html += '<tr class="hover:bg-gray-50/50 transition-colors">';
-    for (let cell of rows[r]) {
+    for (const cell of rows[r]) {
       html += `<td class="px-3 py-2 text-gray-600 border-b border-gray-100">${parseInlineMarkdown(cell)}</td>`;
     }
     html += '</tr>';
@@ -45,7 +70,7 @@ function parseMarkdown(text: string) {
   let tableRows: string[][] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
+    const line = lines[i];
     
     // Check if line is a table row (starts and ends with |)
     const isTableRow = line.trim().startsWith('|') && line.trim().endsWith('|');
@@ -153,8 +178,39 @@ function parseInlineMarkdown(text: string) {
   return parsed;
 }
 
+function buildSuggestedQuestions(context: KnowledgeBaseContext): string[] {
+  const { profile, selected_loan: selectedLoan, user_type: userType } = context
+  const loanName = selectedLoan?.name || profile.intent || 'selected loan'
+  const loanCategory = profile.intent || 'loan'
+  const incomeQuestion = profile.income
+    ? `How does my monthly income of ₹${profile.income.toLocaleString('en-IN')} relate to ${loanCategory} eligibility criteria?`
+    : `What income and employment criteria apply to my ${loanCategory} profile?`
+  const amountQuestion = profile.loan_amount
+    ? `Does my requested amount of ₹${profile.loan_amount.toLocaleString('en-IN')} fit within the ${loanCategory} policy limits?`
+    : `What are the loan amount limits for ${loanCategory}?`
+
+  const commonQuestions = [
+    `Based on my profile, which ${loanName} eligibility rules should I review?`,
+    incomeQuestion,
+    amountQuestion,
+    `Which documents are required for my ${loanCategory} application?`,
+  ]
+
+  if (userType === 'existing') {
+    commonQuestions.splice(
+      1,
+      0,
+      'How can my existing relationship and repayment information support this application?'
+    )
+  }
+
+  return commonQuestions
+}
+
 export default function QueryPage() {
-  const [messages, setMessages] = useState<any[]>([
+  const { sessionId, profile, userType, selectedCustomer, selectedLoan, recommendations } = useJourneyStore()
+  const [savedContext, setSavedContext] = useState<KnowledgeBaseContext | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
       sender: 'bot',
@@ -172,6 +228,30 @@ export default function QueryPage() {
   const [openSourceAccordions, setOpenSourceAccordions] = useState<Record<string, boolean>>({})
 
   const chatEndRef = useRef<HTMLDivElement>(null)
+
+  const localContext: KnowledgeBaseContext = {
+    user_type: userType || profile.user_type,
+    profile,
+    selected_loan: selectedLoan || recommendations[0] || null,
+    customer_context: selectedCustomer,
+  }
+  const activeContext = savedContext || localContext
+  const suggestedQuestions = buildSuggestedQuestions(activeContext)
+
+  // A refresh no longer loses the slider profile: restore the session context
+  // stored by the advisory flow before the user asks their next policy question.
+  useEffect(() => {
+    let cancelled = false
+    getKnowledgeBaseContext(sessionId)
+      .then((context) => {
+        if (!cancelled && context) setSavedContext(context)
+      })
+      .catch(() => {
+        // A first-time user has no stored context yet; local persisted state is
+        // still sent as a safe fallback when they ask a question.
+      })
+    return () => { cancelled = true }
+  }, [sessionId])
 
   // Scroll to bottom of chat automatically when messages change
   useEffect(() => {
@@ -193,12 +273,9 @@ export default function QueryPage() {
     }))
   }
 
-  async function ask(e: React.FormEvent) {
-    e.preventDefault()
-    if (!input.trim() || loading) return
-
-    const userQuestion = input.trim()
-    const userMsgId = Date.now().toString()
+  async function askQuestion(userQuestion: string) {
+    if (!userQuestion.trim() || loading) return
+    const userMsgId = createMessageId()
     
     // Add user question to history
     setMessages(prev => [
@@ -209,23 +286,17 @@ export default function QueryPage() {
         text: userQuestion
       }
     ])
-    setInput('')
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:8080/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: userQuestion,
-          loan_category: category === 'All' ? null : category,
-          top_k: 8,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.detail || 'Query failed')
+      const data = await queryKnowledgeBase(
+        userQuestion,
+        sessionId,
+        category === 'All' ? activeContext.profile.intent || null : category,
+        activeContext,
+      )
 
-      const newBotMsgId = (Date.now() + 1).toString()
+      const newBotMsgId = createMessageId()
       setMessages(prev => [
         ...prev,
         {
@@ -241,13 +312,14 @@ export default function QueryPage() {
         ...prev,
         [newBotMsgId]: true
       }))
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'The request could not be completed.'
       setMessages(prev => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: createMessageId(),
           sender: 'bot',
-          text: `Sorry, I encountered an error while processing your request: ${err.message}`,
+          text: `Sorry, I encountered an error while processing your request: ${message}`,
           isError: true,
           sources: []
         }
@@ -257,23 +329,53 @@ export default function QueryPage() {
     }
   }
 
+  async function ask(e: React.FormEvent) {
+    e.preventDefault()
+    const userQuestion = input.trim()
+    if (!userQuestion) return
+    setInput('')
+    await askQuestion(userQuestion)
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Policy Knowledge Base</h1>
       <div className="flex flex-col h-[70vh] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden">
         {/* Category selector panel */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-100 shrink-0">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-blue-600 animate-pulse" size={18} />
-            <span className="text-sm font-semibold text-gray-700">Filter Search Domain</span>
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 shrink-0 space-y-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="text-blue-600 animate-pulse" size={18} />
+              <div>
+                <span className="text-sm font-semibold text-gray-700">Your profile is active</span>
+                <p className="text-[11px] text-gray-500">
+                  {activeContext.user_type === 'existing'
+                    ? 'Using your existing-customer details and selected loan profile.'
+                    : 'Using the details you provided in Loan Advisory.'}
+                </p>
+              </div>
+            </div>
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+            >
+              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+            </select>
           </div>
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
-          >
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
+          <div className="flex flex-wrap gap-2">
+            {suggestedQuestions.map((question) => (
+              <button
+                key={question}
+                type="button"
+                disabled={loading}
+                onClick={() => void askQuestion(question)}
+                className="rounded-full border border-blue-100 bg-white px-3 py-1.5 text-left text-[11px] font-medium text-blue-700 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Messages Scroll Area */}
@@ -334,7 +436,7 @@ export default function QueryPage() {
 
                       {openSourceAccordions[m.id] && (
                         <div className="divide-y divide-gray-50 max-h-[220px] overflow-y-auto bg-gray-50/30">
-                          {m.sources.map((s: any, idx: number) => {
+                          {m.sources.map((s, idx: number) => {
                             const isExpanded = expandedSources[`${m.id}-${idx}`]
                             return (
                               <div key={idx} className="p-3 text-xs">
