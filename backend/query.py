@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import logging
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -10,6 +11,8 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 from sentence_transformers import SentenceTransformer
 
 from db import get_conn
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # LLM provider — reads LLM_PROVIDER from env ("groq" or "openrouter", default groq)
@@ -46,8 +49,12 @@ def _call_llm(messages: list) -> str:
             messages=messages,
         )
 
-
     return response.choices[0].message.content.strip()
+
+
+# ---------------------------------------------------------------------------
+# Embedder (lazy singleton)
+# ---------------------------------------------------------------------------
 
 _embedder = None
 
@@ -63,9 +70,22 @@ def get_embedder() -> SentenceTransformer:
 # ---------------------------------------------------------------------------
 
 def retrieve(query: str, top_k: int = 5, loan_category: str = None) -> List[Dict[str, Any]]:
-    """Cosine-similarity search over rag.chunks in Supabase pgvector."""
+    """Cosine-similarity search over rag.chunks in Supabase pgvector.
+
+    If loan_category is set but returns 0 chunks (e.g. no Gold Loan docs
+    uploaded yet), automatically falls back to an unfiltered search so the
+    user still gets a useful answer instead of a dead end.
+    """
     embedder = get_embedder()
     q_vec = embedder.encode([query])[0].tolist()
+
+    _UNFILTERED = """
+        SELECT id, doc_id, doc_name, loan_category, section, page_number, content,
+               1 - (embedding <=> %s::vector) AS similarity
+        FROM rag.chunks
+        ORDER BY embedding <=> %s::vector
+        LIMIT %s;
+    """
 
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -79,19 +99,18 @@ def retrieve(query: str, top_k: int = 5, loan_category: str = None) -> List[Dict
                     ORDER BY embedding <=> %s::vector
                     LIMIT %s;
                     """,
-                    (str(q_vec), f"%{loan_category}%", str(q_vec), top_k)
+                    (str(q_vec), f"%{loan_category}%", str(q_vec), top_k),
                 )
+                rows = cur.fetchall()
+                if rows:
+                    return [dict(row) for row in rows]
+                # No docs for this category — fall back to unfiltered search
+                logger.warning(
+                    "No chunks for loan_category=%r; retrying without filter.", loan_category
+                )
+                cur.execute(_UNFILTERED, (str(q_vec), str(q_vec), top_k))
             else:
-                cur.execute(
-                    """
-                    SELECT id, doc_id, doc_name, loan_category, section, page_number, content,
-                           1 - (embedding <=> %s::vector) AS similarity
-                    FROM rag.chunks
-                    ORDER BY embedding <=> %s::vector
-                    LIMIT %s;
-                    """,
-                    (str(q_vec), str(q_vec), top_k)
-                )
+                cur.execute(_UNFILTERED, (str(q_vec), str(q_vec), top_k))
             return [dict(row) for row in cur.fetchall()]
 
 
@@ -101,7 +120,7 @@ def retrieve(query: str, top_k: int = 5, loan_category: str = None) -> List[Dict
 
 def extract_numbers(text: str) -> List[str]:
     """Extract all numeric tokens (amounts, percentages, years, etc.)."""
-    return re.findall(r'[\₹\$]?\d[\d,\.]*\s*(?:lakh|crore|%|years?|months?|p\.a\.)?', text, re.IGNORECASE)
+    return re.findall(r'[₹\$]?\d[\d,\.]*\s*(?:lakh|crore|%|years?|months?|p\.a\.)?', text, re.IGNORECASE)
 
 
 def verify_numbers(answer: str, source_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -116,6 +135,40 @@ def verify_numbers(answer: str, source_chunks: List[Dict[str, Any]]) -> Dict[str
         "numbers_verified": len(unverified) == 0,
         "unverified_numbers": unverified,
     }
+
+
+# ---------------------------------------------------------------------------
+# Profile normalisation
+# ---------------------------------------------------------------------------
+
+def _profile_for_prompt(profile: dict | None) -> dict:
+    """Normalize saved and direct frontend profile formats for the LLM."""
+    if not isinstance(profile, dict):
+        return {}
+
+    loan_profile = profile.get("profile", profile)
+    if not isinstance(loan_profile, dict):
+        loan_profile = {}
+
+    normalized = {
+        "user_type": profile.get("user_type", loan_profile.get("user_type", "new")),
+        "loan_profile": loan_profile,
+    }
+
+    selected_loan = profile.get("selected_loan")
+    # Only include selected_loan when it matches the current intent so a stale
+    # Home Loan result does not colour a Gold Loan answer.
+    if (
+        isinstance(selected_loan, dict)
+        and selected_loan.get("category") == loan_profile.get("intent")
+    ):
+        normalized["selected_loan"] = selected_loan
+
+    customer_context = profile.get("customer_context")
+    if isinstance(customer_context, dict):
+        normalized["customer_context"] = customer_context
+
+    return normalized
 
 
 # ---------------------------------------------------------------------------
@@ -136,36 +189,6 @@ Rules you MUST follow:
 7. Use every relevant field from the Verified Advisory Profile. Never say a field is "not provided" when it appears there. If the credit field is "Not Sure / New to Credit", say the credit score is unknown and state that any policy score threshold cannot yet be confirmed.
 8. Never write "assumed", infer eligibility from employment or income alone, or claim the user is eligible unless every policy criterion required for that claim is both present in the profile and satisfied. Clearly identify outstanding checks.
 9. When the profile has a requested tenure, mention it for eligibility, tenure, or product-fit questions. Compare it with a policy tenure limit only when that limit appears in a retrieved excerpt."""
-
-
-def _profile_for_prompt(profile: dict | None) -> dict:
-    """Normalize saved and direct frontend profile formats for the LLM."""
-    if not isinstance(profile, dict):
-        return {}
-
-    loan_profile = profile.get("profile", profile)
-    if not isinstance(loan_profile, dict):
-        loan_profile = {}
-
-    normalized = {
-        "user_type": profile.get("user_type", loan_profile.get("user_type", "new")),
-        "loan_profile": loan_profile,
-    }
-
-    selected_loan = profile.get("selected_loan")
-    # Ignore a stale product from a previous journey. It must not influence a
-    # Vehicle Loan answer merely because it was once a Home Loan best match.
-    if (
-        isinstance(selected_loan, dict)
-        and selected_loan.get("category") == loan_profile.get("intent")
-    ):
-        normalized["selected_loan"] = selected_loan
-
-    customer_context = profile.get("customer_context")
-    if isinstance(customer_context, dict):
-        normalized["customer_context"] = customer_context
-
-    return normalized
 
 
 def answer(query: str, loan_category: str = None, top_k: int = 5, profile: dict = None) -> Dict[str, Any]:
