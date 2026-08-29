@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "DhanSetu | Smart Loan Guidance",
   description:
     "Explore suitable home, car, business, gold and other loan options through a guided digital lending experience.",
+  icons: {
+    icon: "/favicon.ico",
+  },
   keywords: [
     "DhanSetu",
     "Home Loan",

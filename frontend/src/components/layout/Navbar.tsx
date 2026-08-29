@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   User,
-  RotateCcw,
   Menu,
   X,
   ChevronDown,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { BRAND, LOAN_PURPOSES } from "@/lib/constants";
 import { useJourneyStore } from "@/store/journey-store";
+import { useIsMounted } from "@/lib/hooks/use-is-mounted";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -32,19 +32,15 @@ const LOAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { userType, selectedCustomer, resetDemo } = useJourneyStore();
+  const { authUser, selectedCustomer } = useJourneyStore();
+  const mounted = useIsMounted();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loansDropdownOpen, setLoansDropdownOpen] = useState(false);
   const [mobileLoansOpen, setMobileLoansOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isDashboard = pathname.startsWith("/dashboard");
-
-  const handleReset = () => {
-    resetDemo();
-    router.push("/");
-  };
+  const isLoggedIn = mounted && Boolean(authUser || selectedCustomer);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -194,33 +190,24 @@ export function Navbar() {
 
         {/* Right Action Area */}
         <div className="flex items-center gap-3">
-          {/* Active Demo Session Indicator */}
-          {userType && (
-            <div className="hidden sm:flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-1.5 text-xs text-slate-200 border border-slate-700">
-              <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
-              <span className="truncate max-w-[120px]">
-                {userType === "existing" && selectedCustomer
-                  ? selectedCustomer.name
-                  : "Guest Session"}
-              </span>
-              <button
-                onClick={handleReset}
-                title="Reset Session"
-                className="ml-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <RotateCcw className="h-3 w-3" />
-              </button>
-            </div>
+          {/* Dynamic Login / Profile Button */}
+          {isLoggedIn ? (
+            <Link
+              href="/profile"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
+            >
+              <User className="h-3.5 w-3.5" />
+              <span>Profile</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
+            >
+              <User className="h-3.5 w-3.5" />
+              <span>Login</span>
+            </Link>
           )}
-
-          {/* Login Button (Solid Emerald) */}
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
-          >
-            <User className="h-3.5 w-3.5" />
-            <span>Login</span>
-          </Link>
 
           {/* Mobile Menu Toggle Button */}
           <button
@@ -314,6 +301,29 @@ export function Navbar() {
                 DEMO ↗
               </span>
             </Link>
+
+            {/* Mobile Auth Link */}
+            <div className="pt-2 border-t border-slate-700/60">
+              {isLoggedIn ? (
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-1 text-[#4ade80] font-semibold"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-1 text-slate-200 hover:text-white font-semibold"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

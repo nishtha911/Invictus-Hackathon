@@ -27,7 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUserType } = useJourneyStore();
+  const { setUserType, login } = useJourneyStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -49,6 +49,18 @@ export default function LoginPage() {
 
     try {
       const res = await loginCustomer(data);
+      login(
+        {
+          name: res.customer.name,
+          mobile_number: data.mobile_number,
+          email: res.customer.email,
+          customer_id: res.customer.id,
+          employer: res.customer.employer,
+          employment_type: res.customer.employment_type,
+          monthly_income: res.customer.monthly_income,
+        },
+        res.customer
+      );
       setUserType("existing", res.customer);
       toast.success(`Welcome back, ${res.customer.name}!`, { id: "login" });
       router.push("/advisor");
