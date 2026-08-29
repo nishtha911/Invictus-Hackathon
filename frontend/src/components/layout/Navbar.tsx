@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   User,
@@ -58,8 +59,15 @@ export function Navbar() {
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo Left */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A63] text-white font-bold text-lg shadow-xs group-hover:bg-[#28967b] transition-colors">
-            D
+          <div className="relative h-9 w-9 sm:h-10 sm:w-10 shrink-0">
+            <Image
+              src="/images/dhansetu-icon.png"
+              alt="DhanSetu"
+              width={40}
+              height={40}
+              priority
+              className="h-full w-full object-contain"
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
