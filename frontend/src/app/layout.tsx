@@ -21,7 +21,9 @@ export const metadata: Metadata = {
   description:
     "Explore suitable home, car, business, gold and other loan options through a guided digital lending experience.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/branding/dhansetu-icon.png",
+    shortcut: "/branding/dhansetu-icon.png",
+    apple: "/branding/dhansetu-icon.png",
   },
   keywords: [
     "DhanSetu",

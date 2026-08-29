@@ -61,7 +61,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           <div className="relative h-9 w-9 sm:h-10 sm:w-10 shrink-0">
             <Image
-              src="/images/dhansetu-icon.png"
+              src="/branding/dhansetu-icon.png"
               alt="DhanSetu"
               width={40}
               height={40}
