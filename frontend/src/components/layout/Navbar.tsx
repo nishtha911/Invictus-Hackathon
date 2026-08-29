@@ -178,7 +178,15 @@ export function Navbar() {
               About Us
             </Link>
 
-            {/* 5. Bank Dashboard */}
+            {/* 5. Knowledge Base (RAG) */}
+            <Link
+              href="/rag/query"
+              className="hover:text-white text-slate-300 transition-colors"
+            >
+              Knowledge Base
+            </Link>
+
+            {/* 6. Bank Dashboard */}
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
@@ -302,6 +310,14 @@ export function Navbar() {
               className="block py-1 text-slate-200 hover:text-white"
             >
               About Us
+            </Link>
+
+            <Link
+              href="/rag/query"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-1 text-slate-200 hover:text-white"
+            >
+              Knowledge Base
             </Link>
 
             <Link

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Zap, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Zap, CheckCircle, Paperclip } from "lucide-react";
 import { useStore } from "@/store/app-store";
 import { sendMessage, getRecommendations, UIComponent, ChatMessage } from "@/lib/api/client";
 import { toast } from "sonner";
@@ -72,6 +72,14 @@ function TextInput({ comp, onAnswer }: { comp: UIComponent; onAnswer: (v: string
   const [val, setVal] = useState("");
   return (
     <div className="flex gap-2">
+      <button
+        type="button"
+        className="glass glass-hover px-3 rounded-xl border border-white/10 text-slate-400 hover:text-white transition-all flex items-center justify-center shrink-0"
+        onClick={() => toast.info("Document upload (OCR) coming soon!")}
+        title="Upload Document"
+      >
+        <Paperclip className="w-5 h-5" />
+      </button>
       <input
         type={comp.type === "number_input" ? "number" : "text"}
         value={val}

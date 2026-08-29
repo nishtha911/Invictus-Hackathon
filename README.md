@@ -1,155 +1,89 @@
-# Loan Policy RAG — Bank Knowledge Base
-
-End-to-end RAG pipeline for bank loan policy documents.
-
-```
-Upload PDF/TXT → Extract → Clean → Chunk → Embed → pgvector → Retrieve → Grounded Answer
-```
-
----
-
-## Prerequisites
-
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL with pgvector extension
-
-### Install pgvector (Windows)
-
-1. Download the pgvector release matching your PostgreSQL version from  
-   https://github.com/pgvector/pgvector/releases
-2. Copy `vector.dll` → `PostgreSQL\lib\`  
-   Copy `vector.control` + `vector--*.sql` → `PostgreSQL\share\extension\`
+<div align="center">
+  <img src="images/logo.png" alt="DhanSetu Logo" width="120" />
+  <h1>🌉 DhanSetu</h1>
+  <p><strong>Intelligent AI-Powered Loan Advisory & Customer Onboarding Platform</strong></p>
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#architecture">Architecture</a> •
+    <a href="#tech-stack">Tech Stack</a> •
+    <a href="#installation">Installation</a>
+  </p>
+</div>
 
 ---
 
-## 1. Database Setup
+## 🌟 Overview
 
-```sql
--- Run in psql as superuser
-CREATE DATABASE loan_rag;
-\c loan_rag
-CREATE EXTENSION vector;
+**DhanSetu** (translating to "Bridge to Wealth") is a next-generation conversational AI loan advisor. Built during the Invictus Hackathon, it seamlessly bridges the gap between potential borrowers and complex financial products. By leveraging Advanced Generative AI and RAG (Retrieval-Augmented Generation), DhanSetu interacts with customers to understand their needs, analyze their profiles, and provide personalized, highly accurate loan product recommendations.
+
+## ✨ Key Features
+
+- 💬 **Conversational AI Intake**: Dynamic, adaptive chat interface that collects user requirements through conversation.
+- 🎯 **Smart Recommendations**: Algorithmic scoring matches users to the absolute best loan products based on their profile.
+- 📚 **RAG-Powered Knowledge Base**: Instant answers strictly grounded in actual banking policies and product brochures using `pgvector`.
+- 📊 **Banker Dashboard**: Dedicated portal for bank agents to track leads, monitor completeness, and review the AI's data extraction.
+- ⚡ **Real-time Extraction**: Instantly parses conversational context into structured JSON profiles.
+
+## 🏗 Architecture
+
+The platform uses a robust, separated architecture:
+
+- **Frontend**: A highly responsive, glassmorphic UI built with Next.js 13+ (App Router) and Tailwind CSS.
+- **Backend Orchestrator**: FastAPI powering the API layer.
+- **AI Engine**: LangGraph state machine handling conversational states, prompt routing, and entity extraction.
+- **Database / RAG**: Supabase (PostgreSQL) powering both relational data (leads/users) and vector embeddings (`pgvector`) for the document knowledge base.
+
+## 💻 Tech Stack
+
+| Domain | Technologies |
+| :--- | :--- |
+| **Frontend** | Next.js, React, TailwindCSS, Motion, Lucide Icons |
+| **Backend** | Python, FastAPI, Uvicorn |
+| **AI & LLM** | LangGraph, LangChain, Google Gemini |
+| **Database** | PostgreSQL, pgvector (Supabase) |
+
+## 🚀 Installation & Setup
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/nishtha911/Invictus-Hackathon.git
+cd Invictus-Hackathon
 ```
 
-The tables (`documents`, `chunks`) are created automatically on first backend start.
-
----
-
-## 2. Backend Setup
-
+### 2. Backend Setup (FastAPI)
 ```bash
 cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
-Edit `.env`:
+Create a `.env` file in the `backend` directory with your API keys:
+```env
+OPENAI_API_KEY=your_key_here
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
 ```
-DATABASE_URL=postgresql://postgres:<password>@localhost:5432/loan_rag
-GROQ_API_KEY=<your_groq_api_key>
-```
-
-Run:
+Run the backend:
 ```bash
-# Load .env then start
-set DATABASE_URL=postgresql://postgres:<password>@localhost:5432/loan_rag
-set GROQ_API_KEY=<your_groq_api_key>
-uvicorn main:app --reload --port 8000
+python run.py
 ```
 
-API docs: http://localhost:8000/docs
-
----
-
-## 3. Frontend Setup
-
+### 3. Frontend Setup (Next.js)
 ```bash
 cd frontend
 npm install
+```
+Create a `.env.local` file in the `frontend` directory:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+Run the frontend:
+```bash
 npm run dev
 ```
 
-Open: http://localhost:5173
-
 ---
 
-## Usage
-
-### Upload Documents
-1. Go to **Upload Documents** tab
-2. Drag & drop or browse for PDF/TXT policy files
-3. Select the loan category for each file
-4. Click **Process & Add to Knowledge Base**
-
-### View Knowledge Base
-- **Knowledge Base** tab shows all ingested documents with chunk counts
-
-### Query
-1. Go to **Query Policies** tab
-2. Optionally filter by loan category
-3. Ask any policy question, e.g.:
-   - *What is the maximum education loan amount?*
-   - *What are the eligibility criteria for a home loan?*
-   - *What documents are required for a vehicle loan?*
-4. The answer is grounded in retrieved chunks — sources and chunk IDs are shown
-5. A **numbers verified** badge confirms all numeric values in the answer appear in the source text
-
----
-
-## Architecture
-
-```
-backend/
-  main.py        — FastAPI routes: /upload  /query  /documents
-  ingest.py      — extract → clean → section-aware chunk → embed → store
-  query.py       — vector search → grounded LLM answer → number verification
-  db.py          — pgvector schema (documents + chunks tables)
-  requirements.txt
-  .env
-
-frontend/
-  src/
-    App.jsx        — tab shell
-    UploadPage.jsx — file upload with per-file category selection
-    QueryPage.jsx  — question input, answer display, source citations
-    DocsPage.jsx   — knowledge base document list
-```
-
-## Key Design Decisions
-
-| Concern | Approach |
-|---|---|
-| Hallucination prevention | temperature=0, strict system prompt, answer only from retrieved context |
-| Number verification | regex extracts numbers from answer, checks each against source chunks |
-| Chunking | section-aware split on policy headings, secondary paragraph split for long sections |
-| Chunk IDs | stable `doc{id}-chunk{index}` format for traceability (`grounded_on_chunk_ids`) |
-| Isolation | completely separate local DB — no Supabase, no existing project data |
-| Integration-ready | `grounded_on_chunk_ids` field in query response matches Nishtha's schema |
-
----
-
-## Integration Notes (for Nishtha's recommendation layer)
-
-The `/query` response includes:
-
-```json
-{
-  "answer": "...",
-  "grounded_on_chunk_ids": ["doc1-chunk0003", "doc1-chunk0007"],
-  "numbers_verified": true,
-  "sources": [
-    {
-      "chunk_id": "doc1-chunk0003",
-      "doc_name": "Education Loan Policy.pdf",
-      "loan_category": "Education Loan",
-      "section": "Loan Amount",
-      "page_number": 2,
-      "similarity": 0.91
-    }
-  ]
-}
-```
-
-These chunk IDs can be stored as `grounded_on_chunk_ids` in the recommendation records.
+<div align="center">
+  <i>Built with ❤️ by the Invictus Hackathon Team</i>
+</div>
