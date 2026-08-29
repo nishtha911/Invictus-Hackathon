@@ -1,4 +1,4 @@
-# database.py
+# /backend/app/services/database.py
 """
 Supabase database client for loan product catalogue and RAG policy retrieval.
 Falls back to a static product list if Supabase is unavailable (local dev mode).
@@ -32,32 +32,120 @@ except Exception:
     logger.warning("sentence-transformers not available — RAG citations disabled.")
 
 # ── Static fallback loan product catalogue ───────────────────────────────
-# Derived from database/seed_data.sql — used when Supabase is not seeded/available.
+# Keys match exactly what scoring_engine.py expects:
+# product_id, product_name, base_interest_rate, min_tenure_months, max_tenure_months,
+# min_monthly_income, min_amount, max_amount, max_foir_pct, is_active
 STATIC_LOAN_PRODUCTS = [
-    {"id": "prod-001", "name": "SBI Home Advantage", "category": "home_loan", "base_interest_rate": 8.40, "min_loan_amount": 500000, "max_loan_amount": 75000000, "min_tenure_months": 12, "max_tenure_months": 360, "processing_fee_pct": 0.35, "is_active": True},
-    {"id": "prod-002", "name": "HDFC Home Premium", "category": "home_loan", "base_interest_rate": 8.65, "min_loan_amount": 1000000, "max_loan_amount": 100000000, "min_tenure_months": 12, "max_tenure_months": 360, "processing_fee_pct": 0.50, "is_active": True},
-    {"id": "prod-003", "name": "ICICI Home First", "category": "home_loan", "base_interest_rate": 8.75, "min_loan_amount": 300000, "max_loan_amount": 50000000, "min_tenure_months": 12, "max_tenure_months": 300, "processing_fee_pct": 0.50, "is_active": True},
-    {"id": "prod-004", "name": "Axis Bank QuickPersonal", "category": "personal_loan", "base_interest_rate": 10.75, "min_loan_amount": 50000, "max_loan_amount": 4000000, "min_tenure_months": 12, "max_tenure_months": 60, "processing_fee_pct": 1.50, "is_active": True},
-    {"id": "prod-005", "name": "HDFC FlexiPersonal", "category": "personal_loan", "base_interest_rate": 10.50, "min_loan_amount": 50000, "max_loan_amount": 4000000, "min_tenure_months": 6, "max_tenure_months": 60, "processing_fee_pct": 1.25, "is_active": True},
-    {"id": "prod-006", "name": "Kotak Mahindra Salary Plus", "category": "personal_loan", "base_interest_rate": 10.25, "min_loan_amount": 100000, "max_loan_amount": 3500000, "min_tenure_months": 12, "max_tenure_months": 60, "processing_fee_pct": 1.00, "is_active": True},
-    {"id": "prod-007", "name": "SBI Car Loan", "category": "vehicle_loan", "base_interest_rate": 8.85, "min_loan_amount": 100000, "max_loan_amount": 10000000, "min_tenure_months": 12, "max_tenure_months": 84, "processing_fee_pct": 0.25, "is_active": True},
-    {"id": "prod-008", "name": "HDFC Auto Smart", "category": "vehicle_loan", "base_interest_rate": 8.95, "min_loan_amount": 100000, "max_loan_amount": 8000000, "min_tenure_months": 12, "max_tenure_months": 84, "processing_fee_pct": 0.50, "is_active": True},
-    {"id": "prod-009", "name": "SBI Education Loan", "category": "education_loan", "base_interest_rate": 8.15, "min_loan_amount": 400000, "max_loan_amount": 15000000, "min_tenure_months": 12, "max_tenure_months": 180, "processing_fee_pct": 0.00, "is_active": True},
-    {"id": "prod-010", "name": "Axis Business Booster", "category": "business_loan", "base_interest_rate": 11.50, "min_loan_amount": 200000, "max_loan_amount": 5000000, "min_tenure_months": 12, "max_tenure_months": 60, "processing_fee_pct": 1.75, "is_active": True},
+    # Home Loans
+    {
+        "product_id": "prod-001", "product_name": "SBI Home Advantage",
+        "category": "home_loan", "base_interest_rate": 8.40,
+        "min_amount": 500000, "max_amount": 75000000,
+        "min_monthly_income": 25000, "max_foir_pct": 0.55,
+        "min_tenure_months": 12, "max_tenure_months": 360,
+        "processing_fee_pct": 0.35, "is_active": True,
+    },
+    {
+        "product_id": "prod-002", "product_name": "HDFC Home Premium",
+        "category": "home_loan", "base_interest_rate": 8.65,
+        "min_amount": 1000000, "max_amount": 100000000,
+        "min_monthly_income": 35000, "max_foir_pct": 0.50,
+        "min_tenure_months": 12, "max_tenure_months": 360,
+        "processing_fee_pct": 0.50, "is_active": True,
+    },
+    {
+        "product_id": "prod-003", "product_name": "ICICI Home First",
+        "category": "home_loan", "base_interest_rate": 8.75,
+        "min_amount": 300000, "max_amount": 50000000,
+        "min_monthly_income": 20000, "max_foir_pct": 0.55,
+        "min_tenure_months": 12, "max_tenure_months": 300,
+        "processing_fee_pct": 0.50, "is_active": True,
+    },
+    # Personal Loans
+    {
+        "product_id": "prod-004", "product_name": "Axis QuickPersonal",
+        "category": "personal_loan", "base_interest_rate": 10.75,
+        "min_amount": 50000, "max_amount": 4000000,
+        "min_monthly_income": 15000, "max_foir_pct": 0.50,
+        "min_tenure_months": 12, "max_tenure_months": 60,
+        "processing_fee_pct": 1.50, "is_active": True,
+    },
+    {
+        "product_id": "prod-005", "product_name": "HDFC FlexiPersonal",
+        "category": "personal_loan", "base_interest_rate": 10.50,
+        "min_amount": 50000, "max_amount": 4000000,
+        "min_monthly_income": 20000, "max_foir_pct": 0.50,
+        "min_tenure_months": 6, "max_tenure_months": 60,
+        "processing_fee_pct": 1.25, "is_active": True,
+    },
+    {
+        "product_id": "prod-006", "product_name": "Kotak Salary Plus",
+        "category": "personal_loan", "base_interest_rate": 10.25,
+        "min_amount": 100000, "max_amount": 3500000,
+        "min_monthly_income": 25000, "max_foir_pct": 0.45,
+        "min_tenure_months": 12, "max_tenure_months": 60,
+        "processing_fee_pct": 1.00, "is_active": True,
+    },
+    # Vehicle Loans
+    {
+        "product_id": "prod-007", "product_name": "SBI Car Loan Prime",
+        "category": "vehicle_loan", "base_interest_rate": 8.85,
+        "min_amount": 100000, "max_amount": 10000000,
+        "min_monthly_income": 20000, "max_foir_pct": 0.55,
+        "min_tenure_months": 12, "max_tenure_months": 84,
+        "processing_fee_pct": 0.25, "is_active": True,
+    },
+    {
+        "product_id": "prod-008", "product_name": "HDFC Auto Smart",
+        "category": "vehicle_loan", "base_interest_rate": 8.95,
+        "min_amount": 100000, "max_amount": 8000000,
+        "min_monthly_income": 20000, "max_foir_pct": 0.50,
+        "min_tenure_months": 12, "max_tenure_months": 84,
+        "processing_fee_pct": 0.50, "is_active": True,
+    },
+    # Education Loans
+    {
+        "product_id": "prod-009", "product_name": "SBI Scholar Education",
+        "category": "education_loan", "base_interest_rate": 8.15,
+        "min_amount": 400000, "max_amount": 15000000,
+        "min_monthly_income": 15000, "max_foir_pct": 0.60,
+        "min_tenure_months": 12, "max_tenure_months": 180,
+        "processing_fee_pct": 0.00, "is_active": True,
+    },
+    {
+        "product_id": "prod-010", "product_name": "HDFC Credila Education",
+        "category": "education_loan", "base_interest_rate": 9.25,
+        "min_amount": 200000, "max_amount": 25000000,
+        "min_monthly_income": 10000, "max_foir_pct": 0.65,
+        "min_tenure_months": 12, "max_tenure_months": 180,
+        "processing_fee_pct": 1.00, "is_active": True,
+    },
+    # Business Loans
+    {
+        "product_id": "prod-011", "product_name": "Axis Business Booster",
+        "category": "business_loan", "base_interest_rate": 11.50,
+        "min_amount": 200000, "max_amount": 5000000,
+        "min_monthly_income": 30000, "max_foir_pct": 0.50,
+        "min_tenure_months": 12, "max_tenure_months": 60,
+        "processing_fee_pct": 1.75, "is_active": True,
+    },
+    {
+        "product_id": "prod-012", "product_name": "ICICI Business Growth",
+        "category": "business_loan", "base_interest_rate": 12.00,
+        "min_amount": 500000, "max_amount": 20000000,
+        "min_monthly_income": 50000, "max_foir_pct": 0.55,
+        "min_tenure_months": 12, "max_tenure_months": 84,
+        "processing_fee_pct": 2.00, "is_active": True,
+    },
 ]
 
 # Map frontend intent strings to DB categories
 INTENT_TO_CATEGORY = {
-    "home_loan": "home_loan",
-    "personal_loan": "personal_loan",
-    "vehicle_loan": "vehicle_loan",
-    "education_loan": "education_loan",
+    "home_loan": "home_loan", "personal_loan": "personal_loan",
+    "vehicle_loan": "vehicle_loan", "education_loan": "education_loan",
     "business_loan": "business_loan",
-    # Frontend variations
-    "Home Loan": "home_loan",
-    "Personal Loan": "personal_loan",
-    "Vehicle Loan": "vehicle_loan",
-    "Education Loan": "education_loan",
+    "Home Loan": "home_loan", "Personal Loan": "personal_loan",
+    "Vehicle Loan": "vehicle_loan", "Education Loan": "education_loan",
     "Business Loan": "business_loan",
 }
 
@@ -81,10 +169,8 @@ def fetch_loan_products(category: str = None):
     # Static fallback
     products = [p for p in STATIC_LOAN_PRODUCTS if p["is_active"]]
     if db_category:
-        products = [p for p in products if p["category"] == db_category]
-    if not products:
-        # If category not found in static list, return all products
-        products = [p for p in STATIC_LOAN_PRODUCTS if p["is_active"]]
+        filtered = [p for p in products if p["category"] == db_category]
+        products = filtered if filtered else products  # fallback all if category unknown
     logger.info(f"Using {len(products)} static fallback products for '{db_category}'")
     return products
 
@@ -107,7 +193,6 @@ def get_grounded_policy_chunks(product_id: str, user_query: str, top_k: int = 3)
         except Exception as e:
             logger.warning(f"RAG retrieval failed: {e}")
 
-    # Fallback — no policy citations
     return {"context_text": "", "grounded_on_chunk_ids": [], "raw_chunks": []}
 
 
@@ -133,7 +218,7 @@ def save_customer_profile(extracted_json: dict):
             "credit_score_band": profile.get("credit_score_band", "unknown"),
             "urgency": profile.get("urgency", "exploring"),
             "completeness_pct": meta.get("completeness_pct", 0),
-            "turns_taken": meta.get("turns_taken", 0)
+            "turns_taken": meta.get("turns_taken", 0),
         }
         res = supabase.table("customer_profiles").upsert(db_row).execute()
         return res.data

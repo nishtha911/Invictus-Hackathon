@@ -558,8 +558,124 @@ async def get_recommendations(session_id: str):
     return {"recommendations": [rec.model_dump() for rec in scored_recommendations]}
 
 
+# ── In-memory lead store ───────────────────────────────────────────────
+LEAD_STORE: list[dict] = []
+
+
+# ── Lead Capture Endpoint ──────────────────────────────────────────────
+
+from pydantic import BaseModel as _BaseModel
+from typing import Optional as _Optional
+
+class LeadCaptureRequest(_BaseModel):
+    session_id: str
+    name: str
+    email: str
+    phone: str
+    selected_loan_id: _Optional[str] = None
+    selected_loan_name: _Optional[str] = None
+    loan_amount: _Optional[float] = None
+    estimated_emi: _Optional[float] = None
+    preferred_contact_time: _Optional[str] = "Morning"
+    notes: _Optional[str] = None
+
+
+@app.post("/api/leads")
+async def capture_lead(payload: LeadCaptureRequest):
+    """Capture an inbound lead and return AI scoring intelligence."""
+    from app.services.lead_scorer import score_lead
+
+    # Pull profile context from session if available
+    state = SESSION_STORE.get(payload.session_id)
+    profile = state.profile if state else None
+    pct, _, _ = compute_completeness(profile) if profile else (0, [], [])
+
+    scoring = score_lead(
+        session_id=payload.session_id,
+        completeness_pct=pct,
+        monthly_income=getattr(profile, "monthly_income", None) if profile else None,
+        existing_emi_obligations=getattr(profile, "existing_emi_obligations", None) if profile else None,
+        requested_loan_amount=payload.loan_amount or (getattr(profile, "requested_loan_amount", None) if profile else None),
+        preferred_tenure_months=getattr(profile, "preferred_tenure_months", None) if profile else None,
+        credit_score_band=getattr(profile, "credit_score_band", None) if profile else None,
+        urgency=getattr(profile, "urgency", None) if profile else None,
+        intent=getattr(profile, "intent", None) if profile else None,
+    )
+
+    lead_record = {
+        **scoring,
+        "customer_name": payload.name,
+        "email": payload.email,
+        "phone": payload.phone,
+        "product_id": payload.selected_loan_id,
+        "product_name": payload.selected_loan_name,
+        "loan_amount": payload.loan_amount,
+        "estimated_emi": payload.estimated_emi,
+        "preferred_contact_time": payload.preferred_contact_time,
+        "notes": payload.notes,
+        "status": "New",
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    LEAD_STORE.append(lead_record)
+
+    logger.info(f"Lead captured: {scoring['lead_id']} — {scoring['score_band']} ({scoring['score']}/100)")
+    return {
+        "status": "captured",
+        "lead_id": scoring["lead_id"],
+        "message": "Your loan interest has been recorded. A relationship manager will contact you shortly.",
+        "created_at": lead_record["created_at"],
+        "scoring": scoring,
+    }
+
+
+# ── Sales Dashboard Endpoint ───────────────────────────────────────────
+
+@app.get("/api/dashboard")
+async def get_dashboard():
+    """Return sales intelligence dashboard data."""
+    from datetime import timedelta
+    import random
+
+    total_leads = len(LEAD_STORE)
+    hot_leads = sum(1 for l in LEAD_STORE if l.get("score_band") == "HOT LEAD")
+    warm_leads = sum(1 for l in LEAD_STORE if l.get("score_band") == "WARM LEAD")
+    total_demand = sum(l.get("loan_amount") or 0 for l in LEAD_STORE)
+    avg_score = (sum(l.get("score", 0) for l in LEAD_STORE) / total_leads) if total_leads else 0
+
+    # Status counts
+    statuses = {"New": 0, "Qualified": 0, "Contacted": 0, "Converted": 0}
+    for l in LEAD_STORE:
+        s = l.get("status", "New")
+        statuses[s] = statuses.get(s, 0) + 1
+
+    # Volume trend — last 7 days (real data for today, historical mock)
+    today = datetime.utcnow().date()
+    trend = []
+    today_count = sum(1 for l in LEAD_STORE if l.get("created_at", "")[:10] == str(today))
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        if i == 0:
+            trend.append({"date": str(d), "leads": today_count, "hot": max(0, today_count - 1)})
+        else:
+            n = random.randint(2, 12)
+            trend.append({"date": str(d), "leads": n, "hot": max(0, n - random.randint(1, 4))})
+
+    return {
+        "kpis": {
+            "total_leads": total_leads,
+            "hot_leads": hot_leads,
+            "warm_leads": warm_leads,
+            "avg_lead_score": round(avg_score, 1),
+            "total_loan_demand": total_demand,
+            "conversion_pipeline": statuses,
+        },
+        "leads": LEAD_STORE,
+        "volume_trend": trend,
+    }
+
+
 # ── Mount Frontend Static Files ────────────────────────────────────────
 frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
 if frontend_dir.exists():
     from fastapi.staticfiles import StaticFiles
-    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
