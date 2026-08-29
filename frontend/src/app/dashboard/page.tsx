@@ -68,7 +68,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-mono font-bold text-[#1F7A63] border border-emerald-100">
+              <span className="rounded bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-bold text-[#1F7A63] border border-emerald-100">
                 RETAIL LENDING INTELLIGENCE
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs text-[#1F7A63] font-medium">
@@ -86,7 +86,7 @@ export default function DashboardPage() {
 
           {/* Action Tools */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-slate-600 font-mono">
+            <div className="flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-slate-600">
               <Calendar className="h-3.5 w-3.5 text-[#1F7A63]" />
               <span>Last 7 Days</span>
             </div>

@@ -61,7 +61,7 @@ export function HowItWorksSection() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl font-extrabold font-mono text-slate-300">
+                    <span className="text-3xl font-extrabold text-slate-300 tabular-nums tracking-tight">
                       {step.number}
                     </span>
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0] shadow-2xs">

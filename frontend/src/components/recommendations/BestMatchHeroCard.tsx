@@ -46,7 +46,7 @@ export function BestMatchHeroCard({
         {/* Left Column: Loan Name, Financial Terms & Why It Suits You (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63] font-mono">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1F7A63]">
               {loan.category}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight mt-1">
@@ -59,7 +59,7 @@ export function BestMatchHeroCard({
             {/* KPI 1: Interest Rate */}
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4">
               <span className="text-[11px] text-slate-500 font-medium block">Interest Rate</span>
-              <span className="text-2xl font-extrabold text-[#1F7A63] font-mono mt-0.5 block">
+              <span className="text-2xl font-extrabold text-[#1F7A63] tabular-nums mt-0.5 block">
                 {loan.interest_rate.toFixed(2)}%
               </span>
               <span className="text-[10px] text-slate-400 block mt-1">Repo-linked Floating</span>
@@ -68,10 +68,10 @@ export function BestMatchHeroCard({
             {/* KPI 2: Estimated EMI */}
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4">
               <span className="text-[11px] text-slate-500 font-medium block">Estimated EMI</span>
-              <span className="text-2xl font-extrabold text-[#081C2D] font-mono mt-0.5 block">
+              <span className="text-2xl font-extrabold text-[#081C2D] tabular-nums mt-0.5 block">
                 {formatINR(loan.estimated_emi)}
               </span>
-              <span className="text-[10px] text-slate-500 font-mono block mt-1">
+              <span className="text-[10px] text-slate-500 tabular-nums block mt-1">
                 for {loan.tenure_months} months
               </span>
             </div>

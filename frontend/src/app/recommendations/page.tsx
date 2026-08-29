@@ -69,12 +69,12 @@ export default function RecommendationsPage() {
           </div>
 
           {/* Profile Summary Pill */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs font-mono text-slate-600 shadow-2xs">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs text-slate-600 shadow-2xs">
             <span className="text-[#081C2D] font-bold">{profile.intent || "Home Loan"}</span>
             <span className="text-slate-300">·</span>
-            <span className="text-[#1F7A63] font-semibold">{formatINR(profile.loan_amount || 4500000, true)}</span>
+            <span className="text-[#1F7A63] font-semibold tabular-nums">{formatINR(profile.loan_amount || 4500000, true)}</span>
             <span className="text-slate-300">·</span>
-            <span>{profile.tenure_years || 20} Yrs</span>
+            <span className="tabular-nums font-medium">{profile.tenure_years || 20} Yrs</span>
             <span className="text-slate-300">·</span>
             <span className="text-slate-600">{profile.employment_type || "Salaried"}</span>
           </div>

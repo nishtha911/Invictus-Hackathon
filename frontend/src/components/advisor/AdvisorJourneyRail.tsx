@@ -39,7 +39,7 @@ export function AdvisorJourneyRail({
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Advisory Progress
           </h3>
-          <span className="text-xs font-mono font-bold text-[#081C2D]">
+          <span className="text-xs font-bold text-[#081C2D] tabular-nums">
             {progressPct}%
           </span>
         </div>

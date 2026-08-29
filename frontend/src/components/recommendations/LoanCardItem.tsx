@@ -33,13 +33,13 @@ export function LoanCardItem({ loan, onSelectInterested }: LoanCardItemProps) {
         <div className="grid grid-cols-2 gap-2.5 pt-1">
           <div className="rounded-xl bg-[#F5F7FA] p-3 border border-[#E2E8F0]">
             <span className="text-[10px] text-slate-500 block">Interest Rate</span>
-            <span className="text-base font-bold text-[#1F7A63] font-mono mt-0.5 block">
+            <span className="text-base font-bold text-[#1F7A63] tabular-nums mt-0.5 block">
               {loan.interest_rate.toFixed(2)}%
             </span>
           </div>
           <div className="rounded-xl bg-[#F5F7FA] p-3 border border-[#E2E8F0]">
             <span className="text-[10px] text-slate-500 block">Estimated EMI</span>
-            <span className="text-base font-bold text-[#081C2D] font-mono mt-0.5 block">
+            <span className="text-base font-bold text-[#081C2D] tabular-nums mt-0.5 block">
               {formatINR(loan.estimated_emi)}
             </span>
           </div>

@@ -78,7 +78,7 @@ export default function LoginPage() {
           <div className="lg:col-span-5 bg-[#081C2D] text-white rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-lg">
             <div className="space-y-6">
               <div className="space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#1F7A63] font-mono">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#1F7A63]">
                   Customer Portal
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">

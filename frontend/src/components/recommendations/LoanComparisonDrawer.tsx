@@ -70,7 +70,7 @@ export function LoanComparisonDrawer({
                 <tr>
                   <td className="p-3.5 font-medium text-slate-500">Interest Rate</td>
                   {loans.map((loan) => (
-                    <td key={loan.loan_id} className="p-3.5 font-mono font-bold text-[#1F7A63] text-sm">
+                    <td key={loan.loan_id} className="p-3.5 tabular-nums font-bold text-[#1F7A63] text-sm">
                       {loan.interest_rate.toFixed(2)}% p.a.
                     </td>
                   ))}
@@ -80,7 +80,7 @@ export function LoanComparisonDrawer({
                 <tr>
                   <td className="p-3.5 font-medium text-slate-500">Monthly EMI</td>
                   {loans.map((loan) => (
-                    <td key={loan.loan_id} className="p-3.5 font-mono font-bold text-[#081C2D] text-sm">
+                    <td key={loan.loan_id} className="p-3.5 tabular-nums font-bold text-[#081C2D] text-sm">
                       {formatINR(loan.estimated_emi)}
                     </td>
                   ))}
@@ -90,7 +90,7 @@ export function LoanComparisonDrawer({
                 <tr>
                   <td className="p-3.5 font-medium text-slate-500">Tenure</td>
                   {loans.map((loan) => (
-                    <td key={loan.loan_id} className="p-3.5 font-mono">
+                    <td key={loan.loan_id} className="p-3.5 tabular-nums font-medium text-[#081C2D] text-sm">
                       {loan.tenure_months / 12} Years ({loan.tenure_months} mo)
                     </td>
                   ))}
@@ -100,7 +100,7 @@ export function LoanComparisonDrawer({
                 <tr>
                   <td className="p-3.5 font-medium text-slate-500">Processing Fee</td>
                   {loans.map((loan) => (
-                    <td key={loan.loan_id} className="p-3.5 font-mono">
+                    <td key={loan.loan_id} className="p-3.5 tabular-nums font-medium text-[#081C2D] text-sm">
                       {loan.processing_fee_pct}% of principal
                     </td>
                   ))}

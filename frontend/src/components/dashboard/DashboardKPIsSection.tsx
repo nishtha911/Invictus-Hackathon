@@ -22,8 +22,8 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-[#081C2D] font-mono">{kpis.total_leads}</span>
-            <span className="text-xs text-[#1F7A63] font-semibold flex items-center gap-0.5">
+            <span className="text-3xl font-extrabold text-[#081C2D] tabular-nums tracking-tight">{kpis.total_leads}</span>
+            <span className="text-xs text-[#1F7A63] font-semibold flex items-center gap-0.5 tabular-nums">
               <ArrowUpRight className="h-3 w-3" /> +18.4%
             </span>
           </div>
@@ -39,8 +39,8 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-[#1F7A63] font-mono">{kpis.hot_leads}</span>
-            <span className="text-xs text-[#1F7A63] font-semibold font-mono">Sanction Ready</span>
+            <span className="text-3xl font-extrabold text-[#1F7A63] tabular-nums tracking-tight">{kpis.hot_leads}</span>
+            <span className="text-xs text-[#1F7A63] font-semibold">Sanction Ready</span>
           </div>
           <span className="text-[11px] text-slate-400 block">Under 7-day conversion window</span>
         </div>
@@ -54,7 +54,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-[#081C2D] font-mono">{kpis.qualification_rate}%</span>
+            <span className="text-3xl font-extrabold text-[#081C2D] tabular-nums tracking-tight">{kpis.qualification_rate}%</span>
             <span className="text-xs text-slate-600 font-semibold">Tier-1 & 2 Filter</span>
           </div>
           <span className="text-[11px] text-slate-400 block">FOIR & credit criteria met</span>
@@ -69,7 +69,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] font-mono">
+            <span className="text-3xl font-extrabold text-[#081C2D] tabular-nums tracking-tight">
               {formatINR(kpis.total_loan_demand, true)}
             </span>
             <span className="text-xs text-slate-600 font-semibold">Pipeline Sum</span>
@@ -84,7 +84,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
           <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
             Conversion Pipeline Velocity
           </h3>
-          <span className="text-[11px] font-mono font-semibold text-[#1F7A63]">
+          <span className="text-xs font-semibold text-[#1F7A63] tabular-nums">
             19 Converted Disbursals
           </span>
         </div>
@@ -95,7 +95,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
               1. Inbound Intake
             </span>
-            <span className="text-xl font-bold text-[#081C2D] font-mono">{kpis.conversion_pipeline.new}</span>
+            <span className="text-xl font-bold text-[#081C2D] tabular-nums">{kpis.conversion_pipeline.new}</span>
             <div className="mt-2 h-1.5 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
               <div className="h-full bg-[#081C2D] w-full" />
             </div>
@@ -106,7 +106,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
               2. Qualified
             </span>
-            <span className="text-xl font-bold text-[#081C2D] font-mono">{kpis.conversion_pipeline.qualified}</span>
+            <span className="text-xl font-bold text-[#081C2D] tabular-nums">{kpis.conversion_pipeline.qualified}</span>
             <div className="mt-2 h-1.5 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
               <div className="h-full bg-[#081C2D] w-[67%]" />
             </div>
@@ -117,7 +117,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
               3. Contacted
             </span>
-            <span className="text-xl font-bold text-[#081C2D] font-mono">{kpis.conversion_pipeline.contacted}</span>
+            <span className="text-xl font-bold text-[#081C2D] tabular-nums">{kpis.conversion_pipeline.contacted}</span>
             <div className="mt-2 h-1.5 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
               <div className="h-full bg-[#081C2D] w-[36%]" />
             </div>
@@ -128,7 +128,7 @@ export function DashboardKPIsSection({ kpis }: DashboardKPIsSectionProps) {
             <span className="text-[10px] text-[#1F7A63] uppercase tracking-wider block font-semibold">
               4. Converted
             </span>
-            <span className="text-xl font-bold text-[#1F7A63] font-mono">{kpis.conversion_pipeline.converted}</span>
+            <span className="text-xl font-bold text-[#1F7A63] tabular-nums">{kpis.conversion_pipeline.converted}</span>
             <div className="mt-2 h-1.5 w-full bg-emerald-100 rounded-full overflow-hidden">
               <div className="h-full bg-[#1F7A63] w-[14%]" />
             </div>

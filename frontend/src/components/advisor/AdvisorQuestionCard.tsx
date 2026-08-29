@@ -70,7 +70,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           <span>
             Prefilled with customer context: <strong>{selectedCustomer.name}</strong> ({selectedCustomer.employer})
           </span>
-          <span className="font-mono text-[10px] bg-[#1F7A63] text-white px-2 py-0.5 rounded font-semibold">
+          <span className="text-[10px] bg-[#1F7A63] text-white px-2 py-0.5 rounded font-semibold">
             CUSTOMER PROFILE
           </span>
         </div>
@@ -213,7 +213,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Net Monthly Income
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1 block">
                   {formatINR(profile.income || 120000)}{" "}
                   <span className="text-base font-normal text-slate-500">per month</span>
                 </span>
@@ -230,7 +230,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   onChange={(e) => updateProfile({ income: parseInt(e.target.value, 10) })}
                   className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                <div className="flex justify-between text-xs font-medium text-slate-500 tabular-nums">
                   <span>₹25,000/mo</span>
                   <span>₹2.5 Lakhs</span>
                   <span>₹5.0 Lakhs+</span>
@@ -244,7 +244,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={amt}
                     type="button"
                     onClick={() => updateProfile({ income: amt })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold tabular-nums transition-all cursor-pointer ${
                       profile.income === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -270,7 +270,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Required Borrowing Amount
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1 block">
                   {formatINR(profile.loan_amount || 4500000)}
                 </span>
               </div>
@@ -285,7 +285,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   onChange={(e) => updateProfile({ loan_amount: parseInt(e.target.value, 10) })}
                   className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                <div className="flex justify-between text-xs font-medium text-slate-500 tabular-nums">
                   <span>₹1 Lakh</span>
                   <span>₹50 Lakhs</span>
                   <span>₹1.0 Cr</span>
@@ -299,7 +299,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={amt}
                     type="button"
                     onClick={() => updateProfile({ loan_amount: amt })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold tabular-nums transition-all cursor-pointer ${
                       profile.loan_amount === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -325,7 +325,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Repayment Duration
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1 block">
                   {profile.tenure_years || 20} Years
                   <span className="text-sm font-normal text-slate-500 ml-2">
                     ({(profile.tenure_years || 20) * 12} Monthly EMIs)
@@ -343,7 +343,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   onChange={(e) => updateProfile({ tenure_years: parseInt(e.target.value, 10) })}
                   className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                <div className="flex justify-between text-xs font-medium text-slate-500 tabular-nums">
                   <span>1 Year</span>
                   <span>10 Years</span>
                   <span>20 Years</span>
@@ -357,7 +357,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     key={yr}
                     type="button"
                     onClick={() => updateProfile({ tenure_years: yr })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold tabular-nums transition-all cursor-pointer ${
                       profile.tenure_years === yr
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
                         : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
@@ -383,7 +383,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Current Monthly Outflow
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1 block">
                   {profile.existing_emi && profile.existing_emi > 0
                     ? formatINR(profile.existing_emi)
                     : "₹0 (Zero Active Loans)"}
@@ -405,7 +405,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     <span className="text-xs block text-slate-500">
                       {emi === 0 ? "No Active EMI" : "Existing EMI"}
                     </span>
-                    <span className="text-sm font-mono mt-0.5 block">{formatINR(emi)}</span>
+                    <span className="text-sm font-bold text-[#081C2D] tabular-nums mt-0.5 block">{formatINR(emi)}</span>
                   </button>
                 ))}
               </div>

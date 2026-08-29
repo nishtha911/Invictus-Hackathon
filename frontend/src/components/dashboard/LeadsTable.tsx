@@ -168,7 +168,7 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
                     <div className="font-semibold text-[#081C2D] group-hover:text-[#1F7A63] transition-colors">
                       {lead.customer_name}
                     </div>
-                    <div className="text-[11px] font-mono text-slate-500">{lead.phone}</div>
+                    <div className="text-[11px] text-slate-500 tabular-nums">{lead.phone}</div>
                   </td>
 
                   {/* Product */}
@@ -178,14 +178,14 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
                   </td>
 
                   {/* Amount */}
-                  <td className="p-3.5 font-mono font-bold text-[#081C2D] text-sm">
+                  <td className="p-3.5 tabular-nums font-bold text-[#081C2D] text-sm">
                     {formatINR(lead.requested_amount, true)}
                   </td>
 
                   {/* Score */}
                   <td className="p-3.5">
                     <span
-                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono font-semibold border ${
+                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] tabular-nums font-semibold border ${
                         isHot
                           ? "border-emerald-200 bg-[#E8F5F1] text-[#1F7A63]"
                           : "border-slate-200 bg-[#F5F7FA] text-slate-700"

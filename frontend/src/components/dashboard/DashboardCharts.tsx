@@ -101,7 +101,7 @@ export function DashboardCharts({
             <div key={prod.name} className="space-y-1 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 font-medium">{prod.name}</span>
-                <span className="font-mono text-[#081C2D] font-bold">{formatINR(prod.value, true)}</span>
+                <span className="tabular-nums text-[#081C2D] font-bold">{formatINR(prod.value, true)}</span>
               </div>
               <div className="h-2 w-full bg-[#F5F7FA] rounded-full overflow-hidden border border-[#E2E8F0]">
                 <div
@@ -115,9 +115,9 @@ export function DashboardCharts({
           ))}
         </div>
 
-        <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-slate-500 font-mono">
+        <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-slate-500">
           <span>Top Product: Home Loan</span>
-          <span className="text-[#1F7A63] font-semibold">52 Inquiries</span>
+          <span className="text-[#1F7A63] font-semibold tabular-nums">52 Inquiries</span>
         </div>
       </div>
     </div>

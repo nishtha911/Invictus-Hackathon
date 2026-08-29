@@ -33,7 +33,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function PersonalisedIntakeSection() {
   const router = useRouter();
-  const { profile, updateProfile, extractedData, setExtractedData, setStepIndex } = useJourneyStore();
+  const { profile, updateProfile, setExtractedData, setStepIndex } = useJourneyStore();
   const [, startTransition] = useTransition();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -88,8 +88,6 @@ export function PersonalisedIntakeSection() {
     }
   };
 
-  const completeness = extractedData?.completeness_score || Math.round(((currentIndex + 1) / totalQuestions) * 100);
-
   return (
     <section
       id="personalised-loans"
@@ -110,7 +108,7 @@ export function PersonalisedIntakeSection() {
           </p>
         </div>
 
-        {/* 3-Column Desktop Grid Layout / 1-Column Mobile */}
+        {/* 2-Column Desktop Grid Layout / 1-Column Mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Journey Context & Step Rail (Hidden on small mobile, visible lg) */}
           <div className="hidden lg:block lg:col-span-3 space-y-4">
@@ -119,7 +117,7 @@ export function PersonalisedIntakeSection() {
                 <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
                   Intake Roadmap
                 </span>
-                <span className="text-xs font-mono font-semibold text-[#1F7A63]">
+                <span className="text-xs font-semibold text-[#1F7A63] tabular-nums">
                   {currentIndex + 1}/{totalQuestions}
                 </span>
               </div>
@@ -160,7 +158,7 @@ export function PersonalisedIntakeSection() {
                       </div>
 
                       {isCompleted && val !== undefined && val !== null && (
-                        <span className="text-[10px] font-mono text-[#1F7A63] shrink-0">
+                        <span className="text-[11px] font-semibold text-[#1F7A63] tabular-nums shrink-0">
                           {typeof val === "number" ? (q.field === "tenure_years" ? `${val}y` : formatINR(val, true)) : String(val).split(" ")[0]}
                         </span>
                       )}
@@ -179,13 +177,13 @@ export function PersonalisedIntakeSection() {
             </div>
           </div>
 
-          {/* CENTER COLUMN: Dominant Question Card & Controls (6 cols on lg) */}
-          <div className="lg:col-span-6 space-y-4">
+          {/* MAIN COLUMN: Dominant Question Card & Controls (9 cols on lg) */}
+          <div className="lg:col-span-9 space-y-4">
             <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-xs relative">
               {/* Question Header */}
               <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-[#E2E8F0]">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md bg-[#081C2D] px-2.5 py-0.5 text-xs font-mono font-bold text-white">
+                  <span className="rounded-md bg-[#081C2D] px-2.5 py-0.5 text-xs font-bold text-white">
                     Step {currentIndex + 1} of {totalQuestions}
                   </span>
                   <span className="text-xs text-slate-400 font-medium">
@@ -201,7 +199,7 @@ export function PersonalisedIntakeSection() {
                       style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs font-mono text-[#1F7A63]">
+                  <span className="text-xs font-semibold text-[#1F7A63] tabular-nums">
                     {Math.round(((currentIndex + 1) / totalQuestions) * 100)}%
                   </span>
                 </div>
@@ -228,7 +226,7 @@ export function PersonalisedIntakeSection() {
 
                   {/* Input Type 1: Choice Grid (e.g. Loan Purpose) */}
                   {currentQuestion.inputType === "choice_grid" && currentQuestion.options && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                       {currentQuestion.options.map((opt) => {
                         const Icon = ICON_MAP[opt.icon || ""] || Home;
                         const isSelected = profile.intent === opt.id || profile.intent === opt.label;
@@ -325,7 +323,7 @@ export function PersonalisedIntakeSection() {
                         <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold block">
                           Selected {currentQuestion.field === "tenure_years" ? "Tenure" : "Amount"}
                         </span>
-                        <div className="text-2xl sm:text-3xl font-extrabold font-mono text-[#081C2D] mt-1">
+                        <div className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1">
                           {currentQuestion.field === "tenure_years"
                             ? `${Number(currentFieldValue || 20)} Years`
                             : formatINR(Number(currentFieldValue || currentQuestion.min || 0))}
@@ -343,7 +341,7 @@ export function PersonalisedIntakeSection() {
                           onChange={(e) => handleSliderChange(Number(e.target.value))}
                           className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                         />
-                        <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                        <div className="flex justify-between text-xs font-medium text-slate-500 tabular-nums">
                           <span>
                             {currentQuestion.field === "tenure_years"
                               ? `${currentQuestion.min} Yrs`
@@ -371,7 +369,7 @@ export function PersonalisedIntakeSection() {
                                   key={preset.label}
                                   type="button"
                                   onClick={() => handleSliderChange(preset.value)}
-                                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold font-mono border transition-all cursor-pointer ${
+                                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold tabular-nums border transition-all cursor-pointer ${
                                     isSelected
                                       ? "border-[#1F7A63] bg-[#1F7A63] text-white"
                                       : "border-[#E2E8F0] bg-white text-slate-700 hover:border-slate-300"
@@ -408,103 +406,6 @@ export function PersonalisedIntakeSection() {
                 >
                   <span>{currentIndex === totalQuestions - 1 ? "Explore Matched Loans" : "Continue"}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN: Live Profile Summary & Progress (3 cols on lg) */}
-          <div className="hidden lg:block lg:col-span-3 space-y-4">
-            <div className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-4 text-left">
-              <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
-                  Your Progress
-                </span>
-                <span className="rounded-md bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-bold font-mono text-[#1F7A63] border border-emerald-100">
-                  {completeness}% Ready
-                </span>
-              </div>
-
-              {/* Progress Indicator */}
-              <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                <motion.div
-                  className="bg-[#1F7A63] h-full"
-                  initial={{ width: "20%" }}
-                  animate={{ width: `${completeness}%` }}
-                  transition={{ duration: 0.4 }}
-                />
-              </div>
-
-              {/* Profile Snapshot Fields */}
-              <div className="space-y-3 pt-2">
-                <div className="rounded-xl bg-white p-3 border border-[#E2E8F0] space-y-1">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Loan Goal
-                  </span>
-                  <span className="text-xs font-bold text-[#081C2D] block">
-                    {profile.intent || "Not specified"}
-                  </span>
-                </div>
-
-                <div className="rounded-xl bg-white p-3 border border-[#E2E8F0] space-y-1">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Requested Amount
-                  </span>
-                  <span className="text-xs font-bold font-mono text-[#081C2D] block">
-                    {profile.loan_amount ? formatINR(profile.loan_amount) : "₹0"}
-                  </span>
-                </div>
-
-                <div className="rounded-xl bg-white p-3 border border-[#E2E8F0] space-y-1">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                    Monthly Income
-                  </span>
-                  <span className="text-xs font-bold font-mono text-[#081C2D] block">
-                    {profile.income ? formatINR(profile.income) : "₹0"}
-                  </span>
-                </div>
-
-                {profile.employment_type && (
-                  <div className="rounded-xl bg-white p-3 border border-[#E2E8F0] space-y-1">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                      Employment
-                    </span>
-                    <span className="text-xs font-medium text-slate-700 block truncate">
-                      {profile.employment_type}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Dynamic Signals Tagged */}
-              {extractedData?.signals_captured && extractedData.signals_captured.length > 0 && (
-                <div className="pt-2 border-t border-[#E2E8F0] space-y-1.5">
-                  <span className="text-[10px] font-semibold text-[#1F7A63] uppercase tracking-wider block">
-                    Captured Signals ({extractedData.signals_captured.length})
-                  </span>
-                  <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
-                    {extractedData.signals_captured.map((signal, sIdx) => (
-                      <div
-                        key={sIdx}
-                        className="text-[10px] text-slate-600 bg-white px-2 py-1 rounded border border-[#E2E8F0] flex items-center gap-1.5"
-                      >
-                        <CheckCircle2 className="h-3 w-3 text-[#1F7A63] shrink-0" />
-                        <span className="truncate">{signal}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Direct Full Advisor Route */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => router.push("/advisor")}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#081C2D] bg-white py-2 text-xs font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer shadow-2xs"
-                >
-                  <span>Launch Full Session</span>
-                  <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             </div>

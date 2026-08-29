@@ -58,11 +58,11 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
           <div className="flex items-start justify-between pb-5 border-b border-[#E2E8F0]">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="rounded bg-[#F5F7FA] px-2 py-0.5 text-[11px] font-mono text-slate-600 border border-[#E2E8F0]">
+                <span className="rounded bg-[#F5F7FA] px-2 py-0.5 text-[11px] text-slate-600 border border-[#E2E8F0] tabular-nums">
                   {lead.id}
                 </span>
                 <span
-                  className={`rounded-md px-2.5 py-0.5 text-[11px] font-bold font-mono border ${lead.score_band === "HOT LEAD"
+                  className={`rounded-md px-2.5 py-0.5 text-[11px] font-bold tabular-nums border ${lead.score_band === "HOT LEAD"
                       ? "border-emerald-200 bg-[#E8F5F1] text-[#1F7A63]"
                       : "border-slate-200 bg-[#F5F7FA] text-slate-700"
                     }`}
@@ -96,10 +96,10 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
               <span className="text-[10px] text-slate-500 uppercase tracking-wider block">
                 Requested Principal
               </span>
-              <span className="text-base font-bold text-[#081C2D] font-mono block mt-0.5">
+              <span className="text-base font-bold text-[#081C2D] tabular-nums block mt-0.5">
                 {formatINR(lead.requested_amount)}
               </span>
-              <span className="text-[10px] text-slate-500">EMI ~{formatINR(lead.estimated_emi)}/mo</span>
+              <span className="text-[10px] text-slate-500 tabular-nums">EMI ~{formatINR(lead.estimated_emi)}/mo</span>
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
           <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4 space-y-2.5 text-xs text-slate-700">
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-[#1F7A63]" />
-              <span className="font-mono">{lead.phone}</span>
+              <span className="tabular-nums">{lead.phone}</span>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-[#1F7A63]" />

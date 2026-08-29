@@ -2,10 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, ChevronUp, ChevronDown } from "lucide-react";
 import { AdvisorJourneyRail } from "@/components/advisor/AdvisorJourneyRail";
 import { AdvisorQuestionCard } from "@/components/advisor/AdvisorQuestionCard";
-import { AdvisorProfileRail } from "@/components/advisor/AdvisorProfileRail";
 import { ExtractionIndicator } from "@/components/advisor/ExtractionIndicator";
 import { useJourneyStore } from "@/store/journey-store";
 import { fetchLoanRecommendations } from "@/lib/api/recommendations";
@@ -25,8 +23,7 @@ function AdvisorContent() {
     extractionStatusMessage,
   } = useJourneyStore();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [showMobileProfile, setShowMobileProfile] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   // Handle URL intent query parameter (e.g. /advisor?intent=home_loan)
   useEffect(() => {
@@ -80,27 +77,10 @@ function AdvisorContent() {
               active={isExtracting}
               message={extractionStatusMessage}
             />
-
-            {/* Mobile Profile Toggle Button */}
-            <button
-              onClick={() => setShowMobileProfile(!showMobileProfile)}
-              className="lg:hidden inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#081C2D]"
-            >
-              <Eye className="h-3.5 w-3.5 text-[#1F7A63]" />
-              <span>{showMobileProfile ? "Hide Profile" : "View Profile"}</span>
-              {showMobileProfile ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </button>
           </div>
         </div>
 
-        {/* Mobile Expandable Profile Drawer */}
-        {showMobileProfile && (
-          <div className="lg:hidden mb-6">
-            <AdvisorProfileRail onFindMatches={handleFindMatches} isLoading={isLoading} />
-          </div>
-        )}
-
-        {/* 3-Column Desktop Grid Layout */}
+        {/* 2-Column Desktop Grid Layout (Roadmap + Dominant Question Area) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Journey Roadmap Rail (3 cols) */}
           <div className="hidden lg:block lg:col-span-3">
@@ -111,14 +91,9 @@ function AdvisorContent() {
             />
           </div>
 
-          {/* Center Column: Question & Controls (6 cols) */}
-          <div className="lg:col-span-6 space-y-4">
+          {/* Main Column: Question & Controls (9 cols) */}
+          <div className="lg:col-span-9 space-y-4">
             <AdvisorQuestionCard onCompleteJourney={handleFindMatches} />
-          </div>
-
-          {/* Right Column: Live Profile Rail (3 cols) */}
-          <div className="hidden lg:block lg:col-span-3">
-            <AdvisorProfileRail onFindMatches={handleFindMatches} isLoading={isLoading} />
           </div>
         </div>
       </div>

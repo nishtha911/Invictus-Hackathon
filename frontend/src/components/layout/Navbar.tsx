@@ -184,7 +184,7 @@ export function Navbar() {
               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
             >
               <span>Bank Dashboard</span>
-              <span className="rounded bg-[#1F7A63]/30 px-1 py-0.2 text-[9px] font-mono font-bold text-[#4ade80]">
+              <span className="rounded bg-[#1F7A63]/30 px-1 py-0.2 text-[9px] font-bold text-[#4ade80]">
                 DEMO
               </span>
               <ArrowUpRight className="h-3 w-3 text-slate-400" />
@@ -307,7 +307,7 @@ export function Navbar() {
             <Link
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2 text-xs font-mono text-slate-300 bg-slate-800/80 px-3 rounded-lg border border-slate-700"
+              className="flex items-center justify-between py-2 text-xs text-slate-300 bg-slate-800/80 px-3 rounded-lg border border-slate-700"
             >
               <span>Bank Dashboard</span>
               <span className="rounded bg-[#1F7A63]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#4ade80]">

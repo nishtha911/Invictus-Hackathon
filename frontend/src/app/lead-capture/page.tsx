@@ -332,10 +332,10 @@ export default function LeadCapturePage() {
           <div className="lg:col-span-5 space-y-4">
             <div className="bank-card p-6 sm:p-7 bg-white border border-[#E2E8F0] shadow-sm space-y-5">
               <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#1F7A63] font-mono">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1F7A63]">
                   Selected Product
                 </span>
-                <span className="rounded-md bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-semibold text-[#1F7A63]">
+                <span className="rounded-md bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-semibold text-[#1F7A63] tabular-nums">
                   {activeLoan.match_score}% Match
                 </span>
               </div>
@@ -348,25 +348,25 @@ export default function LeadCapturePage() {
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Requested Loan</span>
-                  <span className="text-base font-bold text-[#081C2D] font-mono">
+                  <span className="text-base font-bold text-[#081C2D] tabular-nums">
                     {formatINR(profile.loan_amount || 4500000)}
                   </span>
                 </div>
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Estimated EMI</span>
-                  <span className="text-base font-bold text-[#1F7A63] font-mono">
+                  <span className="text-base font-bold text-[#1F7A63] tabular-nums">
                     {formatINR(activeLoan.estimated_emi)}
                   </span>
                 </div>
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Interest Rate</span>
-                  <span className="text-sm font-bold text-[#081C2D] font-mono">
+                  <span className="text-sm font-bold text-[#081C2D] tabular-nums">
                     {activeLoan.interest_rate.toFixed(2)}% p.a.
                   </span>
                 </div>
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Tenure</span>
-                  <span className="text-sm font-bold text-[#081C2D] font-mono">
+                  <span className="text-sm font-bold text-[#081C2D] tabular-nums">
                     {profile.tenure_years || 20} Years
                   </span>
                 </div>

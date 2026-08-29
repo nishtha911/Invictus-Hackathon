@@ -177,8 +177,8 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
                         </div>
                       </div>
                       <div className="mt-2 pt-1.5 border-t border-[#E2E8F0] flex items-center justify-between text-[10px] text-slate-600">
-                        <span>{formatINR(cust.monthly_income, true)}/mo</span>
-                        <span className="text-[#1F7A63] font-mono font-semibold">CIBIL {cust.cibil_score}</span>
+                        <span className="tabular-nums font-medium">{formatINR(cust.monthly_income, true)}/mo</span>
+                        <span className="text-[#1F7A63] font-semibold tabular-nums">CIBIL {cust.cibil_score}</span>
                       </div>
                     </div>
                   );
@@ -193,7 +193,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
                     Pre-fills <strong>{selectedCustomer.employer}</strong> ({formatINR(selectedCustomer.monthly_income)}/mo)
                   </span>
                 </div>
-                <span className="text-[11px] text-[#1F7A63] font-mono font-medium">{selectedCustomer.account_type}</span>
+                <span className="text-[11px] text-[#1F7A63] font-medium">{selectedCustomer.account_type}</span>
               </div>
             </motion.div>
           )}
