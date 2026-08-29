@@ -1,6 +1,6 @@
 /**
- * TypeScript Contracts for LoanSense AI Architecture
- * Aligned with Backend FastAPI Models and GenAI Agent Pipelines
+ * TypeScript Contracts for DHANSETU Architecture
+ * Aligned with Backend FastAPI Models and Underwriting Policy Pipelines
  */
 
 export type UserType = "new" | "existing";

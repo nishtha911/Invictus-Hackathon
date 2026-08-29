@@ -1,11 +1,11 @@
-# LoanSense AI — Frontend (Pod 4)
-**Cognizant Invictus Hackathon — AI-Powered Bank Loan Advisory Platform**
+# DHANSETU — Frontend (Pod 4)
+**Cognizant Invictus Hackathon — Smart Lending, Simplified.**
 
-A production-grade, policy-grounded Next.js web application delivering conversational financial intake, deterministic EMI matching, and AI-scored sales intelligence.
+A production-grade, policy-grounded Next.js banking web application delivering conversational financial intake, deterministic EMI calculations, transparent loan recommendations, and underwriting sales intelligence.
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```text
 BANK WEBSITE (/)
@@ -17,22 +17,22 @@ BANK WEBSITE (/)
        │                              │
        ▼                              ▼
 NEW CUSTOMER / GUEST           EXISTING CUSTOMER
-Conversational Intake          Mock Login (Prefilled Context)
+Loan Intent / Advisor          Login (/login)
        │                              │
        └──────────────┬───────────────┘
                       ▼
-            GENAI EXTRACTION LAYER
-            Intent / Income / Amount
+           STRUCTURED PROFILE INTAKE
+           Intent / Income / Amount / Tenure
                       │
                       ▼
-          DETERMINISTIC MATCHING ENGINE
-            Rule-based FOIR & Loan DB
+         DETERMINISTIC MATCHING ENGINE
+           Rule-based FOIR & Loan DB
                       │
                       ▼
           POLICY-GROUNDED REASONING
                       │
                       ▼
-         PERSONALIZED LOAN CARDS (/recommendations)
+        PERSONALIZED LOAN CARDS (/recommendations)
                       │
                       ▼
                  INTERESTED?
@@ -52,7 +52,7 @@ Conversational Intake          Mock Login (Prefilled Context)
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Installation
 Inside the `frontend/` directory:
@@ -74,7 +74,7 @@ npm run start
 
 ---
 
-## ⚙️ Environment Configuration
+## Environment Configuration
 
 Configuration is managed via `frontend/.env.local`:
 
@@ -88,31 +88,32 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 
 ---
 
-## 🗺️ Application Routes
+## Application Routes
 
 | Route | View | Description |
 | :--- | :--- | :--- |
-| `/` | **Bank Website Entry** | Hero section with live product preview, loan solutions, system architecture breakdown, and User Type intake modal. |
-| `/advisor` | **Hybrid Chat & Intake** | 8-step conversational intake with MCQ cards, smart currency/tenure sliders, and live profile extraction panel. |
-| `/recommendations` | **Loan Recommendations** | Hero best match card, verified calculations, policy citations (RAG), comparison drawer, and Interest Yes/No decision. |
-| `/lead-capture` | **Lead Capture & Qualification** | Zod-validated priority application form and instant GenAI lead scoring output. |
-| `/dashboard` | **Bank Sales Intelligence** | Operational command center with KPIs, Recharts volume trends, leads queue table, and AI Underwriting Briefing drawer. |
+| `/` | **DhanSetu Homepage** | Clean hero with family lifestyle photography, comprehensive loan solutions catalogue, 4-step process, and trust matrix. |
+| `/login` | **Existing Customer Login** | Fast sign-in for registered borrowers using Full Name and 10-digit mobile number with quick demo fill. |
+| `/advisor` | **Intelligent Loan Advisor** | 8-step conversational intake with options, smart sliders, live profile summary, and category pre-selection. |
+| `/recommendations` | **Loan Recommendations** | Recommended product card, verified calculations, policy citations, comparison drawer, and interest decisions. |
+| `/lead-capture` | **Lead Capture & Qualification** | Zod-validated priority application form and instant lead scoring output. |
+| `/dashboard` | **Bank Sales Intelligence** | Operational command center with KPIs, Recharts volume trends, leads queue table, and Underwriting Briefing drawer. |
 
 ---
 
-## 🔌 Backend Contracts & Integration (Pod 2 / Pod 1 Handoff)
+## Backend Contracts & Integration
 
 Centralized in `src/lib/api/`:
 - `POST /api/v1/extract-profile`: Takes `ProfileIntake` (user_type, income, loan_amount, intent)
 - `POST /api/v1/recommend-loans`: Returns recommended loans with calculated EMIs and policy citations
-- `POST /api/v1/leads`: Captures and scores inbound lead with AI briefing
+- `POST /api/v1/leads`: Captures and scores inbound lead with underwriter briefing
 
 ---
 
-## 🎨 Tech Stack
+## Tech Stack
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS (v4) with custom FinTech dark tokens
+- **Styling**: Tailwind CSS (v4) with master banking tokens (Soft White, Navy `#081C2D`, Emerald `#1F7A63`, Cool Gray `#9AA3A8`)
 - **Motion**: `motion/react`
 - **Icons**: Lucide React
 - **Forms**: React Hook Form + Zod

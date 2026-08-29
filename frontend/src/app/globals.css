@@ -1,99 +1,166 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-
 @import "tailwindcss";
 
-/* ── Design Tokens ──────────────────────────────────────────────── */
-:root {
-  --bg-base:      #f8f9fa;
-  --bg-surface:   #ffffff;
-  --bg-elevated:  #ffffff;
-  --border:       #e9ecef;
-  --primary-blue: #004aad;
-  --primary-teal: #00a884;
-  --text-primary: #1e293b;
-  --text-muted:   #64748b;
-  --text-dim:     #94a3b8;
+@layer base {
+  :root {
+    /* DHANSETU Master Palette */
+    --background: #F5F7FA;
+    --foreground: #081C2D;
+
+    --navy: #081C2D;
+    --navy-hover: #0D263D;
+    --navy-surface: #0E2438;
+    --emerald: #1F7A63;
+    --emerald-hover: #186350;
+    --emerald-light: #E8F5F1;
+    --emerald-tint: #F0FDF9;
+    --soft-white: #F5F7FA;
+    --cool-gray: #9AA3A8;
+    --gray-border: #E2E8F0;
+    --gray-subtle: #F1F5F9;
+
+    --card: #FFFFFF;
+    --card-foreground: #081C2D;
+
+    --popover: #FFFFFF;
+    --popover-foreground: #081C2D;
+
+    --primary: #1F7A63;
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #081C2D;
+    --secondary-foreground: #FFFFFF;
+
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+
+    --accent: #1F7A63;
+    --accent-foreground: #FFFFFF;
+
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #1F7A63;
+
+    --radius: 0.75rem;
+
+    /* Banking Surface Tokens */
+    --surface-page: #F5F7FA;
+    --surface-white: #FFFFFF;
+    --surface-card: #FFFFFF;
+    --surface-navy: #081C2D;
+    --surface-navy-card: #0D2338;
+    --border-neutral: #E2E8F0;
+    --border-neutral-hover: #CBD5E1;
+  }
 }
 
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg-base);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* ── Utilities ─────────────────────────────────────────────────── */
-.bg-primary-blue { background-color: var(--primary-blue); }
-.text-primary-blue { color: var(--primary-blue); }
-.bg-primary-teal { background-color: var(--primary-teal); }
-.text-primary-teal { color: var(--primary-teal); }
-
-/* ── Inputs ────────────────────────────────────────────────────── */
-.input-field {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: var(--text-primary);
-  font-size: 15px;
-  font-family: 'Outfit', sans-serif;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.input-field::placeholder { color: var(--text-dim); }
-.input-field:focus {
-  border-color: var(--primary-teal);
-  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.1);
+/* Section scroll offset for fixed navbar */
+section[id] {
+  scroll-margin-top: 5.5rem;
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  border-radius: 8px;
-  background-color: var(--primary-blue);
-  color: white;
+/* Clean Banking Card & Panels */
+.bank-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04), 0 1px 2px -1px rgba(8, 28, 45, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+.bank-card-interactive {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bank-card-interactive:hover {
+  border-color: #1F7A63;
+  box-shadow: 0 8px 20px -4px rgba(8, 28, 45, 0.07), 0 4px 8px -3px rgba(8, 28, 45, 0.04);
+  transform: translateY(-2px);
+}
+
+.bank-card-selected {
+  background-color: #F0FDF9;
+  border: 1.5px solid #1F7A63;
+  border-radius: 0.875rem;
+}
+
+/* Standardized Button Utility Classes */
+.btn-emerald {
+  background-color: #1F7A63;
+  color: #FFFFFF;
   font-weight: 600;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  border-radius: 0.625rem;
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
 }
-.btn-primary:hover { background-color: #003a8c; }
 
-.btn-teal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  border-radius: 8px;
-  background-color: var(--primary-teal);
-  color: white;
+.btn-emerald:hover {
+  background-color: #186350;
+  box-shadow: 0 4px 12px rgba(31, 122, 99, 0.22);
+}
+
+.btn-navy-outline {
+  background-color: transparent;
+  color: #081C2D;
+  border: 1px solid #081C2D;
   font-weight: 600;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  border-radius: 0.625rem;
+  transition: all 0.15s ease-in-out;
 }
-.btn-teal:hover { background-color: #008f6f; }
-.btn-teal:active { transform: scale(0.98); }
 
-/* Progress bar for chat page (override light theme) */
-.progress-bar {
-  height: 3px;
-  background: #e2e8f0;
+.btn-navy-outline:hover {
+  background-color: #081C2D;
+  color: #FFFFFF;
 }
-.progress-fill {
-  height: 100%;
-  background: var(--primary-blue);
-  transition: width 0.5s ease;
+
+.btn-secondary-neutral {
+  background-color: #FFFFFF;
+  color: #081C2D;
+  border: 1px solid #E2E8F0;
+  font-weight: 500;
+  border-radius: 0.625rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-secondary-neutral:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+/* Accessible focus visible rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #1F7A63;
+  outline-offset: 2px;
+}
+
+/* Subtle Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F7FA;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
