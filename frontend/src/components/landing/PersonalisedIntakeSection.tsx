@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -40,32 +39,62 @@ export function PersonalisedIntakeSection() {
   const currentQuestion: IntakeQuestionDef = INTAKE_QUESTIONS[currentIndex] || INTAKE_QUESTIONS[0];
   const totalQuestions = INTAKE_QUESTIONS.length;
 
-  // Helper to safely get profile field value
-  const getProfileValue = (field: keyof ProfileIntake | string): unknown => {
-    return (profile as unknown as Record<string, unknown>)[String(field)];
-  };
-
-  const currentFieldValue = getProfileValue(currentQuestion.field);
-
-  // Asynchronously trigger profile extraction via advisor service
-  const triggerExtraction = (updatedField: Record<string, unknown>) => {
-    const updatedProfile = { ...profile, ...updatedField };
-    updateProfile(updatedProfile);
-
+  const triggerExtraction = (partial: Partial<ProfileIntake>) => {
+    updateProfile(partial);
     startTransition(async () => {
       try {
-        const res = await extractProfile(updatedProfile);
-        if (res && res.data) {
-          setExtractedData(res.data);
+        const updated = { ...profile, ...partial };
+        const result = await extractProfile(updated);
+        if (result && result.data) {
+          setExtractedData(result.data);
         }
       } catch {
-        // Graceful mock fallback already handled in client
+        // Fallback gracefully without throwing
       }
     });
   };
 
+  const getProfileValue = (field: string) => {
+    return profile[field as keyof ProfileIntake];
+  };
+
+  const currentFieldValue = getProfileValue(currentQuestion.field);
+
+  const isOptionSelected = (field: string, val: string | number) => {
+    return getProfileValue(field) === val;
+  };
+
+  const handleOptionSelect = (field: string, val: string | number) => {
+    const patch: Partial<ProfileIntake> = { [field]: val };
+    if (field === "intent") {
+      const intentDef = INTAKE_QUESTIONS[0].options?.find((o) => o.id === val || o.label === val);
+      if (intentDef) {
+        if (val === "Home Loan") {
+          patch.loan_amount = 4500000;
+          patch.tenure_years = 20;
+        } else if (val === "Vehicle Loan") {
+          patch.loan_amount = 1200000;
+          patch.tenure_years = 5;
+        } else if (val === "Business Loan") {
+          patch.loan_amount = 2500000;
+          patch.tenure_years = 4;
+        } else if (val === "Personal Loan") {
+          patch.loan_amount = 500000;
+          patch.tenure_years = 3;
+        } else if (val === "Education Loan") {
+          patch.loan_amount = 2000000;
+          patch.tenure_years = 7;
+        } else if (val === "Gold Loan") {
+          patch.loan_amount = 300000;
+          patch.tenure_years = 2;
+        }
+      }
+    }
+    triggerExtraction(patch);
+  };
+
   const handleSelectOption = (value: string) => {
-    triggerExtraction({ [currentQuestion.field]: value });
+    handleOptionSelect(currentQuestion.field, value);
   };
 
   const handleSliderChange = (num: number) => {
@@ -96,10 +125,6 @@ export function PersonalisedIntakeSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-2.5 mb-12">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F5F1] px-3 py-1 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Guided Pre-Assessment</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#081C2D]">
             Find Your Personalised Loan Options
           </h2>

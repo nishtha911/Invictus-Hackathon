@@ -43,10 +43,10 @@ export function Hero() {
               </Link>
 
               <Link
-                href="/#how-it-works"
+                href="#"
                 className="inline-flex items-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
               >
-                <span>How DhanSetu Works</span>
+                <span>AI Advisor</span>
               </Link>
             </div>
           </motion.div>

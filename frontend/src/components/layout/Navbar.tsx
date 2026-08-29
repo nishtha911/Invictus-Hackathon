@@ -33,7 +33,7 @@ const LOAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 
 export function Navbar() {
   const pathname = usePathname();
-  const { authUser, selectedCustomer } = useJourneyStore();
+  const { authUser, selectedCustomer, updateProfile, setStepIndex } = useJourneyStore();
   const mounted = useIsMounted();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loansDropdownOpen, setLoansDropdownOpen] = useState(false);
@@ -42,6 +42,18 @@ export function Navbar() {
 
   const isDashboard = pathname.startsWith("/dashboard");
   const isLoggedIn = mounted && Boolean(authUser || selectedCustomer);
+
+  const handleLoanSelect = (loan: (typeof LOAN_PURPOSES)[0]) => {
+    setLoansDropdownOpen(false);
+    setMobileMenuOpen(false);
+    setMobileLoansOpen(false);
+    updateProfile({
+      intent: loan.id,
+      loan_amount: loan.suggestedAmounts?.[1] || 2500000,
+      tenure_years: loan.id === "Home Loan" ? 20 : 5,
+    });
+    setStepIndex(0);
+  };
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -131,7 +143,7 @@ export function Navbar() {
                         <Link
                           key={loan.id}
                           href={`/advisor?intent=${loan.intentKey}`}
-                          onClick={() => setLoansDropdownOpen(false)}
+                          onClick={() => handleLoanSelect(loan)}
                           className="flex items-start gap-3 rounded-xl p-2.5 hover:bg-[#F5F7FA] transition-all group/item text-left"
                         >
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E8F5F1] text-[#1F7A63] group-hover/item:bg-[#1F7A63] group-hover/item:text-white transition-colors">
@@ -185,12 +197,9 @@ export function Navbar() {
             {/* 5. Bank Dashboard */}
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
             >
               <span>Bank Dashboard</span>
-              <span className="rounded bg-[#1F7A63]/30 px-1 py-0.2 text-[9px] font-bold text-[#4ade80]">
-                DEMO
-              </span>
               <ArrowUpRight className="h-3 w-3 text-slate-400" />
             </Link>
           </nav>
@@ -268,7 +277,7 @@ export function Navbar() {
                       <Link
                         key={loan.id}
                         href={`/advisor?intent=${loan.intentKey}`}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => handleLoanSelect(loan)}
                         className="flex items-center gap-2.5 py-1.5 text-xs text-slate-300 hover:text-white"
                       >
                         <IconComp className="h-3.5 w-3.5 text-[#4ade80]" />
@@ -305,9 +314,7 @@ export function Navbar() {
               className="flex items-center justify-between py-2 text-xs text-slate-300 bg-slate-800/80 px-3 rounded-lg border border-slate-700"
             >
               <span>Bank Dashboard</span>
-              <span className="rounded bg-[#1F7A63]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#4ade80]">
-                DEMO ↗
-              </span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />
             </Link>
 
             {/* Mobile Auth Link */}

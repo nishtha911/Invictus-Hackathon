@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Home,
@@ -14,6 +15,7 @@ import {
   CreditCard,
   Building2,
   Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { LOAN_PURPOSES, EMPLOYMENT_TYPES, CREDIT_BANDS, URGENCY_OPTIONS } from "@/lib/constants";
 import { useJourneyStore } from "@/store/journey-store";
@@ -28,6 +30,139 @@ const purposeIcons: Record<string, React.ComponentType<{ className?: string }>> 
   "Gold Loan": Coins,
   "Education Loan": GraduationCap,
 };
+
+interface NumericInputFieldProps {
+  id: string;
+  value?: number;
+  onChange: (value: number) => void;
+  prefix?: string;
+  suffix?: string;
+  placeholder?: string;
+  label?: string;
+}
+
+function NumericInputField({
+  id,
+  value,
+  onChange,
+  prefix,
+  suffix,
+  placeholder,
+  label,
+}: NumericInputFieldProps) {
+  const [showWarning, setShowWarning] = useState(false);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const triggerWarning = () => {
+    setShowWarning(true);
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+    warningTimeoutRef.current = setTimeout(() => {
+      setShowWarning(false);
+    }, 2500);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allowed control keys
+    if (
+      e.key === "Backspace" ||
+      e.key === "Delete" ||
+      e.key === "Tab" ||
+      e.key === "Escape" ||
+      e.key === "Enter" ||
+      e.key === "ArrowLeft" ||
+      e.key === "ArrowRight" ||
+      e.key === "ArrowUp" ||
+      e.key === "ArrowDown" ||
+      e.key === "Home" ||
+      e.key === "End" ||
+      e.ctrlKey ||
+      e.metaKey
+    ) {
+      return;
+    }
+
+    // Block non-numeric characters and trigger pop-up note
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+      triggerWarning();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    if (/[^0-9]/.test(raw)) {
+      triggerWarning();
+    }
+    const digitsOnly = raw.replace(/[^0-9]/g, "");
+    const parsed = digitsOnly === "" ? 0 : parseInt(digitsOnly, 10);
+    onChange(parsed);
+  };
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      {label && (
+        <label htmlFor={id} className="text-xs font-medium text-slate-600 block text-left">
+          {label}
+        </label>
+      )}
+      <div className="relative">
+        <AnimatePresence>
+          {showWarning && (
+            <motion.div
+              initial={{ opacity: 0, y: 5, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute -top-10 left-3 z-30 flex items-center gap-1.5 rounded-lg bg-[#081C2D] px-3 py-1.5 text-xs font-medium text-amber-300 shadow-xl border border-slate-700 pointer-events-none"
+            >
+              <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+              <span>Enter numerical characters</span>
+              <div className="absolute left-4 -bottom-1 h-2 w-2 rotate-45 bg-[#081C2D] border-r border-b border-slate-700" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div
+          onClick={() => inputRef.current?.focus()}
+          className="relative flex items-center rounded-xl border border-[#E2E8F0] bg-white shadow-xs focus-within:ring-2 focus-within:ring-[#1F7A63] focus-within:border-[#1F7A63] cursor-text transition-all"
+        >
+          {prefix && (
+            <span className="pl-3.5 text-sm font-bold text-slate-500 select-none">
+              {prefix}
+            </span>
+          )}
+          <input
+            ref={inputRef}
+            id={id}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={value === 0 ? "" : (value ?? "")}
+            placeholder={placeholder}
+            onKeyDown={handleKeyDown}
+            onChange={handleChange}
+            style={{
+              outline: "none",
+              boxShadow: "none",
+              border: "none",
+            }}
+            className={`w-full py-2.5 text-sm font-semibold text-[#081C2D] bg-transparent border-0 border-none outline-none ring-0 shadow-none focus:outline-none focus:ring-0 focus:border-none focus:shadow-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400 ${
+              prefix ? "pl-2" : "pl-3.5"
+            } ${suffix ? "pr-2" : "pr-3.5"}`}
+          />
+          {suffix && (
+            <span className="pr-3.5 text-xs font-semibold text-slate-500 select-none">
+              {suffix}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface AdvisorQuestionCardProps {
   onCompleteJourney: () => void;
@@ -199,14 +334,14 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
             </motion.div>
           )}
 
-          {/* 3. Monthly Income Slider & Quick Chips */}
+          {/* 3. Monthly Income Slider, Quick Chips & Manual Input */}
           {currentStepIndex === 2 && (
             <motion.div
               key="step-2"
               initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
-              className="space-y-6"
+              className="space-y-5"
             >
               {/* Display Value */}
               <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
@@ -238,7 +373,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               </div>
 
               {/* Quick Select Chips */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 {[50000, 80000, 120000, 180000, 250000, 350000].map((amt) => (
                   <button
                     key={amt}
@@ -254,17 +389,29 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   </button>
                 ))}
               </div>
+
+              {/* Manual Text Box Input */}
+              <div className="pt-2 border-t border-slate-100">
+                <NumericInputField
+                  id="income-manual-input"
+                  label="Or enter monthly income amount manually:"
+                  value={profile.income}
+                  onChange={(val) => updateProfile({ income: val })}
+                  prefix="₹"
+                  placeholder="e.g. 125000"
+                />
+              </div>
             </motion.div>
           )}
 
-          {/* 4. Loan Amount Slider */}
+          {/* 4. Loan Amount Slider, Quick Chips & Manual Input */}
           {currentStepIndex === 3 && (
             <motion.div
               key="step-3"
               initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
-              className="space-y-6"
+              className="space-y-5"
             >
               <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
@@ -293,7 +440,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 {[500000, 1500000, 3000000, 4500000, 7500000, 12000000].map((amt) => (
                   <button
                     key={amt}
@@ -309,17 +456,29 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   </button>
                 ))}
               </div>
+
+              {/* Manual Text Box Input */}
+              <div className="pt-2 border-t border-slate-100">
+                <NumericInputField
+                  id="loan-amount-manual-input"
+                  label="Or enter required loan amount manually:"
+                  value={profile.loan_amount}
+                  onChange={(val) => updateProfile({ loan_amount: val })}
+                  prefix="₹"
+                  placeholder="e.g. 5000000"
+                />
+              </div>
             </motion.div>
           )}
 
-          {/* 5. Preferred Tenure */}
+          {/* 5. Preferred Tenure Slider, Quick Chips & Manual Input */}
           {currentStepIndex === 4 && (
             <motion.div
               key="step-4"
               initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
-              className="space-y-6"
+              className="space-y-5"
             >
               <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
@@ -351,7 +510,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 {[3, 5, 10, 15, 20, 25, 30].map((yr) => (
                   <button
                     key={yr}
@@ -367,17 +526,29 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   </button>
                 ))}
               </div>
+
+              {/* Manual Text Box Input */}
+              <div className="pt-2 border-t border-slate-100">
+                <NumericInputField
+                  id="tenure-manual-input"
+                  label="Or enter tenure in years manually:"
+                  value={profile.tenure_years}
+                  onChange={(val) => updateProfile({ tenure_years: val })}
+                  suffix="Years"
+                  placeholder="e.g. 15"
+                />
+              </div>
             </motion.div>
           )}
 
-          {/* 6. Existing Obligations (EMI) */}
+          {/* 6. Existing Obligations (EMI) - 4 Options & Manual Input */}
           {currentStepIndex === 5 && (
             <motion.div
               key="step-5"
               initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
-              className="space-y-6"
+              className="space-y-5"
             >
               <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
@@ -390,8 +561,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[0, 5000, 12000, 25000, 40000].map((emi) => (
+              {/* 4 Quick Options (5th option removed as requested) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {[0, 5000, 12000, 25000].map((emi) => (
                   <button
                     key={emi}
                     type="button"
@@ -408,6 +580,18 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     <span className="text-sm font-bold text-[#081C2D] tabular-nums mt-0.5 block">{formatINR(emi)}</span>
                   </button>
                 ))}
+              </div>
+
+              {/* Manual Text Box Input for Custom EMI */}
+              <div className="pt-2 border-t border-slate-100">
+                <NumericInputField
+                  id="existing-emi-manual-input"
+                  label="Or enter custom monthly EMI obligation manually:"
+                  value={profile.existing_emi}
+                  onChange={(val) => updateProfile({ existing_emi: val })}
+                  prefix="₹"
+                  placeholder="e.g. 18500"
+                />
               </div>
             </motion.div>
           )}
