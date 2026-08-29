@@ -13,6 +13,8 @@ import { RecommendedLoan } from "@/lib/types/contracts";
 import { generateMockRecommendations } from "@/lib/mocks/recommendations";
 import { formatINR } from "@/lib/utils/currency";
 
+import { fetchLoanRecommendations } from "@/lib/api/recommendations";
+
 export default function RecommendationsPage() {
   const router = useRouter();
   const {
@@ -26,11 +28,22 @@ export default function RecommendationsPage() {
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
   const [showSessionComplete, setShowSessionComplete] = useState(false);
 
-  // If page is directly visited without advisor, load matching mock
+  // If page is directly visited without advisor, query real backend scoring engine
   useEffect(() => {
     if (!recommendations || recommendations.length === 0) {
-      const generated = generateMockRecommendations(profile);
-      setRecommendations(generated.recommended_loans);
+      fetchLoanRecommendations(profile)
+        .then((res) => {
+          if (res?.recommended_loans?.length > 0) {
+            setRecommendations(res.recommended_loans);
+          } else {
+            const generated = generateMockRecommendations(profile);
+            setRecommendations(generated.recommended_loans);
+          }
+        })
+        .catch(() => {
+          const generated = generateMockRecommendations(profile);
+          setRecommendations(generated.recommended_loans);
+        });
     }
   }, [recommendations, profile, setRecommendations]);
 

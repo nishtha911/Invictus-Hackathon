@@ -67,6 +67,8 @@ export interface ProductRecommendation {
   ai_explanation: AIExplanation;
 }
 
+export type Recommendation = ProductRecommendation;
+
 export interface RecommendationsResponse {
   recommendations: ProductRecommendation[];
 }

@@ -8,13 +8,42 @@ from sentence_transformers import SentenceTransformer
 
 from db import get_conn
 
+import logging
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
 _embedder = None
 
 def get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        try:
+            _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        except Exception as exc:
+            logger.error("Failed to initialize sentence-transformers model 'all-MiniLM-L6-v2': %s", exc)
+            raise RuntimeError(
+                f"Embedding model 'all-MiniLM-L6-v2' failed to load. Check network connection or sentence-transformers installation: {exc}"
+            ) from exc
     return _embedder
+
+
+def normalize_loan_category(category: str | None) -> str:
+    """Normalize any loan category string (e.g., 'Home Loan', 'home-loan', 'HOME_LOAN') to standard snake_case."""
+    if not category:
+        return "general"
+    cat_lower = category.strip().lower()
+    if "home" in cat_lower:
+        return "home_loan"
+    elif "personal" in cat_lower:
+        return "personal_loan"
+    elif "vehicle" in cat_lower or "car" in cat_lower or "auto" in cat_lower:
+        return "vehicle_loan"
+    elif "education" in cat_lower or "student" in cat_lower or "scholar" in cat_lower:
+        return "education_loan"
+    elif "business" in cat_lower or "msme" in cat_lower or "sme" in cat_lower:
+        return "business_loan"
+    return re.sub(r'[\s\-]+', '_', cat_lower)
 
 
 # ---------------------------------------------------------------------------
@@ -155,6 +184,8 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
     Full pipeline: extract → clean → chunk → embed → store.
     Returns summary dict.
     """
+    normalized_category = normalize_loan_category(loan_category)
+
     # 1. Extract
     pages = extract(file_bytes, filename)
 
@@ -174,7 +205,7 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO rag.documents (name, loan_category) VALUES (%s, %s) RETURNING id;",
-                (filename, loan_category)
+                (filename, normalized_category)
             )
             doc_id = cur.fetchone()["id"]
 
@@ -191,7 +222,7 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
                         chunk_id,
                         doc_id,
                         filename,
-                        loan_category,
+                        normalized_category,
                         chunk["section"],
                         chunk["page"],
                         chunk["content"],
@@ -203,6 +234,63 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
     return {
         "doc_id": doc_id,
         "doc_name": filename,
-        "loan_category": loan_category,
+        "loan_category": normalized_category,
         "chunks_stored": len(raw_chunks),
     }
+
+
+def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None) -> list[dict]:
+    """
+    Check backend/sample_docs/ on disk and auto-ingest any missing .txt docs into rag.documents / rag.chunks.
+    Safe to call on every startup (idempotent: skips docs already present in the database).
+    """
+    if sample_docs_dir is None:
+        sample_docs_dir = Path(__file__).resolve().parent / "sample_docs"
+    else:
+        sample_docs_dir = Path(sample_docs_dir)
+
+    if not sample_docs_dir.exists() or not sample_docs_dir.is_dir():
+        logger.warning(f"Sample docs directory not found at: {sample_docs_dir}")
+        return []
+
+    # Map filename prefixes / patterns to standard loan categories
+    def infer_category_from_filename(fname: str) -> str:
+        f_lower = fname.lower()
+        if "home" in f_lower:
+            return "home_loan"
+        elif "personal" in f_lower:
+            return "personal_loan"
+        elif "vehicle" in f_lower or "car" in f_lower or "auto" in f_lower:
+            return "vehicle_loan"
+        elif "education" in f_lower or "student" in f_lower or "scholar" in f_lower:
+            return "education_loan"
+        elif "business" in f_lower or "msme" in f_lower:
+            return "business_loan"
+        return "general"
+
+    ingested = []
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name FROM rag.documents;")
+                existing_doc_names = {row["name"] for row in cur.fetchall()}
+
+        for txt_file in sorted(sample_docs_dir.glob("*.txt")):
+            if txt_file.name in existing_doc_names:
+                continue
+
+            category = infer_category_from_filename(txt_file.name)
+            logger.info(f"Auto-ingesting sample document '{txt_file.name}' as '{category}'...")
+            try:
+                content_bytes = txt_file.read_bytes()
+                result = ingest_document(content_bytes, txt_file.name, category)
+                ingested.append(result)
+                logger.info(f"Successfully auto-ingested '{txt_file.name}' with {result['chunks_stored']} chunks.")
+            except Exception as e:
+                logger.error(f"Failed to auto-ingest sample doc '{txt_file.name}': {e}", exc_info=True)
+
+    except Exception as e:
+        logger.error(f"Error during auto_ingest_sample_docs: {e}", exc_info=True)
+
+    return ingested
+

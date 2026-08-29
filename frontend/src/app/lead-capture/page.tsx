@@ -37,6 +37,7 @@ type LeadFormValues = z.infer<typeof leadSchema>;
 export default function LeadCapturePage() {
   const router = useRouter();
   const {
+    sessionId,
     profile,
     selectedLoan,
     submittedLead,
@@ -88,6 +89,7 @@ export default function LeadCapturePage() {
 
     try {
       const response = await submitLead({
+        session_id: sessionId,
         name: data.name,
         email: data.email,
         phone: data.phone,

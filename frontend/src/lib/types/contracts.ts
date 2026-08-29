@@ -96,6 +96,7 @@ export interface RecommendLoansResponse {
 }
 
 export interface LeadCapturePayload {
+  session_id?: string;
   name: string;
   email: string;
   phone: string;

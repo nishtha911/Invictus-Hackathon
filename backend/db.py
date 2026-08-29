@@ -13,8 +13,18 @@ def get_conn():
     SUPABASE_DB_URL must be the direct PostgreSQL connection string, e.g.:
         postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
     """
-    url = os.environ["SUPABASE_DB_URL"]
-    return psycopg2.connect(url, cursor_factory=RealDictCursor)
+    url = os.environ.get("SUPABASE_DB_URL")
+    if not url:
+        raise RuntimeError(
+            "SUPABASE_DB_URL environment variable is not configured. "
+            "Please set SUPABASE_DB_URL in backend/.env with your Supabase PostgreSQL connection string."
+        )
+    try:
+        return psycopg2.connect(url, cursor_factory=RealDictCursor)
+    except psycopg2.OperationalError as exc:
+        raise RuntimeError(
+            f"Failed to connect to Supabase PostgreSQL at SUPABASE_DB_URL: {exc}"
+        ) from exc
 
 
 def init_db():

@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # Points to /backend/
 
 class Settings(BaseSettings):
     GROQ_API_KEY: str
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
 

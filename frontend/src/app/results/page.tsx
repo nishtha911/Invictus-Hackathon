@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Zap, Shield, Star, TrendingDown } from "lucide-react";
 import { useStore } from "@/store/app-store";
-import { Recommendation } from "@/lib/api/client";
+import { Recommendation } from "@/lib/api/chat";
 
 const STATUS_COLORS = {
   eligible: { bg: "rgba(52,211,153,0.12)", border: "rgba(52,211,153,0.3)", text: "#6ee7b7", label: "Eligible" },

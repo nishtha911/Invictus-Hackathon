@@ -3,8 +3,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Zap, CheckCircle, Paperclip } from "lucide-react";
+import {
+  sendChatMessage as sendMessage,
+  fetchRecommendations as getRecommendations,
+  UIComponent,
+  ChatMessage,
+} from "@/lib/api/chat";
 import { useStore } from "@/store/app-store";
-import { sendMessage, getRecommendations, UIComponent, ChatMessage } from "@/lib/api/client";
 import { toast } from "sonner";
 
 // ── MCQ Option Card ──────────────────────────────────────────────
@@ -239,7 +244,7 @@ export default function ChatPage() {
 
       {/* ── Messages ────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
-        {messages.map((msg, i) => (
+        {messages.map((msg: ChatMessage, i: number) => (
           <div
             key={i}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-up`}

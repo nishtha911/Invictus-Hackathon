@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { ChatMessage, Recommendation } from "@/lib/api/client";
+import { ChatMessage, Recommendation } from "@/lib/api/chat";
 
 interface AppState {
   // Session

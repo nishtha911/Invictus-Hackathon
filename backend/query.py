@@ -19,21 +19,49 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Default models for each provider
-_GROQ_DEFAULT_MODEL       = "llama-3.3-70b-versatile"
+_GROQ_DEFAULT_MODEL       = "openai/gpt-oss-120b"
 _OPENROUTER_DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
-def _call_llm(messages: list) -> str:
-    """Route to Groq or OpenRouter based on LLM_PROVIDER env var."""
+def _get_api_key_and_model():
+    """Get API key and model using app.config or environment variables."""
     provider = os.getenv("LLM_PROVIDER", "groq").lower()
+    if provider == "openrouter":
+        key = os.getenv("OPENROUTER_API_KEY")
+        if not key:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured in backend/.env")
+        model = os.getenv("OPENROUTER_MODEL", _OPENROUTER_DEFAULT_MODEL)
+        return provider, key, model
+    else:
+        # Default groq
+        try:
+            from app.config import get_settings
+            settings = get_settings()
+            key = getattr(settings, "GROQ_API_KEY", None) or os.getenv("GROQ_API_KEY")
+            model = getattr(settings, "GROQ_MODEL", None) or os.getenv("GROQ_MODEL", _GROQ_DEFAULT_MODEL)
+        except Exception:
+            key = os.getenv("GROQ_API_KEY")
+            model = os.getenv("GROQ_MODEL", _GROQ_DEFAULT_MODEL)
+
+        if not key:
+            raise RuntimeError(
+                "GROQ_API_KEY is not configured. Please set GROQ_API_KEY in backend/.env"
+            )
+        if not model or model == "default":
+            model = _GROQ_DEFAULT_MODEL
+        return "groq", key, model
+
+
+def _call_llm(messages: list) -> str:
+    """Route to Groq or OpenRouter with clear error handling."""
+    provider, key, model = _get_api_key_and_model()
 
     if provider == "openrouter":
         from openai import OpenAI
         client = OpenAI(
-            api_key=os.environ["OPENROUTER_API_KEY"],
+            api_key=key,
             base_url="https://openrouter.ai/api/v1",
         )
-        model = os.getenv("OPENROUTER_MODEL", _OPENROUTER_DEFAULT_MODEL)
         response = client.chat.completions.create(
             model=model,
             temperature=0.0,
@@ -41,8 +69,7 @@ def _call_llm(messages: list) -> str:
         )
     else:  # groq (default)
         from groq import Groq
-        client = Groq(api_key=os.environ["GROQ_API_KEY"])
-        model = os.getenv("GROQ_MODEL", _GROQ_DEFAULT_MODEL)
+        client = Groq(api_key=key)
         response = client.chat.completions.create(
             model=model,
             temperature=0.0,
@@ -61,7 +88,13 @@ _embedder = None
 def get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        try:
+            _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        except Exception as exc:
+            logger.error("Failed to load sentence-transformers model 'all-MiniLM-L6-v2': %s", exc)
+            raise RuntimeError(
+                f"Embedding model 'all-MiniLM-L6-v2' failed to load. Check sentence-transformers installation and internet connectivity: {exc}"
+            ) from exc
     return _embedder
 
 
@@ -90,23 +123,27 @@ def retrieve(query: str, top_k: int = 5, loan_category: str = None) -> List[Dict
     with get_conn() as conn:
         with conn.cursor() as cur:
             if loan_category:
+                from ingest import normalize_loan_category
+                norm_cat = normalize_loan_category(loan_category)
+                raw_pattern = f"%{loan_category}%"
+                norm_pattern = f"%{norm_cat}%"
                 cur.execute(
                     """
                     SELECT id, doc_id, doc_name, loan_category, section, page_number, content,
                            1 - (embedding <=> %s::vector) AS similarity
                     FROM rag.chunks
-                    WHERE loan_category ILIKE %s
+                    WHERE loan_category ILIKE %s OR loan_category ILIKE %s
                     ORDER BY embedding <=> %s::vector
                     LIMIT %s;
                     """,
-                    (str(q_vec), f"%{loan_category}%", str(q_vec), top_k),
+                    (str(q_vec), raw_pattern, norm_pattern, str(q_vec), top_k),
                 )
                 rows = cur.fetchall()
                 if rows:
                     return [dict(row) for row in rows]
                 # No docs for this category — fall back to unfiltered search
                 logger.warning(
-                    "No chunks for loan_category=%r; retrying without filter.", loan_category
+                    "No chunks for loan_category=%r (norm=%r); retrying without filter.", loan_category, norm_cat
                 )
                 cur.execute(_UNFILTERED, (str(q_vec), str(q_vec), top_k))
             else:
