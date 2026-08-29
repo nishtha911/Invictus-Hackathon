@@ -1,9 +1,9 @@
 [
   {
-    "session_id": "66f97159-6fe3-4fc4-9a3f-6e7be0587df7",
+    "session_id": "40785cdf-650a-46a1-978b-e78037c2c2b8",
     "user_type": "guest",
     "profile": {
-      "name": null,
+      "name": "Personal Loan",
       "intent": null,
       "monthly_income": null,
       "employment_type": null,
@@ -30,15 +30,15 @@
       "business_loan_details": null
     },
     "extraction_meta": {
-      "completeness_pct": 9,
-      "turns_taken": 1,
+      "completeness_pct": 14,
+      "turns_taken": 8,
       "model": "llama-3.3-70b-versatile",
-      "extracted_at": "2026-08-29T05:26:53.048216",
+      "extracted_at": "2026-08-29T07:18:23.215720",
       "fields_filled": [
+        "name",
         "existing_emi_obligations"
       ],
       "fields_remaining": [
-        "name",
         "intent",
         "monthly_income",
         "employment_type",
