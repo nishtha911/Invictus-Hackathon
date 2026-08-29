@@ -48,7 +48,7 @@ export default function UploadPage() {
         const fd = new FormData()
         fd.append('file', files[i].file)
         fd.append('loan_category', files[i].category)
-        const res = await fetch('http://localhost:8080/upload', { method: 'POST', body: fd })
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/upload`, { method: 'POST', body: fd })
         const data = await res.json()
         if (!res.ok) throw new Error(data.detail || 'Upload failed')
         setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'done', result: data } : f))

@@ -9,8 +9,9 @@ export default function DocsPage() {
 
   async function load() {
     setLoading(true)
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
     try {
-      const res = await fetch('http://localhost:8080/documents')
+      const res = await fetch(`${apiBase}/documents`)
       setDocs(await res.json())
     } finally {
       setLoading(false)
@@ -19,7 +20,7 @@ export default function DocsPage() {
 
   async function remove(id: number) {
     if (!confirm('Remove this document from the knowledge base?')) return
-    await fetch(`http://localhost:8080/documents/${id}`, { method: 'DELETE' })
+    await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/documents/${id}`, { method: 'DELETE' })
     load()
   }
 

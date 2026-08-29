@@ -19,10 +19,11 @@ import uuid
 from pathlib import Path
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 import io
 
 from app.config import get_settings
@@ -58,6 +59,35 @@ SESSION_STORE: dict[str, AdvisoryState] = {}
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 PROFILES_FILE = DATA_DIR / "user_profiles.json"
+KNOWLEDGE_BASE_PROFILES_FILE = DATA_DIR / "knowledge_base_profiles.json"
+
+
+def _load_knowledge_base_profiles() -> dict[str, dict[str, Any]]:
+    """Restore the small session-to-profile cache used by the RAG chat."""
+    if not KNOWLEDGE_BASE_PROFILES_FILE.exists():
+        return {}
+    try:
+        saved_profiles = json.loads(KNOWLEDGE_BASE_PROFILES_FILE.read_text(encoding="utf-8"))
+        return saved_profiles if isinstance(saved_profiles, dict) else {}
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Could not restore knowledge-base profiles: %s", exc)
+        return {}
+
+
+# This is separate from SESSION_STORE because the slider-based UI does not use
+# the advisory graph session endpoints. It survives a backend restart so the
+# policy chat can recover a user's context after a browser refresh.
+KNOWLEDGE_BASE_PROFILE_STORE: dict[str, dict[str, Any]] = _load_knowledge_base_profiles()
+
+
+def _save_knowledge_base_profiles() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    temporary_file = KNOWLEDGE_BASE_PROFILES_FILE.with_suffix(".tmp")
+    temporary_file.write_text(
+        json.dumps(KNOWLEDGE_BASE_PROFILE_STORE, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    temporary_file.replace(KNOWLEDGE_BASE_PROFILES_FILE)
 
 def _save_profiles_to_disk():
     """Save all current session profiles to a JSON file and sync to Supabase."""
@@ -108,18 +138,19 @@ def _save_profiles_to_disk():
         if db_rows:
             import httpx
             import threading
-            
-            SUPABASE_URL = "https://psclpghrsoxelzmebovj.supabase.co"
-            SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzY2xwZ2hyc294ZWx6bWVib3ZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Nzg0Mjk5OSwiZXhwIjoyMTAzNDE4OTk5fQ.bX5_2_CwIqTPPNkNUUJhGtAxaS-5PWaSkEXiez1oeWg"
-            
+            import os as _os
+
+            _supabase_url = _os.environ.get("SUPABASE_URL", "")
+            _supabase_key = _os.environ.get("SUPABASE_KEY", "")
+
             def sync_to_db():
                 try:
                     with httpx.Client() as client:
                         client.post(
-                            f"{SUPABASE_URL}/rest/v1/customer_profiles",
+                            f"{_supabase_url}/rest/v1/customer_profiles",
                             headers={
-                                "apikey": SUPABASE_KEY,
-                                "Authorization": f"Bearer {SUPABASE_KEY}",
+                                "apikey": _supabase_key,
+                                "Authorization": f"Bearer {_supabase_key}",
                                 "Content-Type": "application/json",
                                 "Prefer": "resolution=merge-duplicates"
                             },
@@ -128,7 +159,7 @@ def _save_profiles_to_disk():
                         )
                 except Exception as e:
                     logger.error(f"Supabase sync failed: {e}")
-                    
+
             threading.Thread(target=sync_to_db, daemon=True).start()
 
     except Exception as e:
@@ -683,11 +714,7 @@ async def get_dashboard():
     }
 
 
-# ── Mount Frontend Static Files ────────────────────────────────────────
-frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
-if frontend_dir.exists():
-    from fastapi.staticfiles import StaticFiles
-    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -726,19 +753,68 @@ async def upload_document(
 
     return {"status": "processed", **result}
 
-from pydantic import BaseModel
-from typing import Optional
-
 class QueryRequest(BaseModel):
-    question: str
+    question: str = Field(min_length=1, max_length=2_000)
     loan_category: Optional[str] = None
-    top_k: int = 8
+    top_k: int = Field(default=8, ge=1, le=8)
+    session_id: Optional[str] = Field(default=None, max_length=128)
+    profile: Optional[dict] = None
+
+
+class KnowledgeBaseProfileRequest(BaseModel):
+    """Context collected by the slider-based loan advisory flow."""
+
+    session_id: str = Field(min_length=1, max_length=128)
+    user_type: str = Field(default="new", max_length=32)
+    profile: dict[str, Any]
+    selected_loan: Optional[dict[str, Any]] = None
+    customer_context: Optional[dict[str, Any]] = None
+
+
+@app.put("/api/knowledge-base/profile")
+def save_knowledge_base_profile(payload: KnowledgeBaseProfileRequest):
+    """Persist the active advisory profile so the RAG chat can reuse it."""
+    KNOWLEDGE_BASE_PROFILE_STORE[payload.session_id] = {
+        "user_type": payload.user_type,
+        "profile": payload.profile,
+        "selected_loan": payload.selected_loan,
+        "customer_context": payload.customer_context,
+        "updated_at": datetime.utcnow().isoformat(),
+    }
+    try:
+        _save_knowledge_base_profiles()
+    except OSError as exc:
+        logger.exception("Unable to persist knowledge-base profile for %s", payload.session_id)
+        raise HTTPException(500, "Could not save profile context.") from exc
+    return {"status": "saved", "session_id": payload.session_id}
+
+
+@app.get("/api/knowledge-base/profile/{session_id}")
+def get_knowledge_base_profile(session_id: str):
+    """Restore a saved RAG context after a browser refresh."""
+    saved_profile = KNOWLEDGE_BASE_PROFILE_STORE.get(session_id)
+    if saved_profile is None:
+        raise HTTPException(404, "No saved knowledge-base profile for this session.")
+    return {"session_id": session_id, "context": saved_profile}
+
 
 @app.post("/query")
 def query_knowledge_base(req: QueryRequest):
-    if not req.question.strip():
-        raise HTTPException(400, "Question cannot be empty.")
-    return answer(req.question, loan_category=req.loan_category, top_k=req.top_k)
+    profile_context = req.profile
+    if req.session_id:
+        saved_context = KNOWLEDGE_BASE_PROFILE_STORE.get(req.session_id)
+        if saved_context:
+            # The server-side context is authoritative: the customer never has
+            # to type their slider values into the chat again.
+            profile_context = saved_context
+    try:
+        return answer(req.question, loan_category=req.loan_category, top_k=req.top_k, profile=profile_context)
+    except Exception:
+        logger.exception("RAG /query failed for question: %r", req.question)
+        raise HTTPException(
+            status_code=503,
+            detail="The knowledge base is temporarily unavailable. Please try again in a moment.",
+        )
 
 @app.get("/documents")
 def list_documents():
@@ -763,4 +839,9 @@ def delete_document(doc_id: int):
                 raise HTTPException(404, "Document not found.")
         conn.commit()
     return {"status": "deleted", "doc_id": doc_id}
-
+
+# ── Mount Frontend Static Files ────────────────────────────────────────
+frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+if frontend_dir.exists():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")

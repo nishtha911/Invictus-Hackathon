@@ -1,9 +1,10 @@
 import os
+from pathlib import Path
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
-load_dotenv()  # loads backend/.env automatically
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 
 def get_conn():
@@ -57,8 +58,10 @@ def init_db():
                 );
             """)
 
-            # Drop the ivfflat index if it exists. Sequential scan is highly performant
-            # and 100% accurate for our scale, avoiding pgvector index initialization bugs.
-            cur.execute("DROP INDEX IF EXISTS rag.rag_chunks_embedding_idx;")
+            # NOTE: ivfflat index creation is intentionally left out here.
+            # Sequential scan is accurate and performant at our data scale.
+            # Create the index manually if needed once sufficient rows exist:
+            # CREATE INDEX rag_chunks_embedding_idx ON rag.chunks
+            #   USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
         conn.commit()

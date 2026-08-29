@@ -1,6 +1,11 @@
 import os
 import re
+import json
+from pathlib import Path
 from typing import List, Dict, Any
+
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from sentence_transformers import SentenceTransformer
 
@@ -11,7 +16,7 @@ from db import get_conn
 # ---------------------------------------------------------------------------
 
 # Default models for each provider
-_GROQ_DEFAULT_MODEL       = "openai/gpt-oss-20b"
+_GROQ_DEFAULT_MODEL       = "llama-3.3-70b-versatile"
 _OPENROUTER_DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
@@ -130,7 +135,7 @@ Rules you MUST follow:
 6. Ensure all numbers, interest rates, and loan amounts match the retrieved excerpts exactly. Do not assume or extrapolate details not in the excerpts."""
 
 
-def answer(query: str, loan_category: str = None, top_k: int = 5) -> Dict[str, Any]:
+def answer(query: str, loan_category: str = None, top_k: int = 5, profile: dict = None) -> Dict[str, Any]:
     """
     Retrieve relevant chunks and generate a grounded answer.
     Returns answer text + source metadata + number verification.
@@ -155,7 +160,11 @@ def answer(query: str, loan_category: str = None, top_k: int = 5) -> Dict[str, A
         )
     context = "\n\n---\n\n".join(context_parts)
 
-    user_message = f"Retrieved policy excerpts:\n\n{context}\n\nQuestion: {query}"
+    profile_context = ""
+    if profile:
+        profile_context = f"User Profile / Context:\n{json.dumps(profile, indent=2)}\n\n(Use this context to personalize your answer if applicable.)\n\n"
+
+    user_message = f"{profile_context}Retrieved policy excerpts:\n\n{context}\n\nQuestion: {query}"
 
     answer_text = _call_llm([
         {"role": "system", "content": SYSTEM_PROMPT},
