@@ -57,7 +57,7 @@ const dummyStorage: StateStorage = {
 export const useJourneyStore = create<JourneyState>()(
   persist(
     (set) => ({
-      sessionId: `SESSION-${Date.now()}`,
+      sessionId: "SESSION-DEFAULT",
       userType: null,
       selectedCustomer: null,
       profile: { ...initialProfile },
@@ -134,7 +134,7 @@ export const useJourneyStore = create<JourneyState>()(
 
       resetDemo: () =>
         set({
-          sessionId: `SESSION-${Date.now()}`,
+          sessionId: "SESSION-DEFAULT",
           userType: null,
           selectedCustomer: null,
           profile: { ...initialProfile },

@@ -116,6 +116,7 @@ export default function LoginPage() {
                   src="/images/dhansetu-family-loans.jpg"
                   alt="DhanSetu Banking"
                   fill
+                  sizes="48px"
                   className="object-cover"
                 />
               </div>
