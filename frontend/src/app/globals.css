@@ -2,9 +2,9 @@
 
 @layer base {
   :root {
-    /* DHANSETU Master Palette */
-    --background: #F5F7FA;
-    --foreground: #081C2D;
+    /* Cognis Bank Master Palette - Crisp Corporate Light Banking Theme */
+    --background: #F8FAFC;
+    --foreground: #0F172A;
 
     --navy: #081C2D;
     --navy-hover: #0D263D;
@@ -13,16 +13,16 @@
     --emerald-hover: #186350;
     --emerald-light: #E8F5F1;
     --emerald-tint: #F0FDF9;
-    --soft-white: #F5F7FA;
-    --cool-gray: #9AA3A8;
+    --soft-white: #F8FAFC;
+    --cool-gray: #64748B;
     --gray-border: #E2E8F0;
     --gray-subtle: #F1F5F9;
 
     --card: #FFFFFF;
-    --card-foreground: #081C2D;
+    --card-foreground: #0F172A;
 
     --popover: #FFFFFF;
-    --popover-foreground: #081C2D;
+    --popover-foreground: #0F172A;
 
     --primary: #1F7A63;
     --primary-foreground: #FFFFFF;
@@ -43,10 +43,10 @@
     --input: #E2E8F0;
     --ring: #1F7A63;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
     /* Banking Surface Tokens */
-    --surface-page: #F5F7FA;
+    --surface-page: #F8FAFC;
     --surface-white: #FFFFFF;
     --surface-card: #FFFFFF;
     --surface-navy: #081C2D;
@@ -78,33 +78,42 @@ section[id] {
   scroll-margin-top: 5.5rem;
 }
 
-/* Clean Banking Card & Panels */
+/* Sharp Professional Banking Cards — Zero Glassmorphism */
 .bank-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 0.875rem;
-  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04), 0 1px 2px -1px rgba(8, 28, 45, 0.04);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06);
   transition: all 0.2s ease-in-out;
 }
 
 .bank-card-interactive {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 0.875rem;
-  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bank-card-interactive:hover {
   border-color: #1F7A63;
-  box-shadow: 0 8px 20px -4px rgba(8, 28, 45, 0.07), 0 4px 8px -3px rgba(8, 28, 45, 0.04);
-  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.10);
+  transform: translateY(-1px);
 }
 
 .bank-card-selected {
-  background-color: #F0FDF9;
-  border: 1.5px solid #1F7A63;
-  border-radius: 0.875rem;
+  background-color: #F0FDF4;
+  border: 2px solid #1F7A63;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(31, 122, 99, 0.10);
+}
+
+/* Inset Panel Utility */
+.neo-inset {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  box-shadow: inset 0 2px 4px 0 rgba(15, 23, 42, 0.04);
+  border-radius: 4px;
 }
 
 /* Standardized Button Utility Classes */
@@ -112,8 +121,9 @@ section[id] {
   background-color: #1F7A63;
   color: #FFFFFF;
   font-weight: 600;
-  border-radius: 0.625rem;
-  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .btn-emerald:hover {
@@ -122,31 +132,37 @@ section[id] {
 }
 
 .btn-navy-outline {
-  background-color: transparent;
-  color: #081C2D;
-  border: 1px solid #081C2D;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  border: 1.5px solid #CBD5E1;
   font-weight: 600;
-  border-radius: 0.625rem;
+  border-radius: 4px;
   transition: all 0.15s ease-in-out;
 }
 
 .btn-navy-outline:hover {
-  background-color: #081C2D;
-  color: #FFFFFF;
+  border-color: #0F172A;
+  background-color: #F8FAFC;
 }
 
 .btn-secondary-neutral {
   background-color: #FFFFFF;
-  color: #081C2D;
+  color: #0F172A;
   border: 1px solid #E2E8F0;
   font-weight: 500;
-  border-radius: 0.625rem;
+  border-radius: 4px;
   transition: all 0.15s ease-in-out;
 }
 
 .btn-secondary-neutral:hover {
   background-color: #F8FAFC;
   border-color: #CBD5E1;
+}
+
+/* Global sharp corner override for common Tailwind patterns */
+/* Remove excessive rounding from all standard elements */
+*, *::before, *::after {
+  --tw-radius: 0px;
 }
 
 /* Accessible focus visible rings */
@@ -156,20 +172,5 @@ input:focus-visible,
 select:focus-visible {
   outline: 2px solid #1F7A63;
   outline-offset: 2px;
-}
-
-/* Subtle Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #F5F7FA;
-}
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  border-radius: 2px;
 }

@@ -12,7 +12,7 @@ export function Footer() {
           {/* Column 1: Cognis Bank Brand */}
           <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer w-fit">
-              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white p-1 flex items-center justify-center border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
+              <div className="relative h-9 w-9 shrink-0 overflow-hidden bg-white p-1 flex items-center justify-center border border-white/20 shadow-xs group-hover:opacity-90 transition-opacity">
                 <img
                   src="/images/logo.png"
                   alt="Cognis Bank Logo"
@@ -96,7 +96,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/rag" className="hover:text-emerald-400 transition-colors">
-                  Policy Knowledge Base & RAG
+                  Policy Desk
                 </Link>
               </li>
               <li>
