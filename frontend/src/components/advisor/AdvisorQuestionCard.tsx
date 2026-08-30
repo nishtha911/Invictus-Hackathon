@@ -14,7 +14,6 @@ import {
   CreditCard,
   Building2,
   Calendar,
-  Sparkles,
   Award,
   Globe,
   Scale,

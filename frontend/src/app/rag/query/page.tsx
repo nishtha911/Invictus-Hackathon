@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Bot, User, BookOpen, ChevronDown, ChevronUp, Sparkles, Loader2 } from 'lucide-react'
+import { Send, Bot, User, BookOpen, ChevronDown, ChevronUp, HelpCircle, Loader2 } from 'lucide-react'
 import { useJourneyStore } from '@/store/journey-store'
 import { getKnowledgeBaseContext, KnowledgeBaseContext, queryKnowledgeBase } from '@/knowledge-base-api'
 
@@ -353,11 +353,11 @@ export default function QueryPage() {
           {/* Header */}
           <div className="px-5 py-3.5 bg-gray-50 border-b border-gray-100 shrink-0 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 min-w-0">
-              <Sparkles className="text-[#1F7A63] shrink-0" size={18} />
+              <BookOpen className="text-[#1F7A63] shrink-0" size={18} />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-bold text-gray-800">Policy Knowledge Base</span>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#1F7A63] border border-emerald-200">
+                  <span className="text-[11px] font-semibold text-slate-500">
                     Official Lending Policy
                   </span>
                 </div>
@@ -545,7 +545,7 @@ export default function QueryPage() {
           {/* Standalone Suggested Inquiries Card */}
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#081C2D]">
-              <Sparkles size={14} className="text-[#1F7A63]" />
+              <HelpCircle size={14} className="text-[#1F7A63]" />
               <span>Suggested Inquiries</span>
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">

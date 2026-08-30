@@ -129,9 +129,9 @@ export default function LeadCapturePage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E8F5F1] text-[#1F7A63]">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F5F1] px-3 py-0.5 text-xs font-mono font-bold text-[#1F7A63] border border-emerald-100">
-                REF: {submittedLead.lead_id}
-              </span>
+              <p className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wide">
+                Application Ref: {submittedLead.lead_id}
+              </p>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
                 Request Submitted
               </h1>

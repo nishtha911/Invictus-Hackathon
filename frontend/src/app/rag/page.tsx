@@ -20,16 +20,11 @@ export default function RagMainPage() {
       {/* Premium Bank Header Banner */}
       <div className="bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
+            <div>
               <h1 className="text-2xl font-bold text-[#0F172A] tracking-tight">
                 Lending Policy Guidelines & FAQ Desk
               </h1>
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                Official Bank Rules
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Authoritative bank lending circulars, eligibility thresholds, and interest calculation formulas.
             </p>
           </div>

@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   ArrowRight,
   ShieldCheck,
-  Sparkles,
   Percent,
   Calendar,
 } from "lucide-react";
@@ -209,10 +208,6 @@ export default function LoanDetailPage({
         <div className="bank-card p-6 sm:p-10 bg-white border border-[#E2E8F0] shadow-sm relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] px-3 py-1 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Verified Lending Policy</span>
-              </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold text-[#081C2D] tracking-tight">
                 {loanData.title}
               </h1>

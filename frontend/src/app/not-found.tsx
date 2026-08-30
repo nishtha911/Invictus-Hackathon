@@ -10,9 +10,9 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-mono font-bold text-[#1F7A63] bg-[#E8F5F1] px-3 py-1 rounded-full border border-emerald-100">
+          <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F7A63]">
             ERROR 404
-          </span>
+          </p>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
             Looks like this path doesn&apos;t lead to a loan solution.
           </h1>

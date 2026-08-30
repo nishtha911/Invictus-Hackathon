@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   CreditCard,
   Building,
-  Sparkles,
+  BookOpen,
   Calendar,
 } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
@@ -232,8 +232,8 @@ export default function ProfilePage() {
                 href="/rag"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-[#081C2D] transition-all shadow-2xs"
               >
-                <Sparkles className="h-3.5 w-3.5 text-[#1F7A63]" />
-                <span>Ask Policy AI</span>
+                <BookOpen className="h-3.5 w-3.5 text-[#1F7A63]" />
+                <span>Policy Knowledge Base</span>
               </Link>
 
               <Link

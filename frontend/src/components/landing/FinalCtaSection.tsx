@@ -15,9 +15,9 @@ export function FinalCtaSection() {
           transition={{ duration: 0.4 }}
           className="text-center max-w-3xl mx-auto space-y-6"
         >
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#1F7A63]/20 px-3.5 py-1 text-xs font-semibold text-[#4ade80] border border-[#1F7A63]/30">
+          <p className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-[#4ade80]">
             FAST, CLEAR & POLICY-GROUNDED
-          </span>
+          </p>
 
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
             Ready to Find the Right Loan for Your Needs?
