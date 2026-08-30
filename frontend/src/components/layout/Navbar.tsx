@@ -180,7 +180,7 @@ export function Navbar() {
 
             {/* 5. Knowledge Base (RAG) */}
             <Link
-              href="/rag/query"
+              href="/rag"
               className="hover:text-white text-slate-300 transition-colors"
             >
               Knowledge Base
@@ -313,7 +313,7 @@ export function Navbar() {
             </Link>
 
             <Link
-              href="/rag/query"
+              href="/rag"
               onClick={() => setMobileMenuOpen(false)}
               className="block py-1 text-slate-200 hover:text-white"
             >
