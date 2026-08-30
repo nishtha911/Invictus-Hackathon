@@ -295,7 +295,11 @@ export default function QueryPage() {
       const data = await queryKnowledgeBase(
         userQuestion,
         sessionId,
-        category === 'All' ? activeContext.profile.intent || null : category,
+        // Only restrict retrieval to a specific category when the user has
+        // explicitly picked one from the dropdown. When "All" is selected,
+        // always search the full knowledge base — the profile is still sent as
+        // LLM context so answers can be personalised regardless of the topic.
+        category === 'All' ? null : category,
         activeContext,
       )
 
@@ -354,7 +358,7 @@ export default function QueryPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-bold text-gray-800">Policy Knowledge Base</span>
                   <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#1F7A63] border border-emerald-200">
-                    Live RAG Integration
+                    Official Lending Policy
                   </span>
                 </div>
                 {activeContext.profile.intent && (
