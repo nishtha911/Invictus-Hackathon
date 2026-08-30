@@ -22,6 +22,8 @@ function AdvisorContent() {
     selectedCustomer,
     updateProfile,
     setRecommendations,
+    setPersonalizedOffer,
+    setAdvisorNote,
     isExtracting,
     extractionStatusMessage,
   } = useJourneyStore();
@@ -50,6 +52,8 @@ function AdvisorContent() {
     try {
       const response = await fetchLoanRecommendations(profile);
       setRecommendations(response.recommended_loans);
+      setPersonalizedOffer(response.personalized_offer ?? null);
+      setAdvisorNote(response.advisor_note ?? null);
 
       // Save only after fresh recommendations are available. Persisting before
       // this point could carry an old loan selection into a new advisory run.

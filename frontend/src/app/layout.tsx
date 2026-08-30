@@ -32,9 +32,7 @@ export const metadata: Metadata = {
     "Digital Lending Advisor",
   ],
   authors: [{ name: "Cognis Bank Engineering Team" }],
-  icons: {
-    icon: "/images/logo.png",
-  },
+  // Favicon is served from src/app/icon.png (Next app-icon convention).
 };
 
 export default function RootLayout({

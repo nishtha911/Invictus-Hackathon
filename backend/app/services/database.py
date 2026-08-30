@@ -150,10 +150,10 @@ STATIC_LOAN_PRODUCTS = [
 INTENT_TO_CATEGORY = {
     "home_loan": "home_loan", "personal_loan": "personal_loan",
     "vehicle_loan": "vehicle_loan", "education_loan": "education_loan",
-    "business_loan": "business_loan",
+    "business_loan": "business_loan", "gold_loan": "gold_loan",
     "Home Loan": "home_loan", "Personal Loan": "personal_loan",
     "Vehicle Loan": "vehicle_loan", "Education Loan": "education_loan",
-    "Business Loan": "business_loan",
+    "Business Loan": "business_loan", "Gold Loan": "gold_loan",
 }
 
 

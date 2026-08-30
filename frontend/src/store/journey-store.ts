@@ -4,6 +4,7 @@ import {
   DemoCustomer,
   ExtractedProfileData,
   LeadResponse,
+  PersonalizedOffer,
   ProfileIntake,
   RecommendedLoan,
   UserType,
@@ -28,6 +29,8 @@ export interface JourneyState {
   profile: ProfileIntake;
   extractedData: ExtractedProfileData | null;
   recommendations: RecommendedLoan[];
+  personalizedOffer: PersonalizedOffer | null;
+  advisorNote: string | null;
   selectedLoan: RecommendedLoan | null;
   submittedLead: LeadResponse | null;
   answers: Record<string, string | number | boolean | undefined>;
@@ -43,6 +46,8 @@ export interface JourneyState {
   updateProfile: (partial: Partial<ProfileIntake>) => void;
   setExtractedData: (data: ExtractedProfileData | null) => void;
   setRecommendations: (loans: RecommendedLoan[]) => void;
+  setPersonalizedOffer: (offer: PersonalizedOffer | null) => void;
+  setAdvisorNote: (note: string | null) => void;
   setSelectedLoan: (loan: RecommendedLoan | null) => void;
   setSubmittedLead: (lead: LeadResponse | null) => void;
   setAnswer: (key: string, value: string | number | boolean) => void;
@@ -61,6 +66,9 @@ const initialProfile: ProfileIntake = {
   existing_emi: 0,
   credit_band: "Excellent (780+)",
   urgency: "Immediate (Within 7 Days)",
+  age: 32,
+  preferred_emi: "balanced",
+  interest_type: "not_sure",
 };
 
 const dummyStorage: StateStorage = {
@@ -69,10 +77,17 @@ const dummyStorage: StateStorage = {
   removeItem: () => {},
 };
 
+const generateSessionId = (): string => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export const useJourneyStore = create<JourneyState>()(
   persist(
     (set) => ({
-      sessionId: "SESSION-DEFAULT",
+      sessionId: generateSessionId(),
       authUser: null,
       userType: null,
       selectedCustomer: null,
@@ -80,6 +95,8 @@ export const useJourneyStore = create<JourneyState>()(
       profile: { ...initialProfile },
       extractedData: null,
       recommendations: [],
+      personalizedOffer: null,
+      advisorNote: null,
       selectedLoan: null,
       submittedLead: null,
       answers: {},
@@ -160,6 +177,8 @@ export const useJourneyStore = create<JourneyState>()(
                 credit_band: customer.credit_band,
                 tenure_years: 20,
                 urgency: "Immediate (Within 7 Days)",
+                preferred_emi: "balanced",
+                interest_type: "not_sure",
               },
               answers: existingAnswers,
               currentStepIndex: 0,
@@ -189,6 +208,8 @@ export const useJourneyStore = create<JourneyState>()(
 
       setExtractedData: (data) => set({ extractedData: data }),
       setRecommendations: (loans) => set({ recommendations: loans }),
+      setPersonalizedOffer: (offer) => set({ personalizedOffer: offer }),
+      setAdvisorNote: (note) => set({ advisorNote: note }),
       setSelectedLoan: (loan) => set({ selectedLoan: loan }),
       setSubmittedLead: (lead) => set({ submittedLead: lead }),
       setAnswer: (key, value) =>
@@ -201,7 +222,7 @@ export const useJourneyStore = create<JourneyState>()(
 
       resetDemo: () =>
         set({
-          sessionId: "SESSION-DEFAULT",
+          sessionId: generateSessionId(),
           authUser: null,
           userType: null,
           selectedCustomer: null,
@@ -209,6 +230,8 @@ export const useJourneyStore = create<JourneyState>()(
           profile: { ...initialProfile },
           extractedData: null,
           recommendations: [],
+          personalizedOffer: null,
+          advisorNote: null,
           selectedLoan: null,
           submittedLead: null,
           answers: {},

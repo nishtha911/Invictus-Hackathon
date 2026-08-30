@@ -17,8 +17,9 @@ import {
   Award,
   Globe,
   Scale,
+  Percent,
 } from "lucide-react";
-import { LOAN_PURPOSES, EMPLOYMENT_TYPES, CREDIT_BANDS, URGENCY_OPTIONS } from "@/lib/constants";
+import { LOAN_PURPOSES, EMPLOYMENT_TYPES, CREDIT_BANDS, URGENCY_OPTIONS, EMI_PRIORITY_OPTIONS, INTEREST_TYPE_OPTIONS } from "@/lib/constants";
 import { useJourneyStore } from "@/store/journey-store";
 import { formatINR } from "@/lib/utils/currency";
 import { getDynamicSteps, DynamicJourneyStep } from "./AdvisorJourneyRail";
@@ -144,8 +145,12 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           {currentStep.id === "turnover_details" && "What is your approximate annual business turnover?"}
           {currentStep.id === "loan_amount" && "How much capital would you like to borrow?"}
           {currentStep.id === "tenure" && "What is your target repayment duration?"}
+          {currentStep.id === "emi_priority" && "What matters most in your repayment plan?"}
+          {currentStep.id === "rate_type" && "Do you prefer a fixed or floating interest rate?"}
           {currentStep.id === "existing_emi" && "Do you have ongoing monthly EMI obligations?"}
           {currentStep.id === "credit" && "How would you describe your credit score profile?"}
+          {currentStep.id === "co_applicant" && "Will you add a co-applicant to this loan?"}
+          {currentStep.id === "age" && "What is your current age?"}
           {currentStep.id === "urgency" && "When do you require the loan disbursement?"}
         </h2>
 
@@ -696,6 +701,88 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
             </motion.div>
           )}
 
+          {/* Repayment Priority (preferred EMI) */}
+          {currentStep.id === "emi_priority" && (
+            <motion.div
+              key="emi-priority-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              {EMI_PRIORITY_OPTIONS.map((opt) => {
+                const isSelected = profile.preferred_emi === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => updateProfile({ preferred_emi: opt.id })}
+                    className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
+                      isSelected
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <div
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected ? "bg-[#1F7A63] text-white" : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
+                      }`}
+                    >
+                      <Scale className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[#132443] text-sm">{opt.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{opt.subtext}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
+          {/* Interest Rate Type */}
+          {currentStep.id === "rate_type" && (
+            <motion.div
+              key="rate-type-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              {INTEREST_TYPE_OPTIONS.map((opt) => {
+                const isSelected = profile.interest_type === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => updateProfile({ interest_type: opt.id })}
+                    className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
+                      isSelected
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <div
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected ? "bg-[#1F7A63] text-white" : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
+                      }`}
+                    >
+                      <Percent className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[#132443] text-sm">{opt.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{opt.subtext}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
           {/* Existing EMI */}
           {currentStep.id === "existing_emi" && (
             <motion.div
@@ -801,6 +888,104 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   </div>
                 );
               })}
+            </motion.div>
+          )}
+
+          {/* Co-Applicant (value-adaptive step) */}
+          {currentStep.id === "co_applicant" && (
+            <motion.div
+              key="co-applicant-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              {[
+                { id: true, label: "Yes, add a co-applicant", desc: "Spouse, parent or sibling — combines incomes for a higher limit" },
+                { id: false, label: "No, individual application", desc: "Assessed on your income alone" },
+              ].map((opt) => {
+                const isSelected = profile.has_co_applicant === opt.id;
+                return (
+                  <div
+                    key={String(opt.id)}
+                    onClick={() => updateProfile({ has_co_applicant: opt.id })}
+                    className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
+                      isSelected
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <div
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected ? "bg-[#1F7A63] text-white" : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
+                      }`}
+                    >
+                      <User className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[#132443] text-sm">{opt.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
+          {/* Age (drives max tenure / loan-maturity cap) */}
+          {currentStep.id === "age" && (
+            <motion.div
+              key="age-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="space-y-6"
+            >
+              <div className="text-center rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5">
+                <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
+                  Applicant Age
+                </span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
+                  {profile.age || 32} <span className="text-base font-normal text-slate-500">years</span>
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min={21}
+                  max={70}
+                  step={1}
+                  value={profile.age || 32}
+                  onChange={(e) => updateProfile({ age: parseInt(e.target.value, 10) })}
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                />
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                  <span>21</span>
+                  <span>45</span>
+                  <span>70</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                {[25, 30, 35, 40, 50, 60].map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => updateProfile({ age: a })}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
+                      profile.age === a
+                        ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
+                        : "border-[#E2E8F0] bg-white text-[#132443] hover:border-slate-300"
+                    }`}
+                  >
+                    {a} yrs
+                  </button>
+                ))}
+              </div>
             </motion.div>
           )}
 

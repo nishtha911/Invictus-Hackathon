@@ -30,6 +30,8 @@ def _build_retrieval_query(profile: Dict[str, Any]) -> str:
     income = p.get("monthly_income") or p.get("income") or ""
     amount = p.get("requested_loan_amount") or p.get("loan_amount") or ""
     emp = p.get("employment_type") or ""
+    emi_pref = p.get("preferred_emi") or ""
+    rate_pref = p.get("interest_type") or ""
     parts = [f"loan type: {intent}"]
     if amount:
         parts.append(f"requested amount: {amount}")
@@ -37,6 +39,10 @@ def _build_retrieval_query(profile: Dict[str, Any]) -> str:
         parts.append(f"monthly income: {income}")
     if emp:
         parts.append(f"employment type: {emp}")
+    if emi_pref:
+        parts.append(f"repayment priority: {str(emi_pref).replace('_', ' ')}")
+    if rate_pref:
+        parts.append(f"interest rate preference: {str(rate_pref).replace('_', ' ')}")
     return ", ".join(parts)
 
 

@@ -38,6 +38,11 @@ export interface ProfileIntake {
   existing_emi?: number;
   credit_band?: string;
   urgency?: string;
+  age?: number;
+  has_co_applicant?: boolean;
+  // Repayment preferences
+  preferred_emi?: string;
+  interest_type?: string;
   customer_name?: string;
   customer_id?: string;
   // Loan-specific details
@@ -88,9 +93,45 @@ export interface RecommendedLoan {
   tag?: string; // "BEST MATCH" | "POPULAR" | "FASTEST DISBURSAL"
 }
 
+export interface OfferTerms {
+  interest_rate: number;
+  tenure_months: number;
+  processing_fee_pct: number;
+  estimated_emi: number;
+}
+
+export interface OfferAdjustment {
+  parameter: string;
+  base: string;
+  personalized: string;
+  reason: string;
+  policy_limit: string;
+}
+
+export interface PersonalizedOffer {
+  is_personalized: boolean;
+  within_policy: boolean;
+  base_scheme: string;
+  scheme_name: string;
+  bank: string;
+  category: string;
+  principal: number;
+  base_terms: OfferTerms;
+  personalized_terms: OfferTerms;
+  adjustments: OfferAdjustment[];
+  eligibility_status: "Eligible" | "Conditionally Eligible" | "Review Required";
+  foir_pct: number | null;
+  monthly_emi_difference_vs_base: number;
+  lifetime_cost_difference_vs_base: number;
+  policy_basis: string;
+  rationale: string;
+}
+
 export interface RecommendLoansResponse {
   status: string;
   recommended_loans: RecommendedLoan[];
+  personalized_offer?: PersonalizedOffer | null;
+  advisor_note?: string | null;
   profile_summary: {
     intent: string;
     income: number;

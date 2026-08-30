@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 class ProfileData(BaseModel):
-    intent: Literal["home_loan", "personal_loan", "vehicle_loan", "education_loan", "business_loan"]
+    intent: Literal["home_loan", "personal_loan", "vehicle_loan", "education_loan", "business_loan", "gold_loan"]
     monthly_income: float = Field(..., description="Monthly net income in INR")
     employment_type: Literal["salaried", "self_employed", "business_owner"]
     requested_loan_amount: float = Field(..., description="Loan amount requested in INR")
@@ -13,6 +13,9 @@ class ProfileData(BaseModel):
     existing_emi_obligations: float = Field(default=0.0, description="Monthly existing EMIs in INR")
     credit_score_band: Literal["unknown", "poor", "fair", "good", "excellent"] = "unknown"
     urgency: Literal["immediate", "within_3_months", "exploring"] = "exploring"
+    # Borrower repayment preferences (collected in the advisory intake)
+    preferred_emi: Optional[Literal["lowest", "balanced", "fast_repayment", "flexible"]] = None
+    interest_type: Optional[Literal["fixed", "floating", "not_sure"]] = None
     home_loan_details: Optional[Dict[str, Any]] = None
     vehicle_loan_details: Optional[Dict[str, Any]] = None
     business_loan_details: Optional[Dict[str, Any]] = None

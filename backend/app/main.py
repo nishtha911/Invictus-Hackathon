@@ -566,6 +566,10 @@ class RecommendLoansRequest(BaseModel):
     existing_emi: Optional[float] = 0.0
     credit_band: Optional[str] = "good"
     urgency: Optional[str] = "exploring"
+    preferred_emi: Optional[str] = None
+    interest_type: Optional[str] = None
+    age: Optional[int] = None
+    has_co_applicant: Optional[bool] = None
     customer_name: Optional[str] = None
     session_id: Optional[str] = None
 
@@ -588,7 +592,7 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
     tenure_months = tenure_years * 12
     intent = req.intent or "Home Loan"
     category_key = INTENT_TO_CATEGORY.get(intent, intent.lower().replace(" ", "_"))
-    if category_key not in ("home_loan", "personal_loan", "vehicle_loan", "education_loan", "business_loan"):
+    if category_key not in ("home_loan", "personal_loan", "vehicle_loan", "education_loan", "business_loan", "gold_loan"):
         category_key = "home_loan"
 
     emp_raw = (req.employment_type or "salaried").lower().replace(" ", "_").replace("-", "_")
@@ -621,6 +625,28 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
 
     user_type_val = "existing_customer" if req.user_type in ("existing", "existing_customer") else "guest"
 
+    emi_pref_raw = (req.preferred_emi or "").lower()
+    if "lowest" in emi_pref_raw or "low emi" in emi_pref_raw:
+        preferred_emi_val = "lowest"
+    elif "fast" in emi_pref_raw or "least" in emi_pref_raw or "interest" in emi_pref_raw:
+        preferred_emi_val = "fast_repayment"
+    elif "flex" in emi_pref_raw:
+        preferred_emi_val = "flexible"
+    elif "balanc" in emi_pref_raw:
+        preferred_emi_val = "balanced"
+    else:
+        preferred_emi_val = None
+
+    rate_pref_raw = (req.interest_type or "").lower()
+    if "fix" in rate_pref_raw:
+        interest_type_val = "fixed"
+    elif "float" in rate_pref_raw:
+        interest_type_val = "floating"
+    elif rate_pref_raw:
+        interest_type_val = "not_sure"
+    else:
+        interest_type_val = None
+
     payload = ExtractedProfilePayload(
         session_id=req.session_id or str(uuid.uuid4()),
         user_type=user_type_val,
@@ -633,6 +659,8 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
             existing_emi_obligations=float(req.existing_emi or 0.0),
             credit_score_band=credit_band,
             urgency=urgency_val,
+            preferred_emi=preferred_emi_val,
+            interest_type=interest_type_val,
         ),
         extraction_meta=ExtractionMeta(
             completeness_pct=100,
@@ -671,10 +699,29 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
                 except Exception as e:
                     logger.warning("Failed to transform RAG recommendation %s: %s", rag_rec.get("scheme_name"), e)
                     continue
-        
+
+        # Synthesise ONE personalised offer from the best match, bounded by bank policy.
+        personalized_offer = None
+        advisor_note_text = None
+        if transformed_loans:
+            try:
+                from app.services.personalized_offer import build_personalized_offer, advisor_note
+                offer_profile = payload.dict().get("profile", {})
+                offer_profile["age"] = req.age
+                offer_profile["has_co_applicant"] = req.has_co_applicant
+                if req.customer_name:
+                    offer_profile["name"] = req.customer_name
+                offer_ctx = {"user_type": user_type_val, "profile": offer_profile}
+                personalized_offer = build_personalized_offer(offer_ctx, transformed_loans[0])
+                advisor_note_text = advisor_note(offer_ctx, transformed_loans[0], personalized_offer)
+            except Exception as e:
+                logger.warning("Personalised offer step skipped: %s", e)
+
         return {
             "status": "success",
             "recommended_loans": transformed_loans,
+            "personalized_offer": personalized_offer,
+            "advisor_note": advisor_note_text,
             "profile_summary": {
                 "intent": intent,
                 "income": income,
@@ -752,7 +799,28 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
             except Exception as eval_err:
                 logger.warning("Failed to evaluate fallback product %s: %s", prod.get("product_name"), eval_err)
 
-        return {"status": "success", "recommended_loans": recommended_loans}
+        personalized_offer = None
+        advisor_note_text = None
+        if recommended_loans:
+            try:
+                from app.services.personalized_offer import build_personalized_offer, advisor_note
+                offer_profile = payload.dict().get("profile", {})
+                offer_profile["age"] = req.age
+                offer_profile["has_co_applicant"] = req.has_co_applicant
+                if req.customer_name:
+                    offer_profile["name"] = req.customer_name
+                offer_ctx = {"user_type": user_type_val, "profile": offer_profile}
+                personalized_offer = build_personalized_offer(offer_ctx, recommended_loans[0])
+                advisor_note_text = advisor_note(offer_ctx, recommended_loans[0], personalized_offer)
+            except Exception as offer_err:
+                logger.warning("Personalised offer step skipped (fallback path): %s", offer_err)
+
+        return {
+            "status": "success",
+            "recommended_loans": recommended_loans,
+            "personalized_offer": personalized_offer,
+            "advisor_note": advisor_note_text,
+        }
 
 
 @app.get("/api/recommendations/{session_id}")
@@ -779,6 +847,8 @@ async def get_recommendations(session_id: str):
         existing_emi=profile.existing_emi_obligations or 0.0,
         credit_band=profile.credit_score_band or "good",
         urgency=profile.urgency or "exploring",
+        preferred_emi=getattr(getattr(profile, "preferred_emi", None), "value", getattr(profile, "preferred_emi", None)),
+        interest_type=getattr(getattr(profile, "interest_type", None), "value", getattr(profile, "interest_type", None)),
     )
     return await recommend_loans_endpoint(req)
 

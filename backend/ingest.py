@@ -35,6 +35,8 @@ def normalize_loan_category(category: str | None) -> str:
         return "education_loan"
     elif "business" in cat_lower or "msme" in cat_lower or "sme" in cat_lower:
         return "business_loan"
+    elif "gold" in cat_lower:
+        return "gold_loan"
     return re.sub(r'[\s\-]+', '_', cat_lower)
 
 
@@ -307,6 +309,8 @@ def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None, force: bo
             return "education_loan"
         elif "business" in f_lower or "msme" in f_lower:
             return "business_loan"
+        elif "gold" in f_lower:
+            return "gold_loan"
         return "general"
 
     ingested = []

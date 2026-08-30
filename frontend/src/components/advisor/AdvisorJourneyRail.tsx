@@ -113,6 +113,18 @@ export function getDynamicSteps(profile: ProfileIntake): DynamicJourneyStep[] {
       description: "Target loan duration in years",
     },
     {
+      id: "emi_priority",
+      title: "Repayment Priority",
+      field: "preferred_emi",
+      description: "Lowest EMI vs least total interest",
+    },
+    {
+      id: "rate_type",
+      title: "Interest Rate Type",
+      field: "interest_type",
+      description: "Fixed vs floating rate preference",
+    },
+    {
       id: "existing_emi",
       title: "Existing Obligations",
       field: "existing_emi",
@@ -123,6 +135,30 @@ export function getDynamicSteps(profile: ProfileIntake): DynamicJourneyStep[] {
       title: "Credit Profile",
       field: "credit_band",
       description: "Credit score & repayment history",
+    }
+  );
+
+  // Value-adaptive: a co-applicant materially changes eligibility on higher-ticket
+  // or education loans, so we only ask when it actually matters.
+  const annualIncome = (profile.income || 0) * 12;
+  const coApplicantMatters =
+    profile.intent === "Education Loan" ||
+    (profile.loan_amount || 0) > annualIncome * 4;
+  if (coApplicantMatters) {
+    steps.push({
+      id: "co_applicant",
+      title: "Co-Applicant",
+      field: "has_co_applicant",
+      description: "A joint applicant can lift your borrowing limit",
+    });
+  }
+
+  steps.push(
+    {
+      id: "age",
+      title: "Your Age",
+      field: "age",
+      description: "Sets the maximum tenure the loan can run",
     },
     {
       id: "urgency",

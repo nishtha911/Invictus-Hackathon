@@ -2,6 +2,8 @@
  * Centralized API Client with Mock/FastAPI Switch
  */
 
+import { toast } from "sonner";
+
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -41,6 +43,13 @@ export async function apiClient<T>(
     // If backend is unreachable and a fallback mock is provided, seamlessly fallback with warning
     if (mockFallback) {
       console.warn(`[Cognis Bank API] Backend unavailable at ${url}, using mock response.`, error);
+      
+      // Attempt to toast warning on client-side
+      try {
+        toast.warning("Live service unavailable. Showing simulated mock data.");
+      } catch (e) {
+        // Ignore errors in non-browser context if any
+      }
 
       return mockFallback();
     }

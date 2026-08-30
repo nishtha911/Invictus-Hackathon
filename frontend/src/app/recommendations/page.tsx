@@ -9,7 +9,8 @@ import { LoanCardItem } from "@/components/recommendations/LoanCardItem";
 import { LoanComparisonDrawer } from "@/components/recommendations/LoanComparisonDrawer";
 import { TrustModal } from "@/components/shared/TrustModal";
 import { SessionCompleteModal } from "@/components/shared/SessionCompleteModal";
-import { RecommendedLoan } from "@/lib/types/contracts";
+import { TailoredOfferCard } from "@/components/recommendations/TailoredOfferCard";
+import { PersonalizedOffer, RecommendedLoan } from "@/lib/types/contracts";
 import { generateMockRecommendations } from "@/lib/mocks/recommendations";
 import { formatINR } from "@/lib/utils/currency";
 
@@ -20,6 +21,10 @@ export default function RecommendationsPage() {
   const {
     recommendations,
     setRecommendations,
+    personalizedOffer,
+    setPersonalizedOffer,
+    advisorNote,
+    setAdvisorNote,
     profile,
     setSelectedLoan,
   } = useJourneyStore();
@@ -33,6 +38,8 @@ export default function RecommendationsPage() {
     if (!recommendations || recommendations.length === 0) {
       fetchLoanRecommendations(profile)
         .then((res) => {
+          setPersonalizedOffer(res?.personalized_offer ?? null);
+          setAdvisorNote(res?.advisor_note ?? null);
           if (res?.recommended_loans?.length > 0) {
             setRecommendations(res.recommended_loans);
           } else {
@@ -45,7 +52,7 @@ export default function RecommendationsPage() {
           setRecommendations(generated.recommended_loans);
         });
     }
-  }, [recommendations, profile, setRecommendations]);
+  }, [recommendations, profile, setRecommendations, setPersonalizedOffer, setAdvisorNote]);
 
   const activeRecommendations =
     recommendations && recommendations.length > 0
@@ -58,6 +65,32 @@ export default function RecommendationsPage() {
   const handleSelectInterested = (loan: RecommendedLoan) => {
     setSelectedLoan(loan);
     router.push("/lead-capture");
+  };
+
+  const handleAcceptOffer = (offer: PersonalizedOffer) => {
+    const t = offer.personalized_terms;
+    handleSelectInterested({
+      loan_id: `tailored-${offer.base_scheme.toLowerCase().replace(/\s+/g, "-")}`,
+      name: offer.scheme_name,
+      bank: offer.bank,
+      category: offer.category,
+      match_score: 100,
+      interest_rate: t.interest_rate,
+      max_amount: offer.principal,
+      min_amount: offer.principal,
+      tenure_months: t.tenure_months,
+      estimated_emi: t.estimated_emi,
+      processing_fee_pct: t.processing_fee_pct,
+      eligibility_status: offer.eligibility_status,
+      is_verified_calculation: true,
+      reasoning: offer.rationale,
+      bullet_points: offer.adjustments.map((a) => `${a.parameter}: ${a.base} → ${a.personalized}`),
+      policy_citations: [
+        { policy_name: offer.base_scheme, clause_id: "personalisation-bounds", text: offer.policy_basis },
+      ],
+      features: offer.adjustments.map((a) => `${a.parameter} — ${a.reason}`),
+      tag: "TAILORED OFFER",
+    });
   };
 
   const handleNotInterested = () => {
@@ -92,6 +125,26 @@ export default function RecommendationsPage() {
             <span className="text-slate-600">{profile.employment_type || "Salaried"}</span>
           </div>
         </div>
+
+        {/* Advisor's Note — a plain-English read of the customer's situation */}
+        {advisorNote && (
+          <div className="flex gap-3 sm:gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5 shadow-sm">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-[#04241d] border border-white/10 flex items-center justify-center overflow-hidden">
+              <img src="/images/logo.png" alt="Cognis Bank advisor" className="h-6 w-6 object-contain" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#1F7A63]">
+                Your Cognis Bank Advisor
+              </span>
+              <p className="text-xs sm:text-sm leading-relaxed text-[#132443]">{advisorNote}</p>
+            </div>
+          </div>
+        )}
+
+        {/* 0. Personalised, policy-bounded offer */}
+        {personalizedOffer && (
+          <TailoredOfferCard offer={personalizedOffer} onAccept={handleAcceptOffer} />
+        )}
 
         {/* 1. Best Match Hero Card */}
         {bestMatch && (

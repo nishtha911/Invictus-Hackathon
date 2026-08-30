@@ -95,3 +95,17 @@ export const URGENCY_OPTIONS = [
   { id: "This Month (15-30 Days)", label: "This Month (15-30 Days)", subtext: "Actively shortlisting and finalizing terms" },
   { id: "Exploring (1-3 Months)", label: "Exploring (1-3 Months)", subtext: "Comparing offers and checking pre-eligibility" },
 ];
+
+// Borrower repayment preferences — feed the recommendation retrieval & LLM prompt
+export const EMI_PRIORITY_OPTIONS = [
+  { id: "lowest", label: "Lowest Monthly EMI", subtext: "Smaller instalments over a longer tenure; more total interest" },
+  { id: "balanced", label: "Balanced EMI & Tenure", subtext: "A middle ground between instalment size and interest cost" },
+  { id: "fast_repayment", label: "Least Total Interest", subtext: "Higher EMI, shorter tenure — close the loan faster" },
+  { id: "flexible", label: "Prepayment Flexibility", subtext: "Prioritise part-prepayment and foreclosure freedom" },
+];
+
+export const INTEREST_TYPE_OPTIONS = [
+  { id: "fixed", label: "Fixed Interest Rate", subtext: "EMI stays constant for the fixed-rate term — predictable budgeting" },
+  { id: "floating", label: "Floating Interest Rate", subtext: "Moves with the benchmark repo rate — usually lower to start" },
+  { id: "not_sure", label: "Not Sure — Advise Me", subtext: "Let the advisor weigh both against your profile" },
+];

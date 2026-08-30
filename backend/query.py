@@ -237,6 +237,14 @@ def _profile_for_prompt(profile: dict | None) -> dict:
         raw_loan_profile.get("urgency")
         or profile.get("urgency")
     )
+    preferred_emi = (
+        raw_loan_profile.get("preferred_emi")
+        or profile.get("preferred_emi")
+    )
+    interest_type = (
+        raw_loan_profile.get("interest_type")
+        or profile.get("interest_type")
+    )
     applicant_name = (
         raw_loan_profile.get("name")
         or raw_loan_profile.get("applicant_name")
@@ -264,6 +272,10 @@ def _profile_for_prompt(profile: dict | None) -> dict:
         clean_profile["credit_score_band"] = str(credit_band).title()
     if urgency:
         clean_profile["urgency"] = str(urgency).replace("_", " ").title()
+    if preferred_emi:
+        clean_profile["repayment_priority"] = str(preferred_emi).replace("_", " ").title()
+    if interest_type:
+        clean_profile["interest_rate_preference"] = str(interest_type).replace("_", " ").title()
 
     # Pass specific sub-profile fields if present
     for sub in ("home_loan_details", "vehicle_loan_details", "education_loan_details", "personal_loan_details", "business_loan_details"):
