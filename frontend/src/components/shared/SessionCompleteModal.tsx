@@ -36,7 +36,7 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#081C2D]/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-[#132443]/60 backdrop-blur-xs"
         />
 
         <motion.div
@@ -49,7 +49,7 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
             <CheckCircle className="h-7 w-7" />
           </div>
 
-          <h3 className="mt-4 text-xl font-bold tracking-tight text-[#081C2D]">Session Complete</h3>
+          <h3 className="mt-4 text-xl font-bold tracking-tight text-[#132443]">Session Complete</h3>
           <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             Thank you for exploring your loan options with <strong>{BRAND.name}</strong>. Your session is securely closed without capturing personal contact details.
           </p>
@@ -60,7 +60,7 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleReturnHome}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-xs font-semibold text-[#081C2D] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
             >
               <Home className="h-4 w-4 text-slate-500" />
               <span>Return Home</span>

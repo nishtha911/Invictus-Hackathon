@@ -48,3 +48,29 @@ export async function loginCustomer(payload: LoginPayload): Promise<{ status: st
     customer: customCustomer,
   };
 }
+
+export interface EmployeeLoginPayload {
+  username: string;
+  password: string;
+}
+
+export interface EmployeeLoginResponse {
+  status: string;
+  role: "employee";
+  username: string;
+}
+
+export async function loginEmployee(payload: EmployeeLoginPayload): Promise<EmployeeLoginResponse> {
+  // Simulate network latency
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  if (payload.username.trim() === "bankemployee" && payload.password === "Demo@123") {
+    return {
+      status: "success",
+      role: "employee",
+      username: "bankemployee",
+    };
+  }
+
+  throw new Error("Invalid employee username or password.");
+}

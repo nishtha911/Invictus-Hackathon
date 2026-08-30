@@ -43,7 +43,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#081C2D]/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-[#132443]/60 backdrop-blur-xs"
         />
 
         {/* Modal Container */}
@@ -60,7 +60,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
               <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
                 Customer Type Selection
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#081C2D]">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#132443]">
                 How would you like to start?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500">
@@ -69,7 +69,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#081C2D] transition-colors"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#132443] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -91,7 +91,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
                   <UserPlus className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-[#081C2D]">New Customer / Guest</h3>
+                  <h3 className="text-base font-semibold text-[#132443]">New Customer / Guest</h3>
                   <p className="mt-1 text-xs text-slate-500 leading-relaxed">
                     Interactive conversational intake with questions and smart sliders to determine loan eligibility.
                   </p>
@@ -123,7 +123,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-[#081C2D]">Existing Bank Customer</h3>
+                  <h3 className="text-base font-semibold text-[#132443]">Existing Bank Customer</h3>
                   <p className="mt-1 text-xs text-slate-500 leading-relaxed">
                     Simulate an active banking session with pre-filled salary, account history and credit signals.
                   </p>
@@ -146,7 +146,7 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
               className="mt-5 rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4 space-y-3"
             >
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#081C2D] flex items-center gap-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#132443] flex items-center gap-1.5">
                   <Building2 className="h-3.5 w-3.5 text-[#1F7A63]" />
                   Select Demo Customer Profile
                 </label>
@@ -168,11 +168,11 @@ export function UserTypeModal({ open, onClose }: UserTypeModalProps) {
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-[#081C2D] flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                        <div className="h-7 w-7 rounded-full bg-[#132443] flex items-center justify-center text-[10px] font-bold text-white uppercase">
                           {cust.name.slice(0, 2)}
                         </div>
                         <div className="overflow-hidden">
-                          <p className="text-xs font-semibold text-[#081C2D] truncate">{cust.name}</p>
+                          <p className="text-xs font-semibold text-[#132443] truncate">{cust.name}</p>
                           <p className="text-[10px] text-slate-500 truncate">{cust.employment_type}</p>
                         </div>
                       </div>

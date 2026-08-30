@@ -4,11 +4,11 @@
   :root {
     /* Cognis Bank Master Palette */
     --background: #F5F7FA;
-    --foreground: #081C2D;
+    --foreground: #132443;
 
-    --navy: #081C2D;
-    --navy-hover: #0D263D;
-    --navy-surface: #0E2438;
+    --navy: #132443;
+    --navy-hover: #192e54;
+    --navy-surface: #192c4f;
     --emerald: #1F7A63;
     --emerald-hover: #186350;
     --emerald-light: #E8F5F1;
@@ -19,15 +19,15 @@
     --gray-subtle: #F1F5F9;
 
     --card: #FFFFFF;
-    --card-foreground: #081C2D;
+    --card-foreground: #132443;
 
     --popover: #FFFFFF;
-    --popover-foreground: #081C2D;
+    --popover-foreground: #132443;
 
     --primary: #1F7A63;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #081C2D;
+    --secondary: #132443;
     --secondary-foreground: #FFFFFF;
 
     --muted: #F1F5F9;
@@ -50,8 +50,8 @@
     --surface-page: #F5F7FA;
     --surface-white: #FFFFFF;
     --surface-card: #FFFFFF;
-    --surface-navy: #081C2D;
-    --surface-navy-card: #0D2338;
+    --surface-navy: #132443;
+    --surface-navy-card: #182d50;
     --border-neutral: #E2E8F0;
     --border-neutral-hover: #CBD5E1;
   }
@@ -85,7 +85,7 @@ section[id] {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(19, 36, 67, 0.05);
   transition: all 0.2s ease-in-out;
 }
 
@@ -93,13 +93,13 @@ section[id] {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04);
+  box-shadow: 0 1px 3px 0 rgba(19, 36, 67, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bank-card-interactive:hover {
   border-color: #1F7A63;
-  box-shadow: 0 6px 18px -4px rgba(8, 28, 45, 0.09);
+  box-shadow: 0 6px 18px -4px rgba(19, 36, 67, 0.09);
   transform: translateY(-1px);
 }
 
@@ -125,21 +125,21 @@ section[id] {
 
 .btn-navy-outline {
   background-color: transparent;
-  color: #081C2D;
-  border: 1px solid #081C2D;
+  color: #132443;
+  border: 1px solid #132443;
   font-weight: 600;
   border-radius: 4px;
   transition: all 0.15s ease-in-out;
 }
 
 .btn-navy-outline:hover {
-  background-color: #081C2D;
+  background-color: #132443;
   color: #FFFFFF;
 }
 
 .btn-secondary-neutral {
   background-color: #FFFFFF;
-  color: #081C2D;
+  color: #132443;
   border: 1px solid #E2E8F0;
   font-weight: 500;
   border-radius: 4px;

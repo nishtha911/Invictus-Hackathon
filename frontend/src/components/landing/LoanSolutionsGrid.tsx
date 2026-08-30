@@ -23,7 +23,7 @@ export function LoanSolutionsGrid() {
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
             Comprehensive Loan Portfolio
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#132443]">
             Financing Options for Every Milestone
           </h2>
           <p className="text-sm text-slate-600">
@@ -57,7 +57,7 @@ export function LoanSolutionsGrid() {
                       </span>
                     </div>
 
-                    <h3 className="mt-4 text-lg font-bold text-[#081C2D] group-hover:text-[#1F7A63] transition-colors">
+                    <h3 className="mt-4 text-lg font-bold text-[#132443] group-hover:text-[#1F7A63] transition-colors">
                       {item.label}
                     </h3>
                     <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
@@ -68,7 +68,7 @@ export function LoanSolutionsGrid() {
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
                         Typical Funding Range
                       </span>
-                      <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#081C2D]">
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#132443]">
                         <span>{formatINR(item.suggestedAmounts[0], true)}</span>
                         <span className="text-slate-400">→</span>
                         <span>{formatINR(item.suggestedAmounts[item.suggestedAmounts.length - 1], true)}</span>

@@ -51,7 +51,7 @@ export default function ProfilePage() {
             <User className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-[#081C2D]">No Active Banking Session</h1>
+            <h1 className="text-xl font-extrabold text-[#132443]">No Active Banking Session</h1>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
               Please log in to your Cognis Bank account to view your pre-approved loans, credit profile, and relationship history.
             </p>
@@ -99,12 +99,12 @@ export default function ProfilePage() {
           {/* Header Banner */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#081C2D] to-[#1F7A63] text-white flex items-center justify-center font-extrabold text-2xl uppercase shrink-0 shadow-md">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#132443] to-[#1F7A63] text-white flex items-center justify-center font-extrabold text-2xl uppercase shrink-0 shadow-md">
                 {displayName.slice(0, 2)}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-extrabold text-[#081C2D] tracking-tight">
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-[#132443] tracking-tight">
                     {displayName}
                   </h1>
                   <span className="rounded-md bg-[#E8F5F1] px-2.5 py-0.5 text-[11px] font-bold text-[#1F7A63] border border-emerald-200 flex items-center gap-1">
@@ -134,7 +134,7 @@ export default function ProfilePage() {
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Monthly Income
               </span>
-              <span className="text-sm sm:text-base font-extrabold text-[#081C2D] font-mono block">
+              <span className="text-sm sm:text-base font-extrabold text-[#132443] font-mono block">
                 {formatINR(monthlyIncome)}
               </span>
             </div>
@@ -152,7 +152,7 @@ export default function ProfilePage() {
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Banking Segment
               </span>
-              <span className="text-xs font-bold text-[#081C2D] truncate block">
+              <span className="text-xs font-bold text-[#132443] truncate block">
                 {accountType.split("(")[0]}
               </span>
             </div>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
 
           {/* Detailed Account Information */}
           <div className="space-y-3 pt-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#132443]">
               Verified Banking Profile Details
             </h2>
 
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                   Legal Applicant Name
                 </span>
-                <span className="text-sm font-bold text-[#081C2D] flex items-center gap-2">
+                <span className="text-sm font-bold text-[#132443] flex items-center gap-2">
                   <User className="h-4 w-4 text-[#1F7A63]" />
                   {displayName}
                 </span>
@@ -190,7 +190,7 @@ export default function ProfilePage() {
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                   Registered Mobile
                 </span>
-                <span className="text-sm font-bold text-[#081C2D] tabular-nums flex items-center gap-2 font-mono">
+                <span className="text-sm font-bold text-[#132443] tabular-nums flex items-center gap-2 font-mono">
                   <Phone className="h-4 w-4 text-[#1F7A63]" />
                   {displayPhone}
                 </span>
@@ -230,7 +230,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <Link
                 href="/rag"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-[#081C2D] transition-all shadow-2xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-[#132443] transition-all shadow-2xs"
               >
                 <BookOpen className="h-3.5 w-3.5 text-[#1F7A63]" />
                 <span>Policy Knowledge Base</span>

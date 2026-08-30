@@ -132,19 +132,19 @@ export default function LeadCapturePage() {
               <p className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wide">
                 Application Ref: {submittedLead.lead_id}
               </p>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
                 Request Submitted
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                 A retail lending specialist will contact you during your preferred{" "}
-                <strong className="text-[#081C2D]">{submittedLead.lead_data.preferred_contact_time}</strong> window.
+                <strong className="text-[#132443]">{submittedLead.lead_data.preferred_contact_time}</strong> window.
               </p>
             </div>
 
             {/* Scored Lead Intelligence Card */}
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#132443]">
                   Application Underwriting Summary
                 </span>
                 <span className="rounded-md bg-[#E8F5F1] px-2.5 py-1 text-xs font-mono font-bold text-[#1F7A63] border border-emerald-100">
@@ -201,7 +201,7 @@ export default function LeadCapturePage() {
               <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
                 Priority Application Intake
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
                 Request an Advisory Callback
               </h1>
               <p className="text-xs sm:text-sm text-slate-500">
@@ -215,14 +215,14 @@ export default function LeadCapturePage() {
             >
               {/* Full Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-[#132443] flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 text-[#1F7A63]" />
                   Full Legal Name
                 </label>
                 <input
                   {...register("name")}
                   placeholder="e.g. Rahul Sharma"
-                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
+                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                 />
                 {errors.name && <p className="text-xs text-rose-600">{errors.name.message}</p>}
               </div>
@@ -231,7 +231,7 @@ export default function LeadCapturePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Phone */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                  <label className="text-xs font-semibold text-[#132443] flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 text-[#1F7A63]" />
                     Mobile Number (10 digits)
                   </label>
@@ -243,7 +243,7 @@ export default function LeadCapturePage() {
                       {...register("phone")}
                       placeholder="9820144520"
                       maxLength={10}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] pl-12 pr-4 py-3 text-sm font-mono text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] pl-12 pr-4 py-3 text-sm font-mono text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                     />
                   </div>
                   {errors.phone && <p className="text-xs text-rose-600">{errors.phone.message}</p>}
@@ -251,7 +251,7 @@ export default function LeadCapturePage() {
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                  <label className="text-xs font-semibold text-[#132443] flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-[#1F7A63]" />
                     Email Address
                   </label>
@@ -259,7 +259,7 @@ export default function LeadCapturePage() {
                     {...register("email")}
                     type="email"
                     placeholder="name@example.com"
-                    className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
+                    className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
                   />
                   {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
                 </div>
@@ -267,7 +267,7 @@ export default function LeadCapturePage() {
 
               {/* Preferred Contact Time */}
               <div className="space-y-2 pt-1">
-                <label className="text-xs font-semibold text-[#081C2D] flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-[#132443] flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-[#1F7A63]" />
                   Preferred Callback Window
                 </label>
@@ -283,7 +283,7 @@ export default function LeadCapturePage() {
                       onClick={() => handleSelectTime(t.id as "Morning" | "Afternoon" | "Evening")}
                       className={`rounded-xl border p-2.5 text-center transition-all cursor-pointer ${
                         preferredTime === t.id
-                          ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
+                          ? "border-[#1F7A63] bg-[#F0FDF4] text-[#132443] font-bold ring-1 ring-[#1F7A63]"
                           : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                       }`}
                     >
@@ -333,14 +333,14 @@ export default function LeadCapturePage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-[#081C2D]">{activeLoan.name}</h3>
+                <h3 className="text-xl font-bold text-[#132443]">{activeLoan.name}</h3>
                 <p className="text-xs text-slate-500 mt-1">{activeLoan.category}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Requested Loan</span>
-                  <span className="text-base font-bold text-[#081C2D] font-mono">
+                  <span className="text-base font-bold text-[#132443] font-mono">
                     {formatINR(profile.loan_amount || 4500000)}
                   </span>
                 </div>
@@ -352,20 +352,20 @@ export default function LeadCapturePage() {
                 </div>
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Interest Rate</span>
-                  <span className="text-sm font-bold text-[#081C2D] font-mono">
+                  <span className="text-sm font-bold text-[#132443] font-mono">
                     {activeLoan.interest_rate.toFixed(2)}% p.a.
                   </span>
                 </div>
                 <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3">
                   <span className="text-[10px] text-slate-500 block">Tenure</span>
-                  <span className="text-sm font-bold text-[#081C2D] font-mono">
+                  <span className="text-sm font-bold text-[#132443] font-mono">
                     {profile.tenure_years || 20} Years
                   </span>
                 </div>
               </div>
 
               <div className="pt-2 border-t border-[#E2E8F0] space-y-2">
-                <span className="text-[11px] font-semibold text-[#081C2D] block">
+                <span className="text-[11px] font-semibold text-[#132443] block">
                   Included Benefits:
                 </span>
                 <ul className="space-y-1.5 text-xs text-slate-600">

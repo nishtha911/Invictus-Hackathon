@@ -80,7 +80,7 @@ function AdvisorContent() {
         {/* Top Status Bar */}
         <div className="mb-8 border-b border-[#E2E8F0] pb-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#081C2D] tracking-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#132443] tracking-tight flex items-center gap-2">
               <span>Loan Advisory Session</span>
               <span className="rounded-md bg-[#E8F5F1] px-2.5 py-0.5 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
                 Cognis Bank Advisor

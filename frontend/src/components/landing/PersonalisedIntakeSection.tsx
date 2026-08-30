@@ -98,7 +98,7 @@ export function PersonalisedIntakeSection() {
           <p className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-[#1F7A63]">
             GUIDED PRE-ASSESSMENT
           </p>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#081C2D]">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#132443]">
             Find Your Personalised Loan Options
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -112,7 +112,7 @@ export function PersonalisedIntakeSection() {
           <div className="hidden lg:block lg:col-span-3 space-y-4">
             <div className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#132443]">
                   Intake Roadmap
                 </span>
                 <span className="text-xs font-semibold text-[#1F7A63] tabular-nums">
@@ -134,7 +134,7 @@ export function PersonalisedIntakeSection() {
                       onClick={() => setCurrentIndex(idx)}
                       className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all cursor-pointer ${
                         isActive
-                          ? "bg-white text-[#081C2D] font-bold border border-[#1F7A63] shadow-xs"
+                          ? "bg-white text-[#132443] font-bold border border-[#1F7A63] shadow-xs"
                           : isCompleted
                           ? "bg-white/60 text-slate-700 hover:bg-white"
                           : "text-slate-400 hover:text-slate-600"
@@ -181,7 +181,7 @@ export function PersonalisedIntakeSection() {
               {/* Question Header */}
               <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-[#E2E8F0]">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md bg-[#081C2D] px-2.5 py-0.5 text-xs font-bold text-white">
+                  <span className="rounded-md bg-[#132443] px-2.5 py-0.5 text-xs font-bold text-white">
                     Step {currentIndex + 1} of {totalQuestions}
                   </span>
                   <span className="text-xs text-slate-400 font-medium">
@@ -214,7 +214,7 @@ export function PersonalisedIntakeSection() {
                   className="space-y-6"
                 >
                   <div className="space-y-1.5 text-left">
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#081C2D] tracking-tight">
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#132443] tracking-tight">
                       {currentQuestion.title}
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
@@ -250,7 +250,7 @@ export function PersonalisedIntakeSection() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-1">
-                                <span className="text-sm font-bold text-[#081C2D]">
+                                <span className="text-sm font-bold text-[#132443]">
                                   {opt.label}
                                 </span>
                                 {opt.badge && (
@@ -289,7 +289,7 @@ export function PersonalisedIntakeSection() {
                             }`}
                           >
                             <div>
-                              <span className="text-sm font-bold text-[#081C2D] block">
+                              <span className="text-sm font-bold text-[#132443] block">
                                 {opt.label}
                               </span>
                               {opt.subtext && (
@@ -321,7 +321,7 @@ export function PersonalisedIntakeSection() {
                         <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold block">
                           Selected {currentQuestion.field === "tenure_years" ? "Tenure" : "Amount"}
                         </span>
-                        <div className="text-3xl font-extrabold text-[#081C2D] tracking-tight tabular-nums mt-1">
+                        <div className="text-3xl font-extrabold text-[#132443] tracking-tight tabular-nums mt-1">
                           {currentQuestion.field === "tenure_years"
                             ? `${Number(currentFieldValue || 20)} Years`
                             : formatINR(Number(currentFieldValue || currentQuestion.min || 0))}

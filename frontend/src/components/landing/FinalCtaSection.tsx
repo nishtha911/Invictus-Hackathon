@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 
 export function FinalCtaSection() {
   return (
-    <section className="py-16 sm:py-20 bg-[#081C2D] text-white border-t border-[#0f2c44]">
+    <section className="py-16 sm:py-20 bg-[#132443] text-white border-t border-[#0f2c44]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 15 }}

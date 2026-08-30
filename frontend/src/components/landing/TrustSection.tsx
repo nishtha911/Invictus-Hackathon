@@ -35,7 +35,7 @@ export function TrustSection() {
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
               Why Cognis Bank
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#132443]">
               Transparent Lending Guidance Built on Trust
             </h2>
             <p className="text-sm text-slate-600">
@@ -60,7 +60,7 @@ export function TrustSection() {
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#1F7A63] shadow-2xs">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-base font-bold text-[#081C2D]">{b.title}</h3>
+                    <h3 className="text-base font-bold text-[#132443]">{b.title}</h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
                       {b.description}
                     </p>
@@ -83,7 +83,7 @@ export function TrustSection() {
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-[#081C2D]">Bank-Grade Verification Architecture</h4>
+                <h4 className="text-sm font-bold text-[#132443]">Bank-Grade Verification Architecture</h4>
                 <p className="text-xs text-slate-500">Every EMI computation is verified by deterministic calculation rules.</p>
               </div>
             </div>
@@ -91,7 +91,7 @@ export function TrustSection() {
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => setShowTrustModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-[#081C2D] bg-transparent px-4 py-2.5 text-xs font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#132443] bg-transparent px-4 py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-all cursor-pointer"
               >
                 <Award className="h-4 w-4" />
                 <span>View Verification Matrix</span>

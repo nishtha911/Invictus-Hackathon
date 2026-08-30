@@ -413,7 +413,7 @@ export default function QueryPage() {
                           ? 'bg-[#1F7A63] text-white rounded-tr-none font-medium'
                           : m.isError
                             ? 'bg-red-50 text-red-800 border border-red-100 rounded-tl-none'
-                            : 'bg-white border border-gray-100 rounded-tl-none text-[#081C2D]'
+                            : 'bg-white border border-gray-100 rounded-tl-none text-[#132443]'
                       }`}
                     >
                       {isUser ? (
@@ -523,18 +523,18 @@ export default function QueryPage() {
             <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#1F7A63]" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#132443]">
                   Connected Advisory Context
                 </h3>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg bg-gray-50 p-2 border border-gray-100">
                   <span className="text-[10px] text-gray-400 block font-medium">Goal</span>
-                  <span className="font-bold text-[#081C2D] truncate block">{activeContext.profile.intent}</span>
+                  <span className="font-bold text-[#132443] truncate block">{activeContext.profile.intent}</span>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-2 border border-gray-100">
                   <span className="text-[10px] text-gray-400 block font-medium">Income</span>
-                  <span className="font-bold text-[#081C2D] truncate block">
+                  <span className="font-bold text-[#132443] truncate block">
                     {activeContext.profile.income ? `₹${activeContext.profile.income.toLocaleString('en-IN')}` : '—'}
                   </span>
                 </div>
@@ -544,7 +544,7 @@ export default function QueryPage() {
 
           {/* Standalone Suggested Inquiries Card */}
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#081C2D]">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#132443]">
               <HelpCircle size={14} className="text-[#1F7A63]" />
               <span>Suggested Inquiries</span>
             </div>
@@ -558,7 +558,7 @@ export default function QueryPage() {
                   type="button"
                   disabled={loading}
                   onClick={() => void askQuestion(question)}
-                  className="rounded-xl border border-gray-200 bg-[#F5F7FA] hover:bg-[#F0FDF4] hover:border-[#1F7A63] hover:text-[#1F7A63] p-3 text-left text-xs font-medium text-[#081C2D] disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-2xs cursor-pointer group"
+                  className="rounded-xl border border-gray-200 bg-[#F5F7FA] hover:bg-[#F0FDF4] hover:border-[#1F7A63] hover:text-[#1F7A63] p-3 text-left text-xs font-medium text-[#132443] disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-2xs cursor-pointer group"
                 >
                   <span className="leading-snug block group-hover:translate-x-0.5 transition-transform">{question}</span>
                 </button>

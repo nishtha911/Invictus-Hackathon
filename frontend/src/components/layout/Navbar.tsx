@@ -33,18 +33,23 @@ const LOAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { userType, selectedCustomer, resetDemo } = useJourneyStore();
+  const { userType, selectedCustomer, resetDemo, role, logout } = useJourneyStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loansDropdownOpen, setLoansDropdownOpen] = useState(false);
   const [mobileLoansOpen, setMobileLoansOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isDashboard = pathname.startsWith("/dashboard");
-  const isLoggedIn = userType === "existing" && selectedCustomer;
+  const isLoggedIn = (userType === "existing" && selectedCustomer) || role === "employee";
 
   const handleReset = () => {
-    resetDemo();
-    router.push("/");
+    if (role === "employee") {
+      logout();
+      router.push("/login");
+    } else {
+      resetDemo();
+      router.push("/");
+    }
   };
 
   useEffect(() => {
@@ -138,13 +143,15 @@ export function Navbar() {
             <Link href="/advisor" className={navLinkClass(pathname === "/advisor")}>Loan Advisor</Link>
             <Link href="/rag" className={navLinkClass(pathname.startsWith("/rag"))}>Policy Desk</Link>
             <Link href="/#how-it-works" className="text-sm font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap">How It Works</Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-white border border-slate-600 hover:border-slate-400 px-2.5 py-1 transition-colors whitespace-nowrap"
-            >
-              Dashboard
-              <ArrowUpRight className="h-3 w-3" />
-            </Link>
+            {role === "employee" && (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-white border border-slate-600 hover:border-slate-400 px-2.5 py-1 transition-colors whitespace-nowrap"
+              >
+                Dashboard
+                <ArrowUpRight className="h-3 w-3" />
+              </Link>
+            )}
           </nav>
         )}
 
@@ -153,13 +160,15 @@ export function Navbar() {
           {isLoggedIn ? (
             <>
               {/* Avatar — links to profile, shows initial only */}
-              <Link
-                href="/profile"
-                title={`${selectedCustomer.name} — View Profile`}
-                className="h-9 w-9 bg-[#1F7A63] hover:bg-[#186350] flex items-center justify-center text-white font-semibold text-sm rounded-full transition-colors cursor-pointer shadow-sm"
-              >
-                {selectedCustomer.name.slice(0, 1).toUpperCase()}
-              </Link>
+              {role !== "employee" && selectedCustomer && (
+                <Link
+                  href="/profile"
+                  title={`${selectedCustomer.name} — View Profile`}
+                  className="h-9 w-9 bg-[#1F7A63] hover:bg-[#186350] flex items-center justify-center text-white font-semibold text-sm rounded-full transition-colors cursor-pointer shadow-sm"
+                >
+                  {selectedCustomer.name.slice(0, 1).toUpperCase()}
+                </Link>
+              )}
 
               {/* Logout — red */}
               <button
@@ -238,7 +247,9 @@ export function Navbar() {
 
             <Link href="/advisor" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-200 hover:text-white border-b border-slate-700/40">Loan Advisor</Link>
             <Link href="/rag" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-200 hover:text-white border-b border-slate-700/40">Policy Desk</Link>
-            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-semibold">Underwriter Dashboard</Link>
+            {role === "employee" && (
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-semibold">Underwriter Dashboard</Link>
+            )}
 
             {isLoggedIn && (
               <button

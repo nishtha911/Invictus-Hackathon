@@ -109,7 +109,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
     <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm">
       {/* Existing Customer Ribbon */}
       {userType === "existing" && selectedCustomer && (
-        <div className="mb-5 rounded-xl border border-emerald-200 bg-[#F0FDF4] px-4 py-2.5 flex items-center justify-between text-xs text-[#081C2D]">
+        <div className="mb-5 rounded-xl border border-emerald-200 bg-[#F0FDF4] px-4 py-2.5 flex items-center justify-between text-xs text-[#132443]">
           <span>
             Prefilled with banking context: <strong>{selectedCustomer.name}</strong> ({selectedCustomer.employer})
           </span>
@@ -131,7 +131,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
         </div>
 
         {/* Dynamic Title */}
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#081C2D]">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#132443]">
           {currentStep.id === "purpose" && "What type of loan are you looking for?"}
           {currentStep.id === "employment" && "What is your primary employment type?"}
           {currentStep.id === "employer_details" && "What type of enterprise do you work for?"}
@@ -196,7 +196,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div className="overflow-hidden">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{item.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{item.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
@@ -239,7 +239,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{emp.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{emp.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{emp.subtext}</p>
@@ -280,7 +280,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{org.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{org.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{org.subtext}</p>
@@ -321,7 +321,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{v.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{v.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">Continuous business operations</p>
@@ -345,7 +345,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Net Monthly Income
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
                   {formatINR(profile.income || 120000)}{" "}
                   <span className="text-base font-normal text-slate-500">per month</span>
                 </span>
@@ -377,7 +377,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.income === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
-                        : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
+                        : "border-[#E2E8F0] bg-white text-[#132443] hover:border-slate-300"
                     }`}
                   >
                     {formatINR(amt, true)}
@@ -417,7 +417,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{prop.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{prop.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{prop.desc}</p>
@@ -458,7 +458,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{v.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{v.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{v.desc}</p>
@@ -499,7 +499,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{dest.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{dest.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{dest.desc}</p>
@@ -523,7 +523,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Pledged Ornament Weight
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
                   {profile.gold_weight_grams || 80} Grams (22K Hallmarked)
                 </span>
               </div>
@@ -536,7 +536,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ gold_weight_grams: gm, loan_amount: gm * 4500 })}
                     className={`rounded-xl border p-3 text-center transition-all cursor-pointer ${
                       profile.gold_weight_grams === gm
-                        ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] text-[#132443] font-bold ring-1 ring-[#1F7A63]"
                         : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                     }`}
                   >
@@ -575,7 +575,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                       : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300"
                   }`}
                 >
-                  <span className="font-semibold text-sm text-[#081C2D]">{to.label}</span>
+                  <span className="font-semibold text-sm text-[#132443]">{to.label}</span>
                   {profile.annual_turnover === to.val && <Check className="h-4 w-4 text-[#1F7A63]" />}
                 </button>
               ))}
@@ -595,7 +595,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Required Borrowing Amount
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
                   {formatINR(profile.loan_amount || 4500000)}
                 </span>
               </div>
@@ -627,7 +627,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.loan_amount === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
-                        : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
+                        : "border-[#E2E8F0] bg-white text-[#132443] hover:border-slate-300"
                     }`}
                   >
                     {formatINR(amt, true)}
@@ -650,7 +650,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Repayment Duration
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
                   {profile.tenure_years || (profile.intent === "Home Loan" ? 20 : 5)} Years
                   <span className="text-sm font-normal text-slate-500 ml-2">
                     ({(profile.tenure_years || (profile.intent === "Home Loan" ? 20 : 5)) * 12} Monthly EMIs)
@@ -686,7 +686,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                       className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                         profile.tenure_years === yr
                           ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
-                          : "border-[#E2E8F0] bg-white text-[#081C2D] hover:border-slate-300"
+                          : "border-[#E2E8F0] bg-white text-[#132443] hover:border-slate-300"
                       }`}
                     >
                       {yr} Yrs
@@ -709,7 +709,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 <span className="text-xs text-slate-500 block uppercase tracking-wider font-semibold">
                   Current Monthly Outflow
                 </span>
-                <span className="text-3xl sm:text-4xl font-extrabold text-[#081C2D] font-mono mt-1 block">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#132443] font-mono mt-1 block">
                   {profile.existing_emi && profile.existing_emi > 0
                     ? formatINR(profile.existing_emi)
                     : "₹0 (Zero Active Loans)"}
@@ -745,7 +745,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     onClick={() => updateProfile({ existing_emi: emi })}
                     className={`rounded-xl border py-2.5 px-1 sm:px-3 text-center transition-all cursor-pointer ${
                       profile.existing_emi === emi
-                        ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
+                        ? "border-[#1F7A63] bg-[#F0FDF4] text-[#132443] font-bold ring-1 ring-[#1F7A63]"
                         : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                     }`}
                   >
@@ -793,7 +793,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#081C2D] text-sm">{band.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm">{band.label}</span>
                         {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{band.subtext}</p>
@@ -836,7 +836,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                         <Calendar className="h-4 w-4" />
                       </div>
                       <div>
-                        <span className="font-semibold text-[#081C2D] text-sm block">{urg.label}</span>
+                        <span className="font-semibold text-[#132443] text-sm block">{urg.label}</span>
                         <span className="text-xs text-slate-500">{urg.subtext}</span>
                       </div>
                     </div>
@@ -857,7 +857,7 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           className={`inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] px-4 py-2.5 text-xs font-semibold transition-colors ${
             safeIndex === 0
               ? "opacity-30 cursor-not-allowed text-slate-400"
-              : "text-[#081C2D] hover:bg-[#F5F7FA] cursor-pointer"
+              : "text-[#132443] hover:bg-[#F5F7FA] cursor-pointer"
           }`}
         >
           <ArrowLeft className="h-4 w-4" />

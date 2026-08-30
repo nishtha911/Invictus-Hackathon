@@ -208,7 +208,7 @@ export default function LoanDetailPage({
         <div className="bank-card p-6 sm:p-10 bg-white border border-[#E2E8F0] shadow-sm relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-[#081C2D] tracking-tight">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-[#132443] tracking-tight">
                 {loanData.title}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -225,13 +225,13 @@ export default function LoanDetailPage({
           <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 border-t border-[#E2E8F0]">
             <div className="space-y-0.5">
               <span className="text-xs text-slate-400 font-medium">Interest Rate</span>
-              <p className="text-base sm:text-lg font-extrabold text-[#081C2D] font-mono">
+              <p className="text-base sm:text-lg font-extrabold text-[#132443] font-mono">
                 {loanData.rateRange}
               </p>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs text-slate-400 font-medium">Maximum Tenure</span>
-              <p className="text-base sm:text-lg font-extrabold text-[#081C2D] font-mono">
+              <p className="text-base sm:text-lg font-extrabold text-[#132443] font-mono">
                 {loanData.maxTenure}
               </p>
             </div>
@@ -248,7 +248,7 @@ export default function LoanDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Eligibility Criteria */}
           <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm space-y-4">
-            <h3 className="text-base font-bold text-[#081C2D] flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#132443] flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-[#1F7A63]" />
               <span>Eligibility Guidelines</span>
             </h3>
@@ -264,7 +264,7 @@ export default function LoanDetailPage({
 
           {/* Documentation Checklist */}
           <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm space-y-4">
-            <h3 className="text-base font-bold text-[#081C2D] flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#132443] flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#1F7A63]" />
               <span>Required Documentation</span>
             </h3>
@@ -282,7 +282,7 @@ export default function LoanDetailPage({
         {/* Bottom Direct CTA into Advisor */}
         <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-lg font-bold text-[#081C2D]">
+            <h3 className="text-lg font-bold text-[#132443]">
               Ready to evaluate your {loanData.title} eligibility?
             </h3>
             <p className="text-xs text-slate-500">

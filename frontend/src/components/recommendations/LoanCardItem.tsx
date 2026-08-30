@@ -15,7 +15,7 @@ export function LoanCardItem({ loan, onSelectInterested }: LoanCardItemProps) {
       <div className="space-y-4">
         {/* Top badges */}
         <div className="flex items-center justify-between">
-          <span className="rounded-md bg-[#F5F7FA] px-2.5 py-0.5 text-[11px] font-semibold text-[#081C2D] border border-[#E2E8F0]">
+          <span className="rounded-md bg-[#F5F7FA] px-2.5 py-0.5 text-[11px] font-semibold text-[#132443] border border-[#E2E8F0]">
             {loan.tag || loan.category}
           </span>
           <span className="text-xs font-semibold text-slate-500">
@@ -25,7 +25,7 @@ export function LoanCardItem({ loan, onSelectInterested }: LoanCardItemProps) {
 
         {/* Title */}
         <div>
-          <h3 className="text-base sm:text-lg font-bold text-[#081C2D]">{loan.name}</h3>
+          <h3 className="text-base sm:text-lg font-bold text-[#132443]">{loan.name}</h3>
           <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{loan.reasoning}</p>
         </div>
 
@@ -39,7 +39,7 @@ export function LoanCardItem({ loan, onSelectInterested }: LoanCardItemProps) {
           </div>
           <div className="rounded-xl bg-[#F5F7FA] p-3 border border-[#E2E8F0]">
             <span className="text-[10px] text-slate-500 block">Estimated EMI</span>
-            <span className="text-base font-bold text-[#081C2D] font-mono mt-0.5 block">
+            <span className="text-base font-bold text-[#132443] font-mono mt-0.5 block">
               {formatINR(loan.estimated_emi)}
             </span>
           </div>
@@ -59,7 +59,7 @@ export function LoanCardItem({ loan, onSelectInterested }: LoanCardItemProps) {
       {/* Select CTA */}
       <button
         onClick={() => onSelectInterested(loan)}
-        className="mt-5 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#081C2D] bg-transparent py-2.5 text-xs font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-colors cursor-pointer"
+        className="mt-5 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#132443] bg-transparent py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-colors cursor-pointer"
       >
         <span>Select Product</span>
         <ArrowRight className="h-3.5 w-3.5" />

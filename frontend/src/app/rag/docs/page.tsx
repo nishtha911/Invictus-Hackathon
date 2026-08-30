@@ -39,7 +39,10 @@ export default function DocsPage() {
   }
 
   useEffect(() => {
-    load()
+    const timer = setTimeout(() => {
+      load()
+    }, 0);
+    return () => clearTimeout(timer);
   }, [load])
 
   if (loading) return <div className="max-w-4xl mx-auto p-6"><p className="text-sm text-gray-400">Loading…</p></div>

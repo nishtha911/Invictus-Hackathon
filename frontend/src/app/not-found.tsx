@@ -13,7 +13,7 @@ export default function NotFound() {
           <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F7A63]">
             ERROR 404
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
             Looks like this path doesn&apos;t lead to a loan solution.
           </h1>
           <p className="text-sm text-slate-600 leading-relaxed">
@@ -32,7 +32,7 @@ export default function NotFound() {
 
           <Link
             href="/#loans"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#132443] bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-colors cursor-pointer"
           >
             <span>Explore Loans</span>
             <ArrowRight className="h-4 w-4" />

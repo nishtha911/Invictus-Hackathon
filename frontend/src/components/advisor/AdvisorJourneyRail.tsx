@@ -160,7 +160,7 @@ export function AdvisorJourneyRail({
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Advisory Progress
           </h3>
-          <span className="text-xs font-mono font-bold text-[#081C2D]">
+          <span className="text-xs font-mono font-bold text-[#132443]">
             {progressPct}%
           </span>
         </div>
@@ -188,9 +188,9 @@ export function AdvisorJourneyRail({
               onClick={() => onSelectStep(idx)}
               className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all text-left ${
                 isCurrent
-                  ? "bg-[#F0FDF4] text-[#081C2D] border border-[#1F7A63] font-bold shadow-2xs"
+                  ? "bg-[#F0FDF4] text-[#132443] border border-[#1F7A63] font-bold shadow-2xs"
                   : isDone
-                  ? "text-[#081C2D] hover:bg-[#F5F7FA]"
+                  ? "text-[#132443] hover:bg-[#F5F7FA]"
                   : "text-slate-400 hover:bg-[#F5F7FA]"
               }`}
             >
@@ -205,7 +205,7 @@ export function AdvisorJourneyRail({
                   <Circle className="h-4 w-4 text-slate-300 shrink-0" />
                 )}
                 <div className="truncate">
-                  <span className={`block truncate ${isCurrent ? "font-bold text-[#081C2D]" : ""}`}>
+                  <span className={`block truncate ${isCurrent ? "font-bold text-[#132443]" : ""}`}>
                     {step.title}
                   </span>
                   <span className="text-[10px] text-slate-400 block truncate">

@@ -45,7 +45,7 @@ export function AboutSection() {
               <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
                 About Cognis Bank
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D] leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#132443] leading-tight">
                 Building the Digital Bridge Between Borrowers and Financial Institutions
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
@@ -63,7 +63,7 @@ export function AboutSection() {
                       <ShieldCheck className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                      <span className="text-xs font-bold text-[#081C2D] block">Bank-Grade Verification</span>
+                      <span className="text-xs font-bold text-[#132443] block">Bank-Grade Verification</span>
                       <span className="text-[11px] text-slate-500">Grounded in deterministic banking policies</span>
                     </div>
                   </div>
@@ -71,7 +71,7 @@ export function AboutSection() {
                   <button
                     type="button"
                     onClick={() => setShowTrustModal(true)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#081C2D] bg-white px-3 py-1.5 text-xs font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#132443] bg-white px-3 py-1.5 text-xs font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-all cursor-pointer shadow-2xs"
                   >
                     <Award className="h-3.5 w-3.5" />
                     <span>View Matrix</span>
@@ -97,7 +97,7 @@ export function AboutSection() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0] shadow-2xs">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <h3 className="text-sm font-bold text-[#081C2D]">{p.title}</h3>
+                      <h3 className="text-sm font-bold text-[#132443]">{p.title}</h3>
                       <p className="text-xs text-slate-600 leading-relaxed">
                         {p.description}
                       </p>
