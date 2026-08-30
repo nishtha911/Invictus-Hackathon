@@ -181,7 +181,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer disabled:opacity-60 hover:scale-[1.01]"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors cursor-pointer disabled:opacity-60"
                 >
                   {isSubmitting ? (
                     <span>Verifying Profile...</span>

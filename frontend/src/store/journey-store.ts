@@ -156,7 +156,7 @@ export const useJourneyStore = create<JourneyState>()(
                 urgency: "Immediate (Within 7 Days)",
               },
               answers: existingAnswers,
-              currentStepIndex: 3,
+              currentStepIndex: 0,
             };
           }
           return {
