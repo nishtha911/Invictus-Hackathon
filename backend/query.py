@@ -89,12 +89,16 @@ def get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
         try:
-            _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+            _embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
         except Exception as exc:
-            logger.error("Failed to load sentence-transformers model 'all-MiniLM-L6-v2': %s", exc)
-            raise RuntimeError(
-                f"Embedding model 'all-MiniLM-L6-v2' failed to load. Check sentence-transformers installation and internet connectivity: {exc}"
-            ) from exc
+            logger.warning("First attempt to load 'all-MiniLM-L6-v2' failed (%s), retrying...", exc)
+            try:
+                _embedder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device="cpu")
+            except Exception as retry_exc:
+                logger.error("Failed to load sentence-transformers model 'all-MiniLM-L6-v2': %s", retry_exc)
+                raise RuntimeError(
+                    f"Embedding model 'all-MiniLM-L6-v2' failed to load. Check sentence-transformers installation and internet connectivity: {retry_exc}"
+                ) from retry_exc
     return _embedder
 
 

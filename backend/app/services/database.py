@@ -291,7 +291,6 @@ def save_customer_profile(extracted_json: dict):
             "completeness_pct": meta.get("completeness_pct", 100),
             "turns_taken": meta.get("turns_taken", 8),
         }
-        # Clean null values if needed or let PostgreSQL handle defaults
         cleaned_row = {k: v for k, v in db_row.items() if v is not None}
         res = supabase.table("customer_profiles").upsert(cleaned_row).execute()
         return res.data

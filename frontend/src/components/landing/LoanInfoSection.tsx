@@ -90,7 +90,7 @@ export function LoanInfoSection() {
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
             Borrower Knowledge Base
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#132443]">
             Explore Loan Options
           </h2>
           <p className="text-sm text-slate-600">
@@ -115,7 +115,7 @@ export function LoanInfoSection() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#1F7A63] shadow-2xs">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-base font-bold text-[#081C2D]">{loan.title}</h3>
+                    <h3 className="text-base font-bold text-[#132443]">{loan.title}</h3>
                   </div>
 
                   <div className="space-y-1.5">
@@ -128,7 +128,7 @@ export function LoanInfoSection() {
                   </div>
 
                   <div className="space-y-2 pt-2 border-t border-[#E2E8F0]">
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-[#081C2D] block">
+                    <span className="text-[10px] uppercase tracking-wider font-semibold text-[#132443] block">
                       Key Lending Considerations
                     </span>
                     <ul className="space-y-2">

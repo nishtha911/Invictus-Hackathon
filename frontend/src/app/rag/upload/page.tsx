@@ -5,14 +5,22 @@ import { UploadCloud, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-rea
 
 const CATEGORIES = ['Education Loan', 'Home Loan', 'Personal Loan', 'Vehicle Loan', 'Business Loan', 'Other']
 
+interface UploadFileEntry {
+  file: File;
+  category: string;
+  status: 'pending' | 'uploading' | 'done' | 'error';
+  result: { chunks_stored?: number; [key: string]: unknown } | null;
+  error: string | null;
+}
+
 export default function UploadPage() {
-  const [files, setFiles] = useState<any[]>([])
+  const [files, setFiles] = useState<UploadFileEntry[]>([])
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function addFiles(newFiles: FileList | null) {
     if (!newFiles) return;
-    const entries = Array.from(newFiles).map(f => {
+    const entries: UploadFileEntry[] = Array.from(newFiles).map(f => {
       const name = f.name.toLowerCase();
       let detectedCategory = CATEGORIES[0];
       if (name.includes('education')) detectedCategory = 'Education Loan';
@@ -21,7 +29,7 @@ export default function UploadPage() {
       else if (name.includes('vehicle') || name.includes('car') || name.includes('auto')) detectedCategory = 'Vehicle Loan';
       else if (name.includes('business') || name.includes('sme') || name.includes('corporate')) detectedCategory = 'Business Loan';
       
-      return { file: f, category: detectedCategory, status: 'pending', result: null, error: null };
+      return { file: f, category: detectedCategory, status: 'pending' as const, result: null, error: null };
     });
     setFiles(prev => [...prev, ...entries])
   }
@@ -52,8 +60,9 @@ export default function UploadPage() {
         const data = await res.json()
         if (!res.ok) throw new Error(data.detail || 'Upload failed')
         setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'done', result: data } : f))
-      } catch (err: any) {
-        setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'error', error: err.message } : f))
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Upload failed'
+        setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'error', error: errorMsg } : f))
       }
     }
   }

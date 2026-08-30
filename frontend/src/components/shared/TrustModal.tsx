@@ -20,7 +20,7 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#081C2D]/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-[#132443]/60 backdrop-blur-xs"
         />
 
         <motion.div
@@ -35,13 +35,13 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#081C2D]">Trust & Verification Matrix</h3>
+                <h3 className="text-lg font-bold text-[#132443]">Trust & Verification Matrix</h3>
                 <p className="text-xs text-slate-500">How {BRAND.name} eliminates financial calculation errors</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#081C2D] transition-colors"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#132443] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -54,7 +54,7 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 text-[#1F7A63] shrink-0" />
                 <div>
-                  <h4 className="text-xs font-semibold text-[#081C2D]">Financial Calculations</h4>
+                  <h4 className="text-xs font-semibold text-[#132443]">Financial Calculations</h4>
                   <p className="text-[11px] text-slate-500">EMIs, interest rates, tenure & FOIR ratios</p>
                 </div>
               </div>
@@ -70,7 +70,7 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
               <div className="flex items-center gap-3">
                 <Lock className="h-5 w-5 text-[#1F7A63] shrink-0" />
                 <div>
-                  <h4 className="text-xs font-semibold text-[#081C2D]">Lending Eligibility</h4>
+                  <h4 className="text-xs font-semibold text-[#132443]">Lending Eligibility</h4>
                   <p className="text-[11px] text-slate-500">Income caps, age limits, credit tier validation</p>
                 </div>
               </div>
@@ -86,7 +86,7 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-slate-600 shrink-0" />
                 <div>
-                  <h4 className="text-xs font-semibold text-[#081C2D]">Product Knowledge & Terms</h4>
+                  <h4 className="text-xs font-semibold text-[#132443]">Product Knowledge & Terms</h4>
                   <p className="text-[11px] text-slate-500">Prepayment terms, fee structures & clauses</p>
                 </div>
               </div>
@@ -102,7 +102,7 @@ export function TrustModal({ open, onClose }: TrustModalProps) {
               <div className="flex items-center gap-3">
                 <Cpu className="h-5 w-5 text-slate-600 shrink-0" />
                 <div>
-                  <h4 className="text-xs font-semibold text-[#081C2D]">Personalized Reasoning</h4>
+                  <h4 className="text-xs font-semibold text-[#132443]">Personalized Reasoning</h4>
                   <p className="text-[11px] text-slate-500">Translating complex terms into plain English</p>
                 </div>
               </div>

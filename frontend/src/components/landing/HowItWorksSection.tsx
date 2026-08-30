@@ -38,7 +38,7 @@ export function HowItWorksSection() {
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
             Simple 4-Step Process
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#132443]">
             How Cognis Bank Works
           </h2>
           <p className="text-sm text-slate-600">
@@ -69,7 +69,7 @@ export function HowItWorksSection() {
                     </div>
                   </div>
 
-                  <h3 className="mt-5 text-base font-bold text-[#081C2D]">
+                  <h3 className="mt-5 text-base font-bold text-[#132443]">
                     {step.title}
                   </h3>
                   <p className="mt-2 text-xs text-slate-600 leading-relaxed">

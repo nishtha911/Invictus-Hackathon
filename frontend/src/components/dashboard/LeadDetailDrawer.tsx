@@ -43,7 +43,7 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#081C2D]/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-[#132443]/60 backdrop-blur-xs"
         />
 
         {/* Slide-over Drawer Panel */}
@@ -71,14 +71,14 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
                   {lead.score_band} · {lead.lead_score}/100
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#081C2D] tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#132443] tracking-tight">
                 {lead.customer_name}
               </h2>
               <p className="text-xs text-slate-500">Submitted {lead.created_at}</p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#081C2D] transition-colors"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#132443] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -90,14 +90,14 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
               <span className="text-[10px] text-slate-500 uppercase tracking-wider block">
                 Selected Loan Product
               </span>
-              <span className="text-sm font-bold text-[#081C2D] block mt-0.5">{lead.product_name}</span>
+              <span className="text-sm font-bold text-[#132443] block mt-0.5">{lead.product_name}</span>
               <span className="text-[10px] text-[#1F7A63] font-medium">{lead.loan_category}</span>
             </div>
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-3.5">
               <span className="text-[10px] text-slate-500 uppercase tracking-wider block">
                 Requested Principal
               </span>
-              <span className="text-base font-bold text-[#081C2D] font-mono block mt-0.5">
+              <span className="text-base font-bold text-[#132443] font-mono block mt-0.5">
                 {formatINR(lead.requested_amount)}
               </span>
               <span className="text-[10px] text-slate-500">EMI ~{formatINR(lead.estimated_emi)}/mo</span>
@@ -126,7 +126,7 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
 
           {/* UNDERWRITING BRIEFING */}
           <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-2.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D] flex items-center gap-1.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#132443] flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-[#1F7A63]" />
               Underwriting Assessment Notes
             </h3>
@@ -137,7 +137,7 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
 
           {/* WHY THIS LEAD SCORED HIGH */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#081C2D] flex items-center gap-1.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#132443] flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4 text-[#1F7A63]" />
               Scoring Factors & Verification
             </h4>
@@ -177,7 +177,7 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
             </button>
             <button
               onClick={handleMarkContacted}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#081C2D] bg-white px-4 py-3 text-xs font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#132443] bg-white px-4 py-3 text-xs font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-all cursor-pointer"
             >
               <UserCheck className="h-4 w-4" />
               <span>Mark Contacted</span>

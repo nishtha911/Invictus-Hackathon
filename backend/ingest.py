@@ -16,16 +16,8 @@ logger = logging.getLogger(__name__)
 _embedder = None
 
 def get_embedder() -> SentenceTransformer:
-    global _embedder
-    if _embedder is None:
-        try:
-            _embedder = SentenceTransformer("all-MiniLM-L6-v2")
-        except Exception as exc:
-            logger.error("Failed to initialize sentence-transformers model 'all-MiniLM-L6-v2': %s", exc)
-            raise RuntimeError(
-                f"Embedding model 'all-MiniLM-L6-v2' failed to load. Check network connection or sentence-transformers installation: {exc}"
-            ) from exc
-    return _embedder
+    from query import get_embedder as _get_query_embedder
+    return _get_query_embedder()
 
 
 def normalize_loan_category(category: str | None) -> str:

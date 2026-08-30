@@ -73,7 +73,7 @@ export default function RecommendationsPage() {
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
               Personalized Lending Evaluation
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
               Your Personalized Recommendations
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
@@ -83,7 +83,7 @@ export default function RecommendationsPage() {
 
           {/* Profile Summary Pill */}
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs font-mono text-slate-600 shadow-2xs">
-            <span className="text-[#081C2D] font-bold">{profile.intent || "Home Loan"}</span>
+            <span className="text-[#132443] font-bold">{profile.intent || "Home Loan"}</span>
             <span className="text-slate-300">·</span>
             <span className="text-[#1F7A63] font-semibold">{formatINR(profile.loan_amount || 4500000, true)}</span>
             <span className="text-slate-300">·</span>
@@ -108,7 +108,7 @@ export default function RecommendationsPage() {
           <div className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-[#081C2D]">Alternative Qualified Options</h3>
+                <h3 className="text-lg font-bold text-[#132443]">Alternative Qualified Options</h3>
                 <p className="text-xs text-slate-500">
                   Additional policy-compatible products matching your credit profile.
                 </p>
@@ -136,7 +136,7 @@ export default function RecommendationsPage() {
         {/* 3. Interest Decision Section */}
         <div className="bank-card p-6 sm:p-8 bg-white border border-[#E2E8F0] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-base sm:text-lg font-bold text-[#081C2D]">
+            <h3 className="text-base sm:text-lg font-bold text-[#132443]">
               Would you like to proceed with this loan application?
             </h3>
             <p className="text-xs text-slate-500">

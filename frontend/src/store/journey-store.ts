@@ -24,6 +24,7 @@ export interface JourneyState {
   authUser: AuthUser | null;
   userType: UserType | null;
   selectedCustomer: DemoCustomer | null;
+  role: "customer" | "employee" | "guest" | null;
   profile: ProfileIntake;
   extractedData: ExtractedProfileData | null;
   recommendations: RecommendedLoan[];
@@ -38,6 +39,7 @@ export interface JourneyState {
   login: (user: AuthUser, customer?: DemoCustomer) => void;
   logout: () => void;
   setUserType: (type: UserType, customer?: DemoCustomer) => void;
+  setRole: (role: "customer" | "employee" | "guest" | null) => void;
   updateProfile: (partial: Partial<ProfileIntake>) => void;
   setExtractedData: (data: ExtractedProfileData | null) => void;
   setRecommendations: (loans: RecommendedLoan[]) => void;
@@ -74,6 +76,7 @@ export const useJourneyStore = create<JourneyState>()(
       authUser: null,
       userType: null,
       selectedCustomer: null,
+      role: null,
       profile: { ...initialProfile },
       extractedData: null,
       recommendations: [],
@@ -92,6 +95,7 @@ export const useJourneyStore = create<JourneyState>()(
             authUser: user,
             userType: "existing",
             selectedCustomer: activeCustomer || null,
+            role: "customer",
             profile: {
               ...state.profile,
               user_type: "existing",
@@ -109,6 +113,7 @@ export const useJourneyStore = create<JourneyState>()(
           authUser: null,
           userType: null,
           selectedCustomer: null,
+          role: null,
           profile: {
             ...state.profile,
             user_type: "new",
@@ -142,6 +147,7 @@ export const useJourneyStore = create<JourneyState>()(
               authUser,
               userType: type,
               selectedCustomer: customer,
+              role: "customer",
               profile: {
                 user_type: "existing",
                 customer_id: customer.id,
@@ -156,7 +162,7 @@ export const useJourneyStore = create<JourneyState>()(
                 urgency: "Immediate (Within 7 Days)",
               },
               answers: existingAnswers,
-              currentStepIndex: 3,
+              currentStepIndex: 0,
             };
           }
           return {
@@ -164,6 +170,7 @@ export const useJourneyStore = create<JourneyState>()(
             authUser: null,
             userType: type,
             selectedCustomer: null,
+            role: "guest",
             profile: {
               ...initialProfile,
               user_type: "new",
@@ -172,6 +179,8 @@ export const useJourneyStore = create<JourneyState>()(
             currentStepIndex: 0,
           };
         }),
+
+      setRole: (role) => set({ role }),
 
       updateProfile: (partial) =>
         set((state) => ({
@@ -196,6 +205,7 @@ export const useJourneyStore = create<JourneyState>()(
           authUser: null,
           userType: null,
           selectedCustomer: null,
+          role: null,
           profile: { ...initialProfile },
           extractedData: null,
           recommendations: [],

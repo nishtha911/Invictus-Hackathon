@@ -1,3 +1,4 @@
+import { apiClient } from "./client";
 import { DemoCustomer } from "../types/contracts";
 import { DEMO_CUSTOMERS } from "../mocks/customers";
 
@@ -48,3 +49,36 @@ export async function loginCustomer(payload: LoginPayload): Promise<{ status: st
     customer: customCustomer,
   };
 }
+
+export interface EmployeeLoginPayload {
+  username: string;
+  password: string;
+}
+
+export interface EmployeeLoginResponse {
+  status: string;
+  role: "employee";
+  username: string;
+}
+
+export async function loginEmployee(payload: EmployeeLoginPayload): Promise<EmployeeLoginResponse> {
+  return apiClient<EmployeeLoginResponse>(
+    "/api/v1/auth/employee-login",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (payload.username.trim() === "bankemployee" && payload.password === "Demo@123") {
+        return {
+          status: "success",
+          role: "employee",
+          username: "bankemployee",
+        };
+      }
+      throw new Error("Invalid employee username or password.");
+    }
+  );
+}
+

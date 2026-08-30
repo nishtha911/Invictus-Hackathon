@@ -65,7 +65,7 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
       {/* Table Header & Search Controls */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h3 className="text-base font-bold text-[#081C2D] flex items-center gap-2">
+          <h3 className="text-base font-bold text-[#132443] flex items-center gap-2">
             <span>Inbound Lead Applications</span>
             <span className="rounded-md bg-[#F5F7FA] px-2.5 py-0.5 text-xs font-mono text-slate-600 border border-[#E2E8F0]">
               {filteredLeads.length} leads
@@ -82,7 +82,7 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search name, phone, lead ID..."
-            className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] pl-10 pr-4 py-2 text-xs text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none"
+            className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] pl-10 pr-4 py-2 text-xs text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none"
           />
         </div>
       </div>
@@ -165,7 +165,7 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
                 >
                   {/* Customer */}
                   <td className="p-3.5">
-                    <div className="font-semibold text-[#081C2D] group-hover:text-[#1F7A63] transition-colors">
+                    <div className="font-semibold text-[#132443] group-hover:text-[#1F7A63] transition-colors">
                       {lead.customer_name}
                     </div>
                     <div className="text-[11px] font-mono text-slate-500">{lead.phone}</div>
@@ -173,12 +173,12 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
 
                   {/* Product */}
                   <td className="p-3.5">
-                    <div className="font-medium text-[#081C2D]">{lead.product_name}</div>
+                    <div className="font-medium text-[#132443]">{lead.product_name}</div>
                     <div className="text-[10px] text-slate-500">{lead.loan_category}</div>
                   </td>
 
                   {/* Amount */}
-                  <td className="p-3.5 font-mono font-bold text-[#081C2D] text-sm">
+                  <td className="p-3.5 font-mono font-bold text-[#132443] text-sm">
                     {formatINR(lead.requested_amount, true)}
                   </td>
 

@@ -288,7 +288,7 @@ export function FloatingAssistant() {
                     className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                       msg.sender === "user"
                         ? "bg-[#1F7A63] text-white rounded-tr-none shadow-xs"
-                        : "bg-white text-[#081C2D] border border-[#E2E8F0] rounded-tl-none shadow-2xs"
+                        : "bg-white text-[#132443] border border-[#E2E8F0] rounded-tl-none shadow-2xs"
                     }`}
                   >
                     {msg.text}
@@ -301,7 +301,7 @@ export function FloatingAssistant() {
                         <button
                           key={idx}
                           onClick={opt.action}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#081C2D] hover:border-[#1F7A63] hover:bg-emerald-50/50 hover:text-[#1F7A63] transition-colors shadow-2xs cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#132443] hover:border-[#1F7A63] hover:bg-emerald-50/50 hover:text-[#1F7A63] transition-colors shadow-2xs cursor-pointer"
                         >
                           <span>{opt.label}</span>
                           <ArrowRight className="h-3 w-3" />
@@ -333,7 +333,7 @@ export function FloatingAssistant() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask about loans, rates, or eligibility..."
-                className="flex-1 rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-3.5 py-2 text-xs text-[#081C2D] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
+                className="flex-1 rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-3.5 py-2 text-xs text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
               />
               <button
                 type="submit"

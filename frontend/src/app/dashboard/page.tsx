@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useJourneyStore } from "@/store/journey-store";
 import {
   RefreshCw,
   Download,
@@ -22,6 +24,23 @@ import {
 import { toast } from "sonner";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { role } = useJourneyStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && role !== "employee") {
+      router.push("/login");
+    }
+  }, [mounted, role, router]);
+
   const [kpis, setKpis] = useState<DashboardKPIs>(MOCK_DASHBOARD_KPIS);
   const [trendData, setTrendData] = useState(MOCK_LEAD_TREND_DATA);
   const [productDemand, setProductDemand] = useState(MOCK_PRODUCT_DEMAND_DATA);
@@ -30,11 +49,8 @@ export default function DashboardPage() {
   const [selectedLead, setSelectedLead] = useState<SalesDashboardLeadItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (role !== "employee") return;
     setIsLoading(true);
     try {
       const data = await fetchDashboardData();
@@ -50,7 +66,24 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [role]);
+
+  useEffect(() => {
+    if (role === "employee") {
+      const timer = setTimeout(() => {
+        loadData();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [loadData, role]);
+
+  if (!mounted || role !== "employee") {
+    return (
+      <main className="flex-1 bg-[#F5F7FA] py-8 sm:py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center text-sm text-slate-500 font-medium">Checking authorization...</div>
+      </main>
+    );
+  }
 
   const handleUpdateStatus = (leadId: string, newStatus: SalesDashboardLeadItem["status"]) => {
     setLeads((prev) =>
@@ -80,7 +113,7 @@ export default function DashboardPage() {
                 Live Underwriting Sync
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081C2D] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
               Retail Lending Command Center
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
@@ -97,7 +130,7 @@ export default function DashboardPage() {
 
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#081C2D] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#132443] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Export</span>

@@ -188,13 +188,21 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error(f"Failed to initialize RAG database tables: {exc}")
 
+    # Warm up RAG embedding model
+    try:
+        from query import get_embedder
+        _ = get_embedder()
+        logger.info("RAG embedding model initialized and ready.")
+    except Exception as exc:
+        logger.warning(f"Failed to pre-warm RAG embedder: {exc}")
+
     # Auto-ingest sample documents with metadata enrichment into PostgreSQL RAG tables
     try:
         from ingest import auto_ingest_sample_docs
         ingested = auto_ingest_sample_docs(force=True)
         logger.info(f"Sample docs auto-ingestion completed. Ingested/refreshed {len(ingested)} documents.")
     except Exception as exc:
-        logger.error(f"Failed to auto-ingest sample documents: {exc}", exc_info=True)
+        logger.error(f"Failed to verify sample documents: {exc}", exc_info=True)
 
     yield
 
@@ -1188,4 +1196,25 @@ def delete_document(doc_id: int):
                 raise HTTPException(404, "Document not found.")
         conn.commit()
     return {"status": "deleted", "doc_id": doc_id}
+
+
+# ── Employee & Customer Auth Endpoints ─────────────────────────────────
+
+class EmployeeLoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/v1/auth/employee-login")
+@app.post("/api/auth/employee-login")
+async def employee_login_endpoint(req: EmployeeLoginRequest):
+    """Authenticate bank employee for Command Center access."""
+    if req.username.strip() == "bankemployee" and req.password == "Demo@123":
+        return {
+            "status": "success",
+            "role": "employee",
+            "username": "bankemployee",
+            "message": "Successfully authenticated as bank employee"
+        }
+    raise HTTPException(status_code=401, detail="Invalid employee username or password.")
+
 

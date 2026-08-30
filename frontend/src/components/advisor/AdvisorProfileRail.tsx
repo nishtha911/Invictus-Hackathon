@@ -32,7 +32,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#132443]">
             Borrower Profile
           </h3>
           <p className="text-[11px] text-slate-500">Live Structured Intake</p>
@@ -67,7 +67,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Purpose */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Loan Type</span>
-          <span className="font-semibold text-[#081C2D] flex items-center gap-1">
+          <span className="font-semibold text-[#132443] flex items-center gap-1">
             {profile.intent || "Not selected"}
             {profile.intent && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>
@@ -76,7 +76,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Income */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Monthly Income</span>
-          <span className="font-semibold text-[#081C2D] font-mono flex items-center gap-1">
+          <span className="font-semibold text-[#132443] font-mono flex items-center gap-1">
             {profile.income ? formatINR(profile.income) : "Waiting..."}
             {profile.income && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>
@@ -85,7 +85,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Employment */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Employment</span>
-          <span className="font-semibold text-[#081C2D] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
+          <span className="font-semibold text-[#132443] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
             {profile.employment_type || "Waiting..."}
             {profile.employment_type && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>
@@ -103,7 +103,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Tenure */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Tenure</span>
-          <span className="font-semibold text-[#081C2D] font-mono flex items-center gap-1">
+          <span className="font-semibold text-[#132443] font-mono flex items-center gap-1">
             {profile.tenure_years ? `${profile.tenure_years} Years` : "Waiting..."}
             {profile.tenure_years && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>
@@ -112,7 +112,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Current EMI */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Current EMI</span>
-          <span className="font-semibold text-[#081C2D] font-mono flex items-center gap-1">
+          <span className="font-semibold text-[#132443] font-mono flex items-center gap-1">
             {profile.existing_emi !== undefined ? formatINR(profile.existing_emi) : "Waiting..."}
             <Check className="h-3.5 w-3.5 text-[#1F7A63]" />
           </span>
@@ -121,7 +121,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Credit */}
         <div className="flex items-center justify-between py-1.5 border-b border-[#E2E8F0]">
           <span className="text-slate-500">Credit Profile</span>
-          <span className="font-semibold text-[#081C2D] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
+          <span className="font-semibold text-[#132443] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
             {profile.credit_band || "Waiting..."}
             {profile.credit_band && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>
@@ -130,7 +130,7 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
         {/* Urgency */}
         <div className="flex items-center justify-between py-1.5">
           <span className="text-slate-500">Timeline</span>
-          <span className="font-semibold text-[#081C2D] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
+          <span className="font-semibold text-[#132443] flex items-center gap-1 text-[11px] max-w-[140px] truncate">
             {profile.urgency || "Waiting..."}
             {profile.urgency && <Check className="h-3.5 w-3.5 text-[#1F7A63]" />}
           </span>

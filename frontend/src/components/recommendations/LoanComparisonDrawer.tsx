@@ -28,7 +28,7 @@ export function LoanComparisonDrawer({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#081C2D]/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-[#132443]/60 backdrop-blur-xs"
         />
 
         <motion.div
@@ -40,12 +40,12 @@ export function LoanComparisonDrawer({
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
             <div>
-              <h3 className="text-xl font-bold text-[#081C2D]">Compare Eligible Loan Products</h3>
+              <h3 className="text-xl font-bold text-[#132443]">Compare Eligible Loan Products</h3>
               <p className="text-xs text-slate-500">Side-by-side financial terms, EMIs and features</p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#081C2D] transition-colors"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-[#F5F7FA] hover:text-[#132443] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -58,7 +58,7 @@ export function LoanComparisonDrawer({
                 <tr className="border-b border-[#E2E8F0]">
                   <th className="p-3.5 text-slate-500 font-semibold w-1/4">Product Feature</th>
                   {loans.map((loan) => (
-                    <th key={loan.loan_id} className="p-3.5 text-[#081C2D] font-bold text-sm">
+                    <th key={loan.loan_id} className="p-3.5 text-[#132443] font-bold text-sm">
                       <div>{loan.name}</div>
                       <span className="text-[11px] font-medium text-[#1F7A63]">{loan.match_score}% Match</span>
                     </th>
@@ -80,7 +80,7 @@ export function LoanComparisonDrawer({
                 <tr>
                   <td className="p-3.5 font-medium text-slate-500">Monthly EMI</td>
                   {loans.map((loan) => (
-                    <td key={loan.loan_id} className="p-3.5 font-mono font-bold text-[#081C2D] text-sm">
+                    <td key={loan.loan_id} className="p-3.5 font-mono font-bold text-[#132443] text-sm">
                       {formatINR(loan.estimated_emi)}
                     </td>
                   ))}

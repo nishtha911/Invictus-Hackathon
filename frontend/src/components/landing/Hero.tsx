@@ -23,7 +23,7 @@ export function Hero() {
             </p>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-extrabold tracking-tight text-[#081C2D] leading-[1.12]">
+            <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-extrabold tracking-tight text-[#132443] leading-[1.12]">
               Finance Your Next Step with Confidence.
             </h1>
 
@@ -44,7 +44,7 @@ export function Hero() {
 
               <Link
                 href="/#how-it-works"
-                className="inline-flex items-center gap-2 border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
+                className="inline-flex items-center gap-2 border border-[#132443] bg-white px-5 py-3.5 text-sm font-semibold text-[#132443] hover:bg-[#132443] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>How Cognis Bank Works</span>
               </Link>
