@@ -177,13 +177,23 @@ const LOAN_PAGE_DATA: Record<
   },
 };
 
+// Alias map: intentKey-based URLs → canonical LOAN_PAGE_DATA keys
+const LOAN_KEY_ALIASES: Record<string, string> = {
+  "vehicle-loan": "car-loan",
+  "car-loan": "car-loan",
+};
+
+function resolveKey(raw: string): string {
+  return LOAN_KEY_ALIASES[raw] ?? raw;
+}
+
 export default function LoanDetailPage({
   params,
 }: {
   params: Promise<{ category: string }>;
 }) {
   const resolvedParams = use(params);
-  const key = resolvedParams.category?.toLowerCase();
+  const key = resolveKey(resolvedParams.category?.toLowerCase());
   const loanData = LOAN_PAGE_DATA[key];
 
   if (!loanData) {
