@@ -81,43 +81,19 @@ function AdvisorContent() {
     <main className="flex-1 bg-[#F5F7FA] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Top Status Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#E2E8F0] pb-4">
-          <div className="space-y-0.5">
+        <div className="mb-8 border-b border-[#E2E8F0] pb-4">
+          <div className="space-y-1">
             <h1 className="text-xl sm:text-2xl font-bold text-[#081C2D] tracking-tight flex items-center gap-2">
               <span>Loan Advisory Session</span>
               <span className="rounded-md bg-[#E8F5F1] px-2.5 py-0.5 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
-                Dynamic Intake
+                Cognis Bank Advisor
               </span>
             </h1>
-            <p className="text-xs text-slate-500">
-              Structured financial intake mapping your borrowing requirements to verified lending criteria.
+            <p className="text-xs sm:text-sm text-slate-500">
+              Answer the questions below to calculate your exact borrowing limits and view pre-approved offers.
             </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <ExtractionIndicator
-              active={isExtracting}
-              message={extractionStatusMessage}
-            />
-
-            {/* Mobile Profile Toggle Button */}
-            <button
-              onClick={() => setShowMobileProfile(!showMobileProfile)}
-              className="lg:hidden inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#081C2D]"
-            >
-              <Eye className="h-3.5 w-3.5 text-[#1F7A63]" />
-              <span>{showMobileProfile ? "Hide Profile" : "View Profile"}</span>
-              {showMobileProfile ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Expandable Profile Drawer */}
-        {showMobileProfile && (
-          <div className="lg:hidden mb-6">
-            <AdvisorProfileRail onFindMatches={handleFindMatches} isLoading={isLoading} />
-          </div>
-        )}
 
         {/* 3-Column Desktop Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

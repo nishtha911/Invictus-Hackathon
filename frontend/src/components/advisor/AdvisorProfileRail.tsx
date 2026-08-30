@@ -35,10 +35,10 @@ export function AdvisorProfileRail({ onFindMatches, isLoading }: AdvisorProfileR
           <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
             Borrower Profile
           </h3>
-          <p className="text-[11px] text-slate-500">Live Structured Context</p>
+          <p className="text-[11px] text-slate-500">Live Structured Intake</p>
         </div>
         <span className="rounded-full bg-[#E8F5F1] px-2.5 py-0.5 text-[10px] font-semibold text-[#1F7A63] border border-emerald-100">
-          Syncing
+          Parameters
         </span>
       </div>
 

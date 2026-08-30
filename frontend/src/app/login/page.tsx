@@ -111,17 +111,16 @@ export default function LoginPage() {
 
             {/* Subtle Photography snippet */}
             <div className="mt-8 pt-6 border-t border-slate-700/60 flex items-center gap-3">
-              <div className="relative h-12 w-12 rounded-xl overflow-hidden shrink-0 border border-slate-700">
-                <Image
-                  src="/images/dhansetu-family-loans.jpg"
-                  alt="DhanSetu Banking"
-                  fill
-                  className="object-cover"
+              <div className="relative h-12 w-12 rounded-xl overflow-hidden shrink-0 border border-slate-700 bg-white/10 p-1 flex items-center justify-center">
+                <img
+                  src="/images/logo.png"
+                  alt="Cognis Bank"
+                  className="h-full w-full object-contain"
                 />
               </div>
               <div className="text-xs">
-                <span className="text-white font-semibold block">Retail Lending Advisory</span>
-                <span className="text-slate-400 text-[11px]">Secure Bank Authentication</span>
+                <span className="text-white font-semibold block">Cognis Bank Portal</span>
+                <span className="text-slate-400 text-[11px]">Secure Authentication</span>
               </div>
             </div>
           </div>
