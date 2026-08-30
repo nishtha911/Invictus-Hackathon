@@ -1,0 +1,21 @@
+PersonalPlus - TrustLend
+
+Scheme Name: PersonalPlus
+Bank: TrustLend
+
+Overview:
+Balanced personal loan offering with partial pre-approval and flexible tenure.
+
+Eligibility:
+- Applicants aged 21-60 with stable income.
+
+Financials:
+- Loan amount: ₹30,000 to ₹1,500,000
+- Interest rate: From 11.0% p.a.
+- Tenure: 1 to 7 years
+- Processing fee: 1.0%
+
+Special Conditions:
+- Pre-approved customers may receive lower rates.
+
+Documentation: ID, income proof, bank statement.

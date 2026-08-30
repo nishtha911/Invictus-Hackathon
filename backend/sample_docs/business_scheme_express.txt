@@ -1,0 +1,21 @@
+ExpressBiz Loan - RapidFinance
+
+Scheme Name: ExpressBiz Loan
+Bank: RapidFinance
+
+Overview:
+Quick-disbursal business loan for short-term capital needs with minimal paperwork.
+
+Eligibility:
+- Small businesses with GST registration and 1+ year operations.
+
+Financials:
+- Loan amount: ₹100,000 to ₹5,000,000
+- Interest rate: From 13.0% p.a.
+- Tenure: Up to 5 years
+- Processing fee: 1.75%
+
+Special Conditions:
+- Quick online underwriting; working capital focus.
+
+Documentation: GST returns, bank statements, ID.

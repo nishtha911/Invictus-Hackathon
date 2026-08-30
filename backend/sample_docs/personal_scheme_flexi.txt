@@ -1,0 +1,21 @@
+FlexiPersonal - UrbanCredit
+
+Scheme Name: FlexiPersonal
+Bank: UrbanCredit
+
+Overview:
+Flexible personal loan with EMI restructuring options and top-up facility.
+
+Eligibility:
+- Salaried or self-employed with 2 years track record.
+
+Financials:
+- Loan amount: ₹50,000 to ₹2,000,000
+- Interest rate: From 11.5% p.a.
+- Tenure: Up to 7 years
+- Processing fee: 1.0%
+
+Special Conditions:
+- Top-up available after 12 months of regular repayment.
+
+Documentation: ID, income proof, bank statements.

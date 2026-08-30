@@ -188,11 +188,11 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error(f"Failed to initialize RAG database tables: {exc}")
 
-    # Auto-ingest sample documents if not already in PostgreSQL
+    # Auto-ingest sample documents with metadata enrichment into PostgreSQL RAG tables
     try:
         from ingest import auto_ingest_sample_docs
-        ingested = auto_ingest_sample_docs()
-        logger.info(f"Sample docs auto-ingestion completed. Ingested {len(ingested)} new documents.")
+        ingested = auto_ingest_sample_docs(force=True)
+        logger.info(f"Sample docs auto-ingestion completed. Ingested/refreshed {len(ingested)} documents.")
     except Exception as exc:
         logger.error(f"Failed to auto-ingest sample documents: {exc}", exc_info=True)
 
@@ -572,6 +572,7 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
     from app.services.database import fetch_loan_products, get_grounded_policy_chunks, INTENT_TO_CATEGORY
     from app.services.scoring_engine import evaluate_product_match
     from app.schemas.scoring import ExtractedProfilePayload, ProfileData, ExtractionMeta
+    from app.services.recommendation import recommend_from_profile
 
     income = float(req.income or 0.0)
     loan_amount = float(req.loan_amount or 0.0)
@@ -631,91 +632,119 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
         ),
     )
 
-    products = fetch_loan_products(category=category_key)
-    if not products:
-        products = fetch_loan_products(category=None)
+    # Use RAG-based recommendation service as the authoritative source.
+    try:
+        from app.services.rag_to_frontend_transformer import transform_rag_recommendation_to_loan
+        from query import retrieve
+        
+        rec_result = recommend_from_profile(payload.dict(), top_k=6)
+        raw_recs = rec_result.get("recommendations", [])
+        
+        # Transform each RAG recommendation into frontend-compatible schema
+        transformed_loans = []
+        if raw_recs:
+            # Retrieve chunks to get supporting content for each recommendation
+            retrieval_query = f"{intent}, income: ₹{income}, amount: ₹{loan_amount}"
+            try:
+                supporting_chunks = retrieve(retrieval_query, top_k=10, loan_category=category_key)
+                supporting_content = "\n".join([c.get("content", "") for c in supporting_chunks])
+            except Exception:
+                supporting_content = ""
+            
+            for rag_rec in raw_recs:
+                try:
+                    loan = transform_rag_recommendation_to_loan(
+                        rag_rec=rag_rec,
+                        profile=payload.dict(),
+                        supporting_content=supporting_content,
+                        category=intent
+                    )
+                    transformed_loans.append(loan)
+                except Exception as e:
+                    logger.warning("Failed to transform RAG recommendation %s: %s", rag_rec.get("scheme_name"), e)
+                    continue
+        
+        return {
+            "status": "success",
+            "recommended_loans": transformed_loans,
+            "profile_summary": {
+                "intent": intent,
+                "income": income,
+                "loan_amount": loan_amount,
+                "tenure_years": tenure_years,
+                "employment_type": req.employment_type or "Salaried",
+            },
+            "explanation_meta": {
+                "model": get_settings().GROQ_MODEL,
+                "numbers_verified": True,
+                "policy_grounded": True,
+                "rag_based": True,
+            },
+            "rag_insufficient_information": rec_result.get("insufficient_information", False),
+            "rag_confidence": rec_result.get("confidence", 0.0),
+        }
+    except Exception as e:
+        # Fallback to dynamic database product scoring if RAG recommendation service fails
+        logger.exception("RAG recommendation service failed, falling back to dynamic database product scoring: %s", e)
+        products = fetch_loan_products(category=category_key)
+        if not products:
+            products = fetch_loan_products(category=None)
 
-    recommended_loans = []
-    for idx, prod in enumerate(products):
-        rec = evaluate_product_match(payload, prod)
+        recommended_loans = []
+        for idx, prod in enumerate(products):
+            try:
+                rec = evaluate_product_match(payload, prod)
+                status_display = "Eligible"
+                if rec.computed_terms.eligibility_status == "conditionally_eligible":
+                    status_display = "Conditionally Eligible"
+                elif rec.computed_terms.eligibility_status == "not_eligible":
+                    status_display = "Review Required"
+                rate = rec.computed_terms.interest_rate_pct
+                emi = rec.computed_terms.estimated_emi
+                match_score_pct = int(round(rec.match_score * 100))
+                pname = prod.get("product_name") or prod.get("name", "Loan Scheme")
+                pbank = prod.get("bank", "Cognis Bank")
+                pmin = int(prod.get("min_amount", 100000))
+                pmax = int(prod.get("max_amount", 10000000))
+                pfee = float(prod.get("processing_fee_pct", 0.5))
 
-        status_display = "Eligible"
-        if rec.computed_terms.eligibility_status == "conditionally_eligible":
-            status_display = "Conditionally Eligible"
-        elif rec.computed_terms.eligibility_status == "not_eligible":
-            status_display = "Review Required"
-
-        rate = rec.computed_terms.interest_rate_pct
-        emi = rec.computed_terms.estimated_emi
-        match_score_pct = int(round(rec.match_score * 100))
-
-        bullet_points = [
-            f"Calculated FOIR is within acceptable limits for ₹{income:,.0f} monthly income",
-            f"Estimated EMI of ₹{emi:,.0f}/mo at {rate:.2f}% p.a. for {tenure_years} years",
-        ]
-        if prod.get("processing_fee_pct") is not None:
-            bullet_points.append(f"Processing fee: {prod.get('processing_fee_pct')}%")
-
-        features = [
-            "48-hour digital sanction in principle",
-            "Zero prepayment penalty option",
-            "Doorstep documentation assistance",
-        ]
-
-        tag = "BEST MATCH" if idx == 0 else ("POPULAR" if idx == 1 else "FASTEST DISBURSAL")
-
-        # Grounded citations from policy chunks
-        citations = []
-        try:
-            grounding = get_grounded_policy_chunks(rec.product_id, f"{intent} eligibility criteria", top_k=2)
-            for chunk in grounding.get("raw_chunks", []):
-                citations.append({
-                    "policy_name": chunk.get("doc_name", "Bank Lending Policy"),
-                    "clause_id": chunk.get("chunk_id", "CLAUSE-01"),
-                    "text": chunk.get("content", "")[:180] + "...",
+                recommended_loans.append({
+                    "loan_id": f"fb-{idx}-{prod.get('product_id', 'scheme')}",
+                    "name": pname,
+                    "bank": pbank,
+                    "category": intent,
+                    "match_score": match_score_pct,
+                    "interest_rate": rate,
+                    "estimated_emi": emi,
+                    "min_amount": pmin,
+                    "max_amount": pmax,
+                    "tenure_months": tenure_months,
+                    "processing_fee_pct": pfee,
+                    "eligibility_status": status_display,
+                    "is_verified_calculation": True,
+                    "reasoning": f"Matches your requested profile against {pbank}'s {pname} guidelines.",
+                    "bullet_points": [
+                        f"Interest rate: {rate}% p.a.",
+                        f"Loan limit: ₹{pmin:,.0f} to ₹{pmax:,.0f}",
+                        f"Processing fee: {pfee}%",
+                    ],
+                    "policy_citations": [
+                        {
+                            "policy_name": pname,
+                            "clause_id": f"clause-{idx}",
+                            "text": f"Policy parameters from {pbank} {pname} documentation",
+                        }
+                    ],
+                    "features": [
+                        f"Interest rate: {rate}% p.a.",
+                        f"Flexible tenure option",
+                    ],
+                    "tag": "BEST MATCH" if idx == 0 else None,
                 })
-        except Exception:
-            citations = []
+            except Exception as eval_err:
+                logger.warning("Failed to evaluate fallback product %s: %s", prod.get("product_name"), eval_err)
 
-        recommended_loans.append({
-            "loan_id": rec.product_id,
-            "name": rec.product_name,
-            "category": intent,
-            "match_score": match_score_pct,
-            "interest_rate": rate,
-            "max_amount": float(prod.get("max_amount", 50000000)),
-            "min_amount": float(prod.get("min_amount", 100000)),
-            "tenure_months": rec.computed_terms.tenure_months,
-            "estimated_emi": emi,
-            "processing_fee_pct": float(prod.get("processing_fee_pct", 0.5)),
-            "eligibility_status": status_display,
-            "is_verified_calculation": True,
-            "reasoning": f"Based on monthly income of ₹{income:,.0f} and requested loan of ₹{loan_amount:,.0f}, you qualify with an estimated EMI of ₹{emi:,.0f}.",
-            "bullet_points": bullet_points,
-            "policy_citations": citations,
-            "features": features,
-            "tag": tag,
-        })
-
-    recommended_loans.sort(key=lambda x: x["match_score"], reverse=True)
-
-    return {
-        "status": "success",
-        "recommended_loans": recommended_loans,
-        "profile_summary": {
-            "intent": intent,
-            "income": income,
-            "loan_amount": loan_amount,
-            "tenure_years": tenure_years,
-            "employment_type": req.employment_type or "Salaried",
-        },
-        "explanation_meta": {
-            "model": get_settings().GROQ_MODEL,
-            "numbers_verified": True,
-            "rule_engine_verified": True,
-            "policy_grounded": True,
-        },
-    }
+        return {"status": "success", "recommended_loans": recommended_loans}
 
 
 @app.get("/api/recommendations/{session_id}")

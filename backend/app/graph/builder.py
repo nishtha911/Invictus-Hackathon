@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 
 from langgraph.graph import StateGraph, END
-from langgraph.graph.state import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from app.graph.state import AdvisoryState
 from app.graph.nodes import (
@@ -51,7 +51,7 @@ from app.graph.router import (
 
 logger = logging.getLogger(__name__)
 
-def build_advisory_graph() -> CompiledGraph:
+def build_advisory_graph() -> CompiledStateGraph:
     """
     Build and compile the full advisory conversation graph.
     """

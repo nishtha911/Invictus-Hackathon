@@ -148,27 +148,82 @@ INTENT_TO_CATEGORY = {
 
 
 def fetch_loan_products(category: str = None):
-    """Fetches active loan products. Tries Supabase first, falls back to static list."""
+    """Fetches active loan products dynamically from RAG knowledge base tables (rag.documents & rag.chunks)."""
     db_category = INTENT_TO_CATEGORY.get(category or "", category)
 
-    if supabase:
-        try:
-            query = supabase.table("loan_products").select("*").eq("is_active", True)
-            if db_category:
-                query = query.eq("category", db_category)
-            res = query.execute()
-            if res.data:
-                logger.info(f"Fetched {len(res.data)} products from Supabase for '{db_category}'")
-                return res.data
-        except Exception as e:
-            logger.warning(f"Supabase product fetch failed: {e} — using static fallback")
+    try:
+        from db import get_conn
+        products = []
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                if db_category:
+                    cur.execute(
+                        "SELECT id, name, loan_category FROM rag.documents WHERE loan_category ILIKE %s ORDER BY id;",
+                        (f"%{db_category}%",)
+                    )
+                else:
+                    cur.execute("SELECT id, name, loan_category FROM rag.documents ORDER BY id;")
+                docs = cur.fetchall()
 
-    # Static fallback
+                for d in docs:
+                    doc_id = d["id"]
+                    doc_name = d["name"]
+                    doc_cat = d["loan_category"]
+
+                    cur.execute("SELECT content FROM rag.chunks WHERE doc_id = %s ORDER BY id;", (doc_id,))
+                    chunks = cur.fetchall()
+                    full_text = "\n".join(c["content"] for c in chunks)
+
+                    # Extract scheme name & bank
+                    scheme_match = re.search(r"Scheme Name:\s*([^\n]+)", full_text, re.IGNORECASE)
+                    bank_match = re.search(r"Bank:\s*([^\n]+)", full_text, re.IGNORECASE)
+
+                    scheme_name = scheme_match.group(1).strip() if scheme_match else doc_name.replace(".txt", "").replace("_", " ").title()
+                    bank_name = bank_match.group(1).strip() if bank_match else "Cognis Bank"
+
+                    # Extract interest rate
+                    rate_match = re.search(r"Interest rate[:\s]+From?\s*([\d\.]+)%", full_text, re.IGNORECASE) or re.search(r"[Rr]ate[:\s]*([\d\.]+)%", full_text, re.IGNORECASE)
+                    base_rate = float(rate_match.group(1)) if rate_match else 8.5
+
+                    # Extract min/max loan amounts
+                    min_amt_match = re.search(r"Loan amount[:\s]+[₹\$]?([\d,]+)\s*to", full_text, re.IGNORECASE)
+                    max_amt_match = re.search(r"Loan amount[:\s]+[^₹\$]*[₹\$]?[\d,]+\s*to\s*[₹\$]?([\d,]+)", full_text, re.IGNORECASE)
+
+                    min_amt = float(min_amt_match.group(1).replace(",", "")) if min_amt_match else 100000.0
+                    max_amt = float(max_amt_match.group(1).replace(",", "")) if max_amt_match else 10000000.0
+
+                    # Extract fee
+                    fee_match = re.search(r"[Pp]rocessing fee[:\s]*([\d\.]+)%", full_text, re.IGNORECASE)
+                    fee_pct = float(fee_match.group(1)) if fee_match else 0.5
+
+                    products.append({
+                        "product_id": f"rag-doc-{doc_id}",
+                        "product_name": scheme_name,
+                        "bank": bank_name,
+                        "category": doc_cat,
+                        "base_interest_rate": base_rate,
+                        "min_amount": min_amt,
+                        "max_amount": max_amt,
+                        "min_monthly_income": 20000,
+                        "max_foir_pct": 0.50,
+                        "min_tenure_months": 12,
+                        "max_tenure_months": 360,
+                        "processing_fee_pct": fee_pct,
+                        "is_active": True,
+                        "doc_name": doc_name,
+                    })
+
+        if products:
+            logger.info(f"Fetched {len(products)} RAG-grounded products from database for '{db_category}'")
+            return products
+    except Exception as e:
+        logger.warning(f"RAG product fetch failed: {e} — falling back to static fallback")
+
+    # Static fallback (matching knowledge base naming)
     products = [p for p in STATIC_LOAN_PRODUCTS if p["is_active"]]
     if db_category:
         filtered = [p for p in products if p["category"] == db_category]
-        products = filtered if filtered else products  # fallback all if category unknown
-    logger.info(f"Using {len(products)} static fallback products for '{db_category}'")
+        products = filtered if filtered else products
     return products
 
 

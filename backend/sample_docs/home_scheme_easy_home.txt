@@ -1,0 +1,23 @@
+EasyHome Loan - Neighbourhood Bank
+
+Scheme Name: EasyHome Loan
+Bank: Neighbourhood Bank
+
+Overview:
+Affordable home loan product with streamlined documentation for first-time home buyers.
+
+Eligibility:
+- Salaried applicants with a minimum 2 years employment.
+- Minimum monthly income: ₹20,000.
+
+Financials:
+- Loan amount: ₹250,000 to ₹30,000,000
+- Interest rate: From 8.10% p.a.
+- Tenure: Up to 25 years
+- Processing fee: 0.75%
+
+Special Conditions:
+- Reduced processing fee for salaried applicants with employer tie-ups.
+- Interest subsidy schemes may apply subject to government policy.
+
+Documentation: Salary slips, bank statements, property valuation certificate.

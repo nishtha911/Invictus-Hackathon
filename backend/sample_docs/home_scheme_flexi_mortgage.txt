@@ -1,0 +1,23 @@
+FlexiMortgage - Metropolitan Bank
+
+Scheme Name: FlexiMortgage
+Bank: Metropolitan Bank
+
+Overview:
+Flexible mortgage with overdraft-style features and interest-only payment options for a defined period.
+
+Eligibility:
+- Salaried and business owners with steady income.
+- Minimum income threshold assessed case-by-case.
+
+Financials:
+- Loan amount: ₹1,000,000 to ₹200,000,000
+- Interest rate: From 7.75% p.a.
+- Tenure: Up to 30 years
+- Processing fee: 0.9%
+
+Special Conditions:
+- Interest-only option for the first 2 years available on request.
+- Requires property insurance.
+
+Documentation: Proof of income, business statements for self-employed, property title.

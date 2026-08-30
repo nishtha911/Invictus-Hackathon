@@ -60,7 +60,7 @@ export function BestMatchHeroCard({
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4">
               <span className="text-[11px] text-slate-500 font-medium block">Interest Rate</span>
               <span className="text-2xl font-extrabold text-[#1F7A63] font-mono mt-0.5 block">
-                {loan.interest_rate.toFixed(2)}%
+                {loan.interest_rate ? typeof loan.interest_rate === 'number' ? loan.interest_rate.toFixed(2) : parseFloat(loan.interest_rate).toFixed(2) : 'N/A'}%
               </span>
               <span className="text-[10px] text-slate-400 block mt-1">Repo-linked Floating</span>
             </div>
@@ -69,10 +69,10 @@ export function BestMatchHeroCard({
             <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4">
               <span className="text-[11px] text-slate-500 font-medium block">Estimated EMI</span>
               <span className="text-2xl font-extrabold text-[#081C2D] font-mono mt-0.5 block">
-                {formatINR(loan.estimated_emi)}
+                {loan.estimated_emi ? formatINR(loan.estimated_emi) : 'N/A'}
               </span>
               <span className="text-[10px] text-slate-500 font-mono block mt-1">
-                for {loan.tenure_months} months
+                for {loan.tenure_months ?? 60} months
               </span>
             </div>
 
@@ -94,7 +94,7 @@ export function BestMatchHeroCard({
               Why this option may suit you
             </h4>
             <ul className="space-y-2 text-xs text-slate-600">
-              {loan.bullet_points.map((pt, idx) => (
+              {(loan.bullet_points ?? []).map((pt, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63] mt-1.5 shrink-0" />
                   <span className="leading-relaxed">{pt}</span>
@@ -121,7 +121,7 @@ export function BestMatchHeroCard({
               </button>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed italic">
-              &quot;{loan.reasoning}&quot;
+              &quot;{loan.reasoning || 'This loan matches your profile based on your income, employment type, and loan requirements.'}&quot;
             </p>
 
             {/* Technical Details Accordion */}
