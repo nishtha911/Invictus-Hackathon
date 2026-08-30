@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   RefreshCw,
   Download,
@@ -30,11 +30,7 @@ export default function DashboardPage() {
   const [selectedLead, setSelectedLead] = useState<SalesDashboardLeadItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await fetchDashboardData();
@@ -50,7 +46,11 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleUpdateStatus = (leadId: string, newStatus: SalesDashboardLeadItem["status"]) => {
     setLeads((prev) =>

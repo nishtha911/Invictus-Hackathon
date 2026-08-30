@@ -1,30 +1,46 @@
 "use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { FileText, Trash2, RefreshCw } from 'lucide-react'
 
+interface DocumentItem {
+  id: number;
+  name: string;
+  loan_category: string;
+  chunk_count: number;
+  uploaded_at: string;
+}
+
 export default function DocsPage() {
-  const [docs, setDocs] = useState<any[]>([])
+  const [docs, setDocs] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
     try {
       const res = await fetch(`${apiBase}/documents`)
-      setDocs(await res.json())
+      if (res.ok) {
+        const data = await res.json()
+        setDocs(Array.isArray(data) ? data : [])
+      }
+    } catch {
+      setDocs([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function remove(id: number) {
+  const remove = async (id: number) => {
     if (!confirm('Remove this document from the knowledge base?')) return
-    await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/documents/${id}`, { method: 'DELETE' })
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
+    await fetch(`${apiBase}/documents/${id}`, { method: 'DELETE' })
     load()
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [load])
 
   if (loading) return <div className="max-w-4xl mx-auto p-6"><p className="text-sm text-gray-400">Loading…</p></div>
   if (!docs.length) return <div className="max-w-4xl mx-auto p-6"><p className="text-sm text-gray-400">No documents in the knowledge base yet.</p></div>

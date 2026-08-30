@@ -4,6 +4,7 @@ Supabase database client for loan product catalogue and RAG policy retrieval.
 Falls back to a static product list if Supabase is unavailable (local dev mode).
 """
 import os
+import re
 import logging
 
 logger = logging.getLogger(__name__)

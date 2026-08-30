@@ -24,7 +24,7 @@ const LOAN_PAGE_DATA: Record<
   {
     title: string;
     intentKey: string;
-    icon: any;
+    icon: React.ElementType;
     tagline: string;
     rateRange: string;
     maxTenure: string;

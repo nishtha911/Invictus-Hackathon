@@ -70,6 +70,7 @@ export interface PolicyCitation {
 export interface RecommendedLoan {
   loan_id: string;
   name: string;
+  bank?: string;
   category: string;
   match_score: number; // e.g. 92
   interest_rate: number; // e.g. 8.60 (%)
