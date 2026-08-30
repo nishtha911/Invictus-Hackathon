@@ -21,13 +21,13 @@ except Exception as e:
     supabase = None
     logger.warning(f"Supabase unavailable ({e}) — using static fallback product catalogue.")
 
-# ── Try loading embedder (optional) ─────────────────────────────────────
-try:
-    from sentence_transformers import SentenceTransformer
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
-except Exception:
-    embedder = None
-    logger.warning("sentence-transformers not available — RAG citations disabled.")
+# ── Embedder loader (lazy) ──────────────────────────────────────────────
+def _get_embedder():
+    try:
+        from query import get_embedder
+        return get_embedder()
+    except Exception:
+        return None
 
 # ── Static fallback loan product catalogue ───────────────────────────────
 # Keys match exactly what scoring_engine.py expects:
@@ -230,9 +230,10 @@ def fetch_loan_products(category: str = None):
 
 def get_grounded_policy_chunks(product_id: str, user_query: str, top_k: int = 3):
     """Retrieves top-k policy chunks. Returns empty citations if RAG is unavailable."""
-    if supabase and embedder:
+    emb = _get_embedder()
+    if supabase and emb:
         try:
-            query_vector = embedder.encode(user_query).tolist()
+            query_vector = emb.encode(user_query).tolist()
             res = supabase.rpc("match_policy_chunks", {
                 "query_embedding": query_vector,
                 "match_product_id": product_id,
