@@ -79,11 +79,11 @@ npm run start
 Configuration is managed via `frontend/.env.local`:
 
 ```env
-# Mock Switch: Set to true for mock simulation, false to connect to FastAPI backend
-NEXT_PUBLIC_USE_MOCK_API=true
+# Mock Switch: Set to false to connect directly to FastAPI backend
+NEXT_PUBLIC_USE_MOCK_API=false
 
 # FastAPI Backend Base URL
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
 ---

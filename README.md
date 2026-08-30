@@ -42,45 +42,116 @@ The platform uses a robust, separated architecture:
 | **AI & LLM** | LangGraph, LangChain, Google Gemini |
 | **Database** | PostgreSQL, pgvector (Supabase) |
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Running Instructions
 
-### 1. Clone the repository
+### Prerequisites
+- **Node.js**: v18+ or v20+
+- **Python**: 3.10+ or 3.11+
+- **Supabase Account**: (with `public` and `rag` schemas, or use fallback static catalogue)
+
+---
+
+### Step 1: Clone the Repository & Checkout Branch
 ```bash
 git clone https://github.com/nishtha911/Invictus-Hackathon.git
 cd Invictus-Hackathon
+git checkout paras-siddhi-rag-integration
 ```
 
-### 2. Backend Setup (FastAPI)
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-Create a `.env` file in the `backend` directory with your API keys:
-```env
-OPENAI_API_KEY=your_key_here
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-```
-Run the backend:
-```bash
-python run.py
-```
+---
 
-### 3. Frontend Setup (Next.js)
-```bash
-cd frontend
-npm install
-```
-Create a `.env.local` file in the `frontend` directory:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-Run the frontend:
-```bash
-npm run dev
-```
+### Step 2: Backend Setup & Execution (FastAPI - Port 8080)
+
+1. Navigate to the `backend/` directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create and activate a Python virtual environment:
+   - **Windows (PowerShell)**:
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\Activate.ps1
+     ```
+   - **Linux / macOS**:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Configure environment variables:
+   Create or edit `backend/.env`:
+   ```env
+   # LLM Configuration
+   LLM_PROVIDER=groq
+   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_MODEL=llama-3.3-70b-versatile
+
+   # Supabase Database & Vector RAG Configuration
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_KEY=your_supabase_anon_or_service_key
+   SUPABASE_DB_URL=postgresql://postgres.your-ref:your-password@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
+
+   # Application settings
+   ENVIRONMENT=development
+   LOG_LEVEL=INFO
+   ```
+
+5. Run the backend server:
+   ```bash
+   python run.py
+   ```
+   > ℹ️ The backend will start on **http://localhost:8080** and will automatically initialize the `rag` schema and sample policy document embeddings.
+
+---
+
+### Step 3: Frontend Setup & Execution (Next.js - Port 3000)
+
+1. In a new terminal, navigate to the `frontend/` directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install Node dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure frontend environment variables:
+   Create or edit `frontend/.env.local`:
+   ```env
+   # Set to false to connect directly to live FastAPI backend
+   NEXT_PUBLIC_USE_MOCK_API=false
+
+   # FastAPI Backend Base URL
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+   ```
+
+4. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser and navigate to **[http://localhost:3000](http://localhost:3000)**.
+
+---
+
+## 🧭 Application Workflows & Routes
+
+| Route | Feature | Description |
+| :--- | :--- | :--- |
+| **`/`** | **Home Page** | Loan category discovery, overview, and access to Floating AI Assistant. |
+| **`/advisor`** | **Loan Advisory Intake** | Paras's structured intake: asks personalized questions (Income, Loan Amount, Tenure, Existing EMIs, Employment, Credit Score). |
+| **`/chat`** | **Conversational Advisor** | LangGraph dynamic conversational advisor profiling state. |
+| **`/recommendations`** | **Product Recommendations** | Deterministic FOIR match, interest calculations, and bank policy grounding. |
+| **`/rag/query`** | **Policy Knowledge Base** | Siddhi's RAG chatbot: asks bank policy questions using extracted user advisory answers and pgvector search. |
+| **`/rag/upload`** | **Document Ingestion** | Upload bank policy PDFs / brochures into `rag.documents` and `rag.chunks`. |
+| **`/dashboard`** | **Bank Sales Intelligence** | Real-time underwriter pipeline and lead scoring intelligence. |
 
 ---
 
