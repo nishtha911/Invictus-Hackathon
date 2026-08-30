@@ -5,6 +5,9 @@ Falls back to a static product list if Supabase is unavailable (local dev mode).
 """
 import os
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +23,19 @@ except Exception as e:
     supabase = None
     logger.warning(f"Supabase unavailable ({e}) — using static fallback product catalogue.")
 
-# ── Try loading embedder (optional) ─────────────────────────────────────
-try:
-    from sentence_transformers import SentenceTransformer
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
-except Exception:
-    embedder = None
-    logger.warning("sentence-transformers not available — RAG citations disabled.")
+# ── Embedder (Lazy loaded on demand) ──────────────────────────────────
+_embedder = None
+
+def get_embedder():
+    global _embedder
+    if _embedder is None:
+        try:
+            from sentence_transformers import SentenceTransformer
+            _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        except Exception:
+            _embedder = None
+            logger.warning("sentence-transformers not available — RAG citations disabled.")
+    return _embedder
 
 # ── Static fallback loan product catalogue ───────────────────────────────
 # Keys match exactly what scoring_engine.py expects:
@@ -174,6 +183,7 @@ def fetch_loan_products(category: str = None):
 
 def get_grounded_policy_chunks(product_id: str, user_query: str, top_k: int = 3):
     """Retrieves top-k policy chunks. Returns empty citations if RAG is unavailable."""
+    embedder = get_embedder()
     if supabase and embedder:
         try:
             query_vector = embedder.encode(user_query).tolist()
@@ -222,3 +232,78 @@ def save_customer_profile(extracted_json: dict):
     except Exception as e:
         logger.error(f"Failed to save profile to Supabase: {e}")
         return None
+
+
+def save_lead(lead_dict: dict):
+    """Saves a captured qualified lead to the Supabase qualified_leads table safely."""
+    if not supabase:
+        logger.warning("Supabase client not initialized, skipping DB lead save.")
+        return None
+    try:
+        import uuid as _uuid
+        raw_sid = lead_dict.get("session_id")
+        valid_sid = None
+        if raw_sid:
+            try:
+                valid_sid = str(_uuid.UUID(str(raw_sid)))
+            except Exception:
+                valid_sid = None
+
+        # Clean score band (must be 'hot', 'warm', or 'cold' lowercase for CHECK constraint)
+        band_raw = str(lead_dict.get("score_band", "warm")).lower()
+        if "hot" in band_raw:
+            clean_band = "hot"
+        elif "cold" in band_raw:
+            clean_band = "cold"
+        else:
+            clean_band = "warm"
+
+        # Check product_id exists in loan_products, fallback to 'prod-001'
+        prod_id = lead_dict.get("product_id") or lead_dict.get("loan_id") or "prod-001"
+        if not prod_id.startswith("prod-"):
+            prod_id = "prod-001"
+
+        db_row = {
+            "full_name": lead_dict.get("customer_name") or lead_dict.get("name") or "Interested Borrower",
+            "phone": str(lead_dict.get("phone") or "N/A"),
+            "email": str(lead_dict.get("email") or "N/A"),
+            "session_id": valid_sid,
+            "preferred_contact_time": lead_dict.get("preferred_contact_time", "Morning"),
+            "interested_product_id": prod_id,
+            "lead_score": max(0, min(100, int(lead_dict.get("score") or lead_dict.get("lead_score") or 75))),
+            "lead_band": clean_band,
+            "score_factors": lead_dict.get("key_scoring_factors") or lead_dict.get("score_factors") or [],
+            "chat_summary": lead_dict.get("ai_briefing") or lead_dict.get("chat_summary") or "",
+            "key_objections_or_notes": lead_dict.get("notes") or "",
+            "recommended_talking_points": lead_dict.get("talking_points") or lead_dict.get("recommended_talking_points") or [],
+            "status": "new"
+        }
+
+        # Try inserting with session_id
+        try:
+            res = supabase.table("qualified_leads").insert(db_row).execute()
+            logger.info(f"Successfully saved lead to Supabase: {res.data}")
+            return res.data
+        except Exception as insert_err:
+            # If session_id foreign key constraint failed, insert with session_id=None
+            logger.warning(f"FK constraint retry without session_id: {insert_err}")
+            db_row["session_id"] = None
+            db_row["interested_product_id"] = "prod-001"
+            res = supabase.table("qualified_leads").insert(db_row).execute()
+            logger.info(f"Successfully saved lead with sanitized FKs: {res.data}")
+            return res.data
+    except Exception as e:
+        logger.error(f"Failed to save lead to Supabase qualified_leads: {e}")
+        return None
+
+
+def fetch_leads():
+    """Fetches all leads from Supabase qualified_leads table."""
+    if not supabase:
+        return []
+    try:
+        res = supabase.table("qualified_leads").select("*").order("created_at", desc=True).execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Failed to fetch leads from Supabase: {e}")
+        return []
