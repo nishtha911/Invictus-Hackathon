@@ -199,8 +199,8 @@ async def lifespan(app: FastAPI):
     # Auto-ingest sample documents with metadata enrichment into PostgreSQL RAG tables
     try:
         from ingest import auto_ingest_sample_docs
-        ingested = auto_ingest_sample_docs(force=False)
-        logger.info(f"Sample docs verified in RAG knowledge base ({len(ingested)} documents).")
+        ingested = auto_ingest_sample_docs(force=True)
+        logger.info(f"Sample docs auto-ingestion completed. Ingested/refreshed {len(ingested)} documents.")
     except Exception as exc:
         logger.error(f"Failed to verify sample documents: {exc}", exc_info=True)
 
