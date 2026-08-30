@@ -1,0 +1,25 @@
+ScholarPlus Education Loan - BrightFutures Bank
+
+Scheme Name: ScholarPlus Education Loan
+Bank: BrightFutures Bank
+
+Overview:
+ScholarPlus provides funding for higher education, vocational training and study-abroad programs. The scheme supports tuition, accommodation and approved course-related expenses.
+
+Eligibility:
+- Indian resident students or guardians applying on behalf of a student.
+- Minimum age: 18 years (applicant/guardian criteria vary).
+- Academic admission proof (offer letter or fee invoice) required.
+
+Financials:
+- Minimum monthly family income: No minimum for co-signed loans; income used to determine interest band.
+- Loan amount: ₹50,000 to ₹2,000,000
+- Interest rate: From 9.5% p.a. (floating) depending on credit assessment
+- Tenure: Up to 10 years
+- Processing fee: 1.0% of sanctioned amount
+
+Special Conditions:
+- Moratorium available until course completion + 6 months grace.
+- Collateral required for loans above ₹1,000,000 or if no viable guarantor.
+
+Documentation: Offer letter, fee schedule, ID, address, academic records, guarantor documents.

@@ -92,7 +92,7 @@ def clean(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Chunking  — section-aware
+# Chunking  — section-aware & metadata-enriched
 # ---------------------------------------------------------------------------
 
 # Common section headings found in loan policy documents
@@ -112,11 +112,38 @@ SECTION_PATTERN = re.compile(
 SECTION_DIVIDER = re.compile(r'^[=\-]{10,}\s*$')
 
 
-def chunk_pages(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def extract_doc_metadata(pages: List[Dict[str, Any]], filename: str) -> Dict[str, str]:
+    """Extract Scheme Name and Bank Name from document text or fallback to filename."""
+    full_text = "\n".join([p["text"] for p in pages])
+    scheme_match = re.search(r"Scheme Name:\s*([^\n]+)", full_text, re.IGNORECASE)
+    bank_match = re.search(r"Bank:\s*([^\n]+)", full_text, re.IGNORECASE)
+
+    scheme_name = scheme_match.group(1).strip() if scheme_match else ""
+    bank_name = bank_match.group(1).strip() if bank_match else ""
+
+    if not scheme_name:
+        # Infer from filename e.g. "home_scheme_easy_home.txt" -> "Easy Home"
+        name_clean = Path(filename).stem
+        for pfx in ("home_scheme_", "personal_scheme_", "vehicle_scheme_", "education_scheme_", "business_scheme_"):
+            if name_clean.startswith(pfx):
+                name_clean = name_clean[len(pfx):]
+        scheme_name = name_clean.replace("_", " ").title()
+
+    if not bank_name:
+        bank_name = "Cognis Bank"
+
+    return {"scheme_name": scheme_name, "bank_name": bank_name}
+
+
+def chunk_pages(pages: List[Dict[str, Any]], filename: str = "document.txt") -> List[Dict[str, Any]]:
     """
-    Split pages into section-aware chunks.
-    Each chunk carries: {section, page, content}
+    Split pages into section-aware chunks and enrich with document metadata headers.
+    Each chunk carries: {section, page, content, scheme_name, bank_name}
     """
+    meta = extract_doc_metadata(pages, filename)
+    scheme_name = meta["scheme_name"]
+    bank_name = meta["bank_name"]
+
     chunks = []
     current_section = "General"
     current_page = 1
@@ -124,7 +151,7 @@ def chunk_pages(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     def flush(section, page, buf):
         text = clean(" ".join(buf))
-        if len(text) > 80:
+        if len(text) > 40:
             chunks.append({"section": section, "page": page, "content": text})
 
     for page_obj in pages:
@@ -134,7 +161,7 @@ def chunk_pages(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         for line in lines:
             stripped = line.strip()
             if SECTION_DIVIDER.match(stripped):
-                continue  # skip divider lines, don't add to buffer
+                continue  # skip divider lines
             heading_match = SECTION_PATTERN.match(stripped)
             if heading_match:
                 flush(current_section, current_page, buffer)
@@ -146,11 +173,12 @@ def chunk_pages(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     flush(current_section, current_page, buffer)
 
-    # Secondary split: if a chunk is very long, split by paragraph
+    # Secondary split and Header Enrichment
     final = []
     for chunk in chunks:
+        sub_texts = []
         if len(chunk["content"]) <= 1500:
-            final.append(chunk)
+            sub_texts.append(chunk["content"])
         else:
             paragraphs = re.split(r'\n{2,}|\. {2,}', chunk["content"])
             para_buf = ""
@@ -159,10 +187,22 @@ def chunk_pages(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     para_buf += " " + para
                 else:
                     if para_buf.strip():
-                        final.append({**chunk, "content": para_buf.strip()})
+                        sub_texts.append(para_buf.strip())
                     para_buf = para
             if para_buf.strip():
-                final.append({**chunk, "content": para_buf.strip()})
+                sub_texts.append(para_buf.strip())
+
+        for stext in sub_texts:
+            # Prepend explicit header metadata to chunk content so embedding & retrieval retain exact scheme context
+            header_prefix = f"Scheme Name: {scheme_name}\nBank: {bank_name}\nDocument: {filename}\nSection: {chunk['section']}\n"
+            enriched_content = f"{header_prefix}\n{stext}"
+            final.append({
+                "section": chunk["section"],
+                "page": chunk["page"],
+                "content": enriched_content,
+                "scheme_name": scheme_name,
+                "bank_name": bank_name,
+            })
 
     return final
 
@@ -189,8 +229,8 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
     # 1. Extract
     pages = extract(file_bytes, filename)
 
-    # 2. Chunk
-    raw_chunks = chunk_pages(pages)
+    # 2. Chunk with metadata enrichment
+    raw_chunks = chunk_pages(pages, filename=filename)
 
     if not raw_chunks:
         raise ValueError("No content could be extracted from the document.")
@@ -200,9 +240,11 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
     texts = [c["content"] for c in raw_chunks]
     embeddings = embedder.encode(texts, show_progress_bar=False).tolist()
 
-    # 4. Store — all writes go to rag.documents and rag.chunks
+    # 4. Store — write to rag.documents and rag.chunks (deleting existing doc if re-ingesting)
     with get_conn() as conn:
         with conn.cursor() as cur:
+            cur.execute("DELETE FROM rag.documents WHERE name = %s;", (filename,))
+
             cur.execute(
                 "INSERT INTO rag.documents (name, loan_category) VALUES (%s, %s) RETURNING id;",
                 (filename, normalized_category)
@@ -216,7 +258,14 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
                     INSERT INTO rag.chunks
                         (id, doc_id, doc_name, loan_category, section, page_number, content, embedding)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s::vector)
-                    ON CONFLICT (id) DO NOTHING;
+                    ON CONFLICT (id) DO UPDATE SET
+                        doc_id = EXCLUDED.doc_id,
+                        doc_name = EXCLUDED.doc_name,
+                        loan_category = EXCLUDED.loan_category,
+                        section = EXCLUDED.section,
+                        page_number = EXCLUDED.page_number,
+                        content = EXCLUDED.content,
+                        embedding = EXCLUDED.embedding;
                     """,
                     (
                         chunk_id,
@@ -239,10 +288,10 @@ def ingest_document(file_bytes: bytes, filename: str, loan_category: str) -> Dic
     }
 
 
-def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None) -> list[dict]:
+def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None, force: bool = False) -> list[dict]:
     """
     Check backend/sample_docs/ on disk and auto-ingest any missing .txt docs into rag.documents / rag.chunks.
-    Safe to call on every startup (idempotent: skips docs already present in the database).
+    If force=True, re-ingests all documents to update enriched chunk headers.
     """
     if sample_docs_dir is None:
         sample_docs_dir = Path(__file__).resolve().parent / "sample_docs"
@@ -270,13 +319,15 @@ def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None) -> list[d
 
     ingested = []
     try:
-        with get_conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT name FROM rag.documents;")
-                existing_doc_names = {row["name"] for row in cur.fetchall()}
+        existing_doc_names = set()
+        if not force:
+            with get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT name FROM rag.documents;")
+                    existing_doc_names = {row["name"] for row in cur.fetchall()}
 
         for txt_file in sorted(sample_docs_dir.glob("*.txt")):
-            if txt_file.name in existing_doc_names:
+            if not force and txt_file.name in existing_doc_names:
                 continue
 
             category = infer_category_from_filename(txt_file.name)
@@ -293,4 +344,5 @@ def auto_ingest_sample_docs(sample_docs_dir: Path | str | None = None) -> list[d
         logger.error(f"Error during auto_ingest_sample_docs: {e}", exc_info=True)
 
     return ingested
+
 

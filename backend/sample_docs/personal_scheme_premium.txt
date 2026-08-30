@@ -1,0 +1,21 @@
+PremiumPersonal - Elite Finance
+
+Scheme Name: PremiumPersonal
+Bank: Elite Finance
+
+Overview:
+Higher ticket personal loan for professionals with preferential rates and concierge service.
+
+Eligibility:
+- Salaried professionals with minimum CTC requirement set per city.
+
+Financials:
+- Loan amount: ₹200,000 to ₹5,000,000
+- Interest rate: From 10.25% p.a.
+- Tenure: Up to 5 years
+- Processing fee: 0.75%
+
+Special Conditions:
+- Dedicated relationship manager and faster underwriting for pre-approved customers.
+
+Documentation: Salary proof, employment verification, KYC.

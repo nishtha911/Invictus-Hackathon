@@ -1,0 +1,21 @@
+NewbieCar Starter Loan - AutoStart Bank
+
+Scheme Name: NewbieCar Starter Loan
+Bank: AutoStart Bank
+
+Overview:
+Small-ticket auto loan for recent graduates and first-time car buyers.
+
+Eligibility:
+- Applicants aged 21-30 with proof of employment or co-signer.
+
+Financials:
+- Loan amount: ₹30,000 to ₹500,000
+- Interest rate: From 10.0% p.a.
+- Tenure: Up to 5 years
+- Processing fee: ₹1,000 flat
+
+Special Conditions:
+- Co-signer accepted; simplified underwriting for salaried applicants.
+
+Documentation: ID, job offer/appointment letter or co-signer documents.

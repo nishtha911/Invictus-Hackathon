@@ -1,0 +1,21 @@
+SmartAuto Loan - DriveBank
+
+Scheme Name: SmartAuto Loan
+Bank: DriveBank
+
+Overview:
+Financing for new and used cars with competitive EMI plans and dealer tie-ups for quick processing.
+
+Eligibility:
+- Salaried applicants with stable employment.
+
+Financials:
+- Loan amount: ₹50,000 to ₹5,000,000
+- Interest rate: From 8.5% p.a.
+- Tenure: Up to 7 years
+- Processing fee: 0.5%
+
+Special Conditions:
+- Dealer-assist disbursal available; insurance included as add-on.
+
+Documentation: Vehicle invoice, ID, income proof.

@@ -1,0 +1,23 @@
+SkillBoost Short-term Loan - CareerAid Bank
+
+Scheme Name: SkillBoost Short-term Loan
+Bank: CareerAid Bank
+
+Overview:
+Short-term financing for professional certifications, bootcamps and skill-based courses. Quick approval and simple documentation.
+
+Eligibility:
+- Applicants aged 18 and above.
+- Minimum demonstrable intent (course invoice) required.
+
+Financials:
+- Loan amount: ₹10,000 to ₹200,000
+- Interest rate: 12.5% p.a. (fixed)
+- Tenure: 1 to 3 years
+- Processing fee: ₹999 flat
+
+Special Conditions:
+- Fast-track disbursal within 48 hours for partnered institutes.
+- No collateral.
+
+Documentation: Fee invoice, ID, and minimal income proof (if available).

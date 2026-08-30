@@ -1,0 +1,21 @@
+SMEPlus Loan - CapitalWorks Bank
+
+Scheme Name: SMEPlus Loan
+Bank: CapitalWorks Bank
+
+Overview:
+Tailored term loans for SMEs focused on capex and machinery purchases.
+
+Eligibility:
+- Businesses with audited accounts or verifiable revenue.
+
+Financials:
+- Loan amount: ₹500,000 to ₹50,000,000
+- Interest rate: From 11.5% p.a.
+- Tenure: Up to 10 years
+- Processing fee: 1.25%
+
+Special Conditions:
+- Asset-backed lending options and structured repayment plans.
+
+Documentation: Financial statements, asset invoices, business proof.
