@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   RefreshCw,
   Download,
@@ -29,6 +29,10 @@ export default function DashboardPage() {
   const [leads, setLeads] = useState<SalesDashboardLeadItem[]>(MOCK_SALES_LEADS);
   const [selectedLead, setSelectedLead] = useState<SalesDashboardLeadItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);

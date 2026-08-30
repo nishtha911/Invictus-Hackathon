@@ -33,7 +33,7 @@ function AdvisorContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [showMobileProfile, setShowMobileProfile] = useState(false);
 
-  // Handle URL intent query parameter (e.g. /advisor?intent=home_loan)
+  // Handle URL intent query parameter and clean start
   useEffect(() => {
     const intentParam = searchParams.get("intent");
     if (intentParam) {
@@ -43,8 +43,9 @@ function AdvisorContent() {
       if (matched) {
         updateProfile({ intent: matched.id });
       }
+      setStepIndex(0);
     }
-  }, [searchParams, updateProfile]);
+  }, [searchParams, updateProfile, setStepIndex]);
 
   const handleFindMatches = async () => {
     setIsLoading(true);
