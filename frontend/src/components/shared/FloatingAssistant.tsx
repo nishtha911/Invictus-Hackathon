@@ -31,7 +31,7 @@ export function FloatingAssistant() {
     {
       id: "1",
       sender: "bot",
-      text: "Hello! Welcome to DhanSetu. I can assist you in finding suitable home, car, business, or gold loan options tailored to your needs.",
+      text: "Hello! Welcome to Cognis Bank. I can assist you in exploring verified home, car, business, gold, personal, or education loan options tailored to your profile.",
       options: [
         {
           label: "Home Loan",
@@ -50,7 +50,7 @@ export function FloatingAssistant() {
           action: () => handleSelectCategory("Gold Loan", "gold_loan"),
         },
         {
-          label: "How does DhanSetu work?",
+          label: "How does Cognis Bank work?",
           action: () => handleHowItWorks(),
         },
       ],
@@ -75,7 +75,7 @@ export function FloatingAssistant() {
     const userMsg: ChatMessage = {
       id: String(Date.now()),
       sender: "user",
-      text: "How does DhanSetu work?",
+      text: "How does Cognis Bank work?",
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -86,7 +86,7 @@ export function FloatingAssistant() {
       const botMsg: ChatMessage = {
         id: String(Date.now() + 1),
         sender: "bot",
-        text: "DhanSetu follows a simple 4-step process: 1) Choose your loan goal, 2) Complete a quick 2-minute profile intake, 3) Receive verified EMI calculations & matched products, and 4) Connect directly with a retail lending officer.",
+        text: "Cognis Bank follows a simple 4-step process: 1) Choose your loan goal, 2) Complete a dynamic 2-minute profile intake, 3) Receive verified EMI calculations & matched products, and 4) Connect directly with a retail lending officer.",
         options: [
           {
             label: "Explore Process on Page",
@@ -255,25 +255,28 @@ export function FloatingAssistant() {
             className="flex flex-col w-[calc(100vw-2rem)] sm:w-[380px] h-[520px] max-h-[85vh] rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-[#081C2D] px-5 py-4 text-white flex items-center justify-between">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
-                  <h3 className="text-sm font-bold tracking-tight">DhanSetu Assistant</h3>
+            <div className="flex items-center justify-between border-b border-[#0f3448] bg-gradient-to-r from-[#031c18] via-[#052136] to-[#041a2e] px-4 py-3 text-white rounded-t-2xl">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 border border-white/20 p-1">
+                  <img src="/images/logo.png" alt="Cognis Bank" className="h-full w-full object-contain" />
                 </div>
-                <p className="text-[11px] text-slate-300">How can we help with your loan journey?</p>
+                <div>
+                  <h3 className="text-sm font-bold tracking-tight">Cognis Bank Assistant</h3>
+                  <p className="text-[10px] text-emerald-400 font-medium">Online · Live Lending Guidance</p>
+                </div>
               </div>
+
               <button
                 onClick={() => setIsOpen(false)}
-                aria-label="Close chat"
-                className="rounded-lg p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close Assistant"
+                className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#F5F7FA] text-xs">
+            {/* Chat Body */}
+            <div className="h-[360px] overflow-y-auto p-4 space-y-3 bg-[#F5F7FA]">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -282,10 +285,10 @@ export function FloatingAssistant() {
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-xl px-3.5 py-2.5 leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                       msg.sender === "user"
-                        ? "bg-[#1F7A63] text-white rounded-br-none"
-                        : "bg-white text-[#081C2D] border border-[#E2E8F0] shadow-2xs rounded-bl-none"
+                        ? "bg-[#1F7A63] text-white rounded-tr-none shadow-xs"
+                        : "bg-white text-[#081C2D] border border-[#E2E8F0] rounded-tl-none shadow-2xs"
                     }`}
                   >
                     {msg.text}
@@ -311,10 +314,10 @@ export function FloatingAssistant() {
 
               {isTyping && (
                 <div className="flex items-center gap-1.5 text-slate-400 text-[11px] pl-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse delay-100" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse delay-200" />
-                  <span>DhanSetu Assistant is typing...</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63] animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63] animate-pulse delay-100" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#1F7A63] animate-pulse delay-200" />
+                  <span>Cognis Bank Assistant is typing...</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -343,12 +346,9 @@ export function FloatingAssistant() {
             </form>
 
             {/* Trust Caption */}
-            <div className="bg-[#F5F7FA] px-3 py-1.5 border-t border-[#E2E8F0] flex items-center justify-between text-[10px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="h-3 w-3 text-[#1F7A63]" />
-                Policy-Grounded Advisory
-              </span>
-              <span>DhanSetu v2.0</span>
+            <div className="bg-slate-50 px-3 py-1.5 border-t border-[#E2E8F0] flex items-center justify-between text-[10px] text-slate-400">
+              <span>Cognis Bank AI Policy Assistant</span>
+              <span>256-Bit Encrypted</span>
             </div>
           </motion.div>
         )}

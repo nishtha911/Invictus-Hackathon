@@ -43,13 +43,13 @@ export function AboutSection() {
               className="lg:col-span-5 space-y-4 text-left"
             >
               <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
-                About DhanSetu
+                About Cognis Bank
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D] leading-tight">
                 Building the Digital Bridge Between Borrowers and Financial Institutions
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                DhanSetu is a digital loan advisory platform designed to make loan discovery simpler, clearer, and more accessible.
+                Cognis Bank is a digital loan advisory platform designed to make loan discovery simpler, clearer, and more accessible.
               </p>
               <p className="text-sm text-slate-600 leading-relaxed">
                 We eliminate guesswork from borrowing by pairing structured customer intake with verified banking rule engines—delivering pre-qualified, policy-evaluated borrower interest directly to retail lending teams.

@@ -341,211 +341,227 @@ export default function QueryPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Policy Knowledge Base</h1>
-      <div className="flex flex-col h-[70vh] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden">
-        {/* Category selector panel */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 shrink-0 space-y-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-2.5">
-              <Sparkles className="text-[#1F7A63] mt-0.5 shrink-0" size={18} />
-              <div>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      {/* 2-Column Responsive Grid Layout: Chat Left (8 cols) + Suggestions Right (4 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left / Main Column: Chat Box Window (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col h-[78vh] min-h-[640px] bg-white border border-gray-200/80 rounded-2xl shadow-md overflow-hidden">
+          {/* Header */}
+          <div className="px-5 py-3.5 bg-gray-50 border-b border-gray-100 shrink-0 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Sparkles className="text-[#1F7A63] shrink-0" size={18} />
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-semibold text-gray-800">Advisory Profile Connected</span>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#1F7A63] border border-emerald-200">
+                  <span className="text-sm font-bold text-gray-800">Policy Knowledge Base</span>
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#1F7A63] border border-emerald-200">
                     Live RAG Integration
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-500 mt-0.5">
-                  {activeContext.profile.income || activeContext.profile.loan_amount || activeContext.profile.intent
-                    ? `Answers from your advisory intake are powering personalized policy answers.`
-                    : `Ask bank policy questions or complete your Loan Advisory intake for personalized terms.`}
-                </p>
-                {/* Profile Pills */}
-                {(activeContext.profile.intent || activeContext.profile.income || activeContext.profile.loan_amount || activeContext.profile.employment_type) && (
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    {activeContext.profile.intent && (
-                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
-                        Goal: <strong className="text-slate-900">{activeContext.profile.intent}</strong>
-                      </span>
-                    )}
-                    {activeContext.profile.income ? (
-                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
-                        Income: <strong className="text-slate-900">₹{activeContext.profile.income.toLocaleString('en-IN')}/mo</strong>
-                      </span>
-                    ) : null}
-                    {activeContext.profile.loan_amount ? (
-                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
-                        Amount: <strong className="text-slate-900">₹{activeContext.profile.loan_amount.toLocaleString('en-IN')}</strong>
-                      </span>
-                    ) : null}
-                    {activeContext.profile.employment_type && (
-                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
-                        Type: <strong className="text-slate-900">{activeContext.profile.employment_type}</strong>
-                      </span>
-                    )}
-                    {activeContext.profile.credit_band && (
-                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
-                        Credit: <strong className="text-slate-900">{activeContext.profile.credit_band}</strong>
-                      </span>
-                    )}
-                  </div>
+                {activeContext.profile.intent && (
+                  <p className="text-[11px] text-gray-500 mt-0.5 truncate">
+                    Personalized to: <strong className="text-slate-800">{activeContext.profile.intent}</strong>
+                    {activeContext.profile.income ? ` · Income: ₹${activeContext.profile.income.toLocaleString('en-IN')}/mo` : ''}
+                    {activeContext.profile.employment_type ? ` · ${activeContext.profile.employment_type}` : ''}
+                  </p>
                 )}
               </div>
             </div>
-            <select
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:border-transparent transition-all cursor-pointer shrink-0"
-            >
-              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-            </select>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((question) => (
-              <button
-                key={question}
-                type="button"
-                disabled={loading}
-                onClick={() => void askQuestion(question)}
-                className="rounded-full border border-blue-100 bg-white px-3 py-1.5 text-left text-[11px] font-medium text-blue-700 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Messages Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white">
-          {messages.map((m) => {
-            const isUser = m.sender === 'user'
-            const isBot = m.sender === 'bot'
-            return (
-              <div
-                key={m.id}
-                className={`flex gap-3 max-w-[85%] ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="hidden sm:inline text-xs text-slate-500 font-medium">Domain:</span>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+                className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:border-transparent transition-all cursor-pointer"
               >
-                {/* Avatar Icon */}
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Messages Scroll Area */}
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-gradient-to-b from-gray-50/50 to-white">
+            {messages.map((m) => {
+              const isUser = m.sender === 'user'
+              const isBot = m.sender === 'bot'
+              return (
                 <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm
-                    ${isUser 
-                      ? 'bg-blue-600 text-white' 
-                      : m.isError 
-                        ? 'bg-red-100 text-red-600' 
-                        : 'bg-indigo-50 text-indigo-600 border border-indigo-100'}`}
+                  key={m.id}
+                  className={`flex gap-3 max-w-[88%] ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
                 >
-                  {isUser ? <User size={16} /> : <Bot size={16} />}
-                </div>
-
-                {/* Message Bubble Box */}
-                <div className="space-y-3">
+                  {/* Avatar Icon */}
                   <div
-                    className={`px-5 py-3.5 rounded-2xl leading-relaxed shadow-sm transition-all
-                      ${isUser
-                        ? 'bg-blue-600 text-white rounded-tr-none'
-                        : m.isError
-                          ? 'bg-red-50 text-red-800 border border-red-100 rounded-tl-none'
-                          : 'bg-white border border-gray-100 rounded-tl-none'}`}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm
+                      ${isUser 
+                        ? 'bg-[#1F7A63] text-white' 
+                        : m.isError 
+                          ? 'bg-red-100 text-red-600' 
+                          : 'bg-indigo-50 text-indigo-600 border border-indigo-100'}`}
                   >
-                    {isUser ? (
-                      <p className="whitespace-pre-wrap font-medium text-sm">{m.text}</p>
-                    ) : (
-                      <div 
-                        className="markdown-body text-sm"
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(m.text) }}
-                      />
-                    )}
+                    {isUser ? <User size={16} /> : <Bot size={16} />}
                   </div>
 
-                  {/* Sources Collapsible Accordion (Bot only) */}
-                  {isBot && m.sources && m.sources.length > 0 && (
-                    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm transition-all">
-                      <button
-                        onClick={() => toggleAccordion(m.id)}
-                        className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors border-b border-transparent active:bg-gray-100"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <BookOpen size={13} className="text-gray-400" />
-                          Referenced Sources ({m.sources.length} chunks)
-                        </span>
-                        {openSourceAccordions[m.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                      </button>
-
-                      {openSourceAccordions[m.id] && (
-                        <div className="divide-y divide-gray-50 max-h-[220px] overflow-y-auto bg-gray-50/30">
-                          {m.sources.map((s, idx: number) => {
-                            const isExpanded = expandedSources[`${m.id}-${idx}`]
-                            return (
-                              <div key={idx} className="p-3 text-xs">
-                                {/* Source summary card */}
-                                <div 
-                                  onClick={() => toggleSourceExpansion(m.id, idx)}
-                                  className="flex items-center gap-2 flex-wrap cursor-pointer group"
-                                >
-                                  <span className="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">{s.doc_name}</span>
-                                  <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-semibold">{s.loan_category}</span>
-                                  <span className="text-gray-400">§ {s.section}</span>
-                                  <span className="text-gray-400">p.{s.page_number}</span>
-                                  <span className="ml-auto text-gray-400 font-medium">sim: {s.similarity}</span>
-                                  {isExpanded ? <ChevronUp size={12} className="text-gray-400" /> : <ChevronDown size={12} className="text-gray-400" />}
-                                </div>
-
-                                {/* Expanded chunk content display */}
-                                {isExpanded && s.content && (
-                                  <div className="mt-2.5 p-3 bg-gray-50 border border-gray-100 rounded-lg text-gray-600 font-mono text-[11px] leading-relaxed whitespace-pre-wrap select-all shadow-inner">
-                                    {s.content}
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
+                  {/* Message Bubble Box */}
+                  <div className="space-y-2.5 max-w-full">
+                    <div
+                      className={`px-5 py-3.5 rounded-2xl leading-relaxed shadow-sm transition-all text-xs sm:text-sm ${
+                        isUser
+                          ? 'bg-[#1F7A63] text-white rounded-tr-none font-medium'
+                          : m.isError
+                            ? 'bg-red-50 text-red-800 border border-red-100 rounded-tl-none'
+                            : 'bg-white border border-gray-100 rounded-tl-none text-[#081C2D]'
+                      }`}
+                    >
+                      {isUser ? (
+                        <p className="whitespace-pre-wrap">{m.text}</p>
+                      ) : (
+                        <div 
+                          className="markdown-body"
+                          dangerouslySetInnerHTML={{ __html: parseMarkdown(m.text) }}
+                        />
                       )}
                     </div>
-                  )}
+
+                    {/* Sources Collapsible Accordion (Bot only) */}
+                    {isBot && m.sources && m.sources.length > 0 && (
+                      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm transition-all">
+                        <button
+                          onClick={() => toggleAccordion(m.id)}
+                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors border-b border-transparent active:bg-gray-100 cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <BookOpen size={13} className="text-gray-400" />
+                            Referenced Sources ({m.sources.length} chunks)
+                          </span>
+                          {openSourceAccordions[m.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </button>
+
+                        {openSourceAccordions[m.id] && (
+                          <div className="divide-y divide-gray-50 max-h-[200px] overflow-y-auto bg-gray-50/40">
+                            {m.sources.map((s, idx: number) => {
+                              const isExpanded = expandedSources[`${m.id}-${idx}`]
+                              return (
+                                <div key={idx} className="p-3 text-xs">
+                                  {/* Source summary card */}
+                                  <div 
+                                    onClick={() => toggleSourceExpansion(m.id, idx)}
+                                    className="flex items-center gap-2 flex-wrap cursor-pointer group"
+                                  >
+                                    <span className="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">{s.doc_name}</span>
+                                    <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-semibold">{s.loan_category}</span>
+                                    <span className="text-gray-400">§ {s.section}</span>
+                                    <span className="text-gray-400">p.{s.page_number}</span>
+                                    <span className="ml-auto text-gray-400 font-medium font-mono text-[10px]">sim: {s.similarity}</span>
+                                    {isExpanded ? <ChevronUp size={12} className="text-gray-400" /> : <ChevronDown size={12} className="text-gray-400" />}
+                                  </div>
+
+                                  {/* Expanded chunk content display */}
+                                  {isExpanded && s.content && (
+                                    <div className="mt-2 p-2.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-600 font-mono text-[11px] leading-relaxed whitespace-pre-wrap select-all shadow-inner">
+                                      {s.content}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* Loading Bubble */}
+            {loading && (
+              <div className="flex gap-3 max-w-[85%] mr-auto">
+                <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                  <Bot size={16} />
+                </div>
+                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-xs sm:text-sm text-gray-400 flex items-center gap-2.5">
+                  <Loader2 size={16} className="animate-spin text-[#1F7A63]" />
+                  Evaluating policy guidelines & vector embeddings...
                 </div>
               </div>
-            )
-          })}
+            )}
 
-          {/* Loading Bubble */}
-          {loading && (
-            <div className="flex gap-3 max-w-[85%] mr-auto">
-              <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
-                <Bot size={16} />
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Input Form Bar */}
+          <form onSubmit={ask} className="p-3.5 sm:p-4 bg-white border-t border-gray-100 shrink-0">
+            <div className="flex gap-2">
+              <input
+                id="chat-input"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                disabled={loading}
+                placeholder="Ask about lending rules, rates, required documents, or eligibility limits..."
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:border-transparent transition-all disabled:bg-gray-100 placeholder-gray-400"
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="bg-[#1F7A63] hover:bg-[#186350] disabled:opacity-50 disabled:hover:bg-[#1F7A63] text-white w-11 sm:w-12 h-11 sm:h-12 rounded-xl flex items-center justify-center shadow-md active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Right Column: Suggested Inquiries & Customer Context Panel (4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          {/* Active Context Card */}
+          {activeContext.profile.intent && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#1F7A63]" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#081C2D]">
+                  Connected Advisory Context
+                </h3>
               </div>
-              <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-5 py-3.5 shadow-sm text-sm text-gray-400 flex items-center gap-2.5">
-                <Loader2 size={16} className="animate-spin text-blue-500" />
-                Thinking & retrieving guidelines...
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg bg-gray-50 p-2 border border-gray-100">
+                  <span className="text-[10px] text-gray-400 block font-medium">Goal</span>
+                  <span className="font-bold text-[#081C2D] truncate block">{activeContext.profile.intent}</span>
+                </div>
+                <div className="rounded-lg bg-gray-50 p-2 border border-gray-100">
+                  <span className="text-[10px] text-gray-400 block font-medium">Income</span>
+                  <span className="font-bold text-[#081C2D] truncate block">
+                    {activeContext.profile.income ? `₹${activeContext.profile.income.toLocaleString('en-IN')}` : '—'}
+                  </span>
+                </div>
               </div>
             </div>
           )}
 
-          <div ref={chatEndRef} />
-        </div>
-
-        {/* Input Form Bar */}
-        <form onSubmit={ask} className="p-4 bg-gray-50 border-t border-gray-100 shrink-0">
-          <div className="flex gap-2">
-            <input
-              id="chat-input"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              disabled={loading}
-              placeholder="Ask about loan rules, rates, eligibility limits..."
-              className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 placeholder-gray-400"
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-md active:scale-95 transition-all"
-            >
-              <Send size={18} />
-            </button>
+          {/* Standalone Suggested Inquiries Card */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#081C2D]">
+              <Sparkles size={14} className="text-[#1F7A63]" />
+              <span>Suggested Inquiries</span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Click any question below to immediately evaluate bank rules against your profile.
+            </p>
+            <div className="flex flex-col gap-2">
+              {suggestedQuestions.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => void askQuestion(question)}
+                  className="rounded-xl border border-gray-200 bg-[#F5F7FA] hover:bg-[#F0FDF4] hover:border-[#1F7A63] hover:text-[#1F7A63] p-3 text-left text-xs font-medium text-[#081C2D] disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-2xs cursor-pointer group"
+                >
+                  <span className="leading-snug block group-hover:translate-x-0.5 transition-transform">{question}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

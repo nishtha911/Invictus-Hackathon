@@ -58,11 +58,11 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#081C2D] text-white border-b border-[#0f2c44] shadow-sm">
+    <header className="sticky top-0 z-40 w-full bg-gradient-to-r from-[#031c18] via-[#052136] to-[#041a2e] text-white border-b border-[#0f3448] shadow-md">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo Left */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white/10 p-1 flex items-center justify-center border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white p-1 flex items-center justify-center border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
             <img
               src="/images/logo.png"
               alt="Cognis Bank Logo"
@@ -70,10 +70,10 @@ export function Navbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
+            <span className="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight">
               {BRAND.name}
             </span>
-            <span className="text-[11px] font-normal text-emerald-400 tracking-wide">
+            <span className="text-[11px] font-medium text-emerald-400 tracking-wide">
               {BRAND.tagline}
             </span>
           </div>
@@ -85,8 +85,8 @@ export function Navbar() {
             {/* 1. Home */}
             <Link
               href="/"
-              className={`hover:text-white transition-colors ${
-                pathname === "/" ? "text-white font-semibold" : "text-slate-300"
+              className={`hover:text-emerald-300 transition-colors ${
+                pathname === "/" ? "text-white font-bold" : "text-slate-300"
               }`}
             >
               Home
@@ -102,13 +102,13 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setLoansDropdownOpen(!loansDropdownOpen)}
-                className={`inline-flex items-center gap-1 py-2 hover:text-white transition-colors cursor-pointer ${
-                  loansDropdownOpen ? "text-white font-semibold" : "text-slate-300"
+                className={`inline-flex items-center gap-1 py-2 hover:text-emerald-300 transition-colors cursor-pointer ${
+                  loansDropdownOpen ? "text-white font-bold" : "text-slate-300"
                 }`}
                 aria-expanded={loansDropdownOpen}
                 aria-haspopup="true"
               >
-                <span>Loans</span>
+                <span>Loan Products</span>
                 <ChevronDown
                   className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${
                     loansDropdownOpen ? "rotate-180 text-white" : ""
@@ -130,7 +130,7 @@ export function Navbar() {
                       return (
                         <Link
                           key={loan.id}
-                          href={`/advisor?intent=${loan.intentKey}`}
+                          href={`/loans/${loan.intentKey.replace(/_/g, "-")}`}
                           onClick={() => setLoansDropdownOpen(false)}
                           className="flex items-start gap-3 rounded-xl p-2.5 hover:bg-[#F5F7FA] transition-all group/item text-left"
                         >
@@ -152,13 +152,13 @@ export function Navbar() {
                     })}
 
                     <div className="col-span-2 mt-1 pt-2 border-t border-[#E2E8F0] flex items-center justify-between px-2 text-[11px]">
-                      <span className="text-slate-500">Need personalized exploration?</span>
+                      <span className="text-slate-500">Looking for dynamic calculation?</span>
                       <Link
-                        href="/#loans"
+                        href="/advisor"
                         onClick={() => setLoansDropdownOpen(false)}
-                        className="font-semibold text-[#1F7A63] hover:underline"
+                        className="font-bold text-[#1F7A63] hover:underline"
                       >
-                        Explore all categories →
+                        Start Loan Advisory →
                       </Link>
                     </div>
                   </motion.div>
@@ -166,37 +166,41 @@ export function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* 3. How DhanSetu Works */}
+            {/* 3. Dynamic Advisor */}
             <Link
-              href="/#how-it-works"
-              className="hover:text-white text-slate-300 transition-colors"
+              href="/advisor"
+              className={`hover:text-emerald-300 transition-colors ${
+                pathname === "/advisor" ? "text-white font-bold" : "text-slate-300"
+              }`}
             >
-              How DhanSetu Works
+              Loan Advisor
             </Link>
 
-            {/* 4. About Us */}
-            <Link
-              href="/#about"
-              className="hover:text-white text-slate-300 transition-colors"
-            >
-              About Us
-            </Link>
-
-            {/* 5. Knowledge Base (RAG) */}
+            {/* 4. Knowledge Base (RAG) */}
             <Link
               href="/rag"
-              className="hover:text-white text-slate-300 transition-colors"
+              className={`hover:text-emerald-300 transition-colors ${
+                pathname.startsWith("/rag") ? "text-white font-bold" : "text-slate-300"
+              }`}
             >
-              Knowledge Base
+              Policy Knowledge Base
+            </Link>
+
+            {/* 5. How Cognis Bank Works */}
+            <Link
+              href="/#how-it-works"
+              className="hover:text-emerald-300 text-slate-300 transition-colors"
+            >
+              How It Works
             </Link>
 
             {/* 6. Bank Dashboard */}
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-600 transition-colors"
             >
-              <span>Bank Dashboard</span>
-              <span className="rounded bg-[#1F7A63]/30 px-1 py-0.2 text-[9px] font-mono font-bold text-[#4ade80]">
+              <span>Dashboard</span>
+              <span className="rounded bg-[#1F7A63] px-1 py-0.2 text-[9px] font-mono font-bold text-white">
                 DEMO
               </span>
               <ArrowUpRight className="h-3 w-3 text-slate-400" />
@@ -206,33 +210,40 @@ export function Navbar() {
 
         {/* Right Action Area */}
         <div className="flex items-center gap-3">
-          {/* Active Demo Session Indicator */}
-          {userType && (
-            <div className="hidden sm:flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-1.5 text-xs text-slate-200 border border-slate-700">
-              <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
-              <span className="truncate max-w-[120px]">
-                {userType === "existing" && selectedCustomer
-                  ? selectedCustomer.name
-                  : "Guest Session"}
-              </span>
+          {/* Active Demo / Authenticated Session Indicator or Login */}
+          {userType === "existing" && selectedCustomer ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 px-3 py-2 text-xs text-slate-200 border border-slate-600 transition-all cursor-pointer group"
+                title="View Customer Profile Details"
+              >
+                <span className="h-2 w-2 rounded-full bg-[#4ade80] animate-pulse" />
+                <span className="font-bold text-white truncate max-w-[130px] group-hover:text-emerald-300 transition-colors">
+                  {selectedCustomer.name}
+                </span>
+                <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
+                  Profile →
+                </span>
+              </Link>
               <button
                 onClick={handleReset}
-                title="Reset Session"
-                className="ml-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Log Out & Reset Session"
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-600 bg-slate-800 hover:bg-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white transition-all cursor-pointer"
               >
-                <RotateCcw className="h-3 w-3" />
+                <RotateCcw className="h-3 w-3 text-slate-400" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
+            >
+              <User className="h-3.5 w-3.5" />
+              <span>Login</span>
+            </Link>
           )}
-
-          {/* Login Button (Solid Emerald) */}
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all shadow-xs"
-          >
-            <User className="h-3.5 w-3.5" />
-            <span>Login</span>
-          </Link>
 
           {/* Mobile Menu Toggle Button */}
           <button
@@ -252,87 +263,76 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-[#0D263D] border-t border-slate-700/60 px-5 py-5 space-y-4 text-sm font-medium"
+            className="lg:hidden bg-[#071d2b] border-t border-slate-700 px-5 py-5 space-y-4 text-sm font-medium"
           >
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-1 text-slate-200 hover:text-white"
+              className="block py-2 text-slate-200 hover:text-white border-b border-slate-700/40"
             >
               Home
             </Link>
 
             {/* Mobile Loans Accordion */}
-            <div className="border-y border-slate-700/60 py-2 space-y-2">
+            <div>
               <button
                 type="button"
                 onClick={() => setMobileLoansOpen(!mobileLoansOpen)}
-                className="flex items-center justify-between w-full py-1 text-slate-200 hover:text-white text-left font-semibold cursor-pointer"
+                className="w-full flex items-center justify-between py-2 text-slate-200 hover:text-white border-b border-slate-700/40"
               >
-                <span>Loans</span>
+                <span>Loan Products</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    mobileLoansOpen ? "rotate-180 text-white" : "text-slate-400"
+                  className={`h-4 w-4 text-slate-400 transition-transform ${
+                    mobileLoansOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>
 
-              {mobileLoansOpen && (
-                <div className="pl-3 space-y-2 pt-1">
-                  {LOAN_PURPOSES.map((loan) => {
-                    const IconComp = LOAN_ICONS[loan.icon] || Home;
-                    return (
+              <AnimatePresence>
+                {mobileLoansOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pl-3 py-2 space-y-2 bg-slate-900/60 rounded-xl my-2"
+                  >
+                    {LOAN_PURPOSES.map((loan) => (
                       <Link
                         key={loan.id}
-                        href={`/advisor?intent=${loan.intentKey}`}
+                        href={`/loans/${loan.intentKey.replace(/_/g, "-")}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2.5 py-1.5 text-xs text-slate-300 hover:text-white"
+                        className="block py-1.5 text-xs text-slate-300 hover:text-white"
                       >
-                        <IconComp className="h-3.5 w-3.5 text-[#4ade80]" />
-                        <span>{loan.label}</span>
-                        <span className="text-[10px] text-slate-400 ml-auto">
-                          {loan.badge}
-                        </span>
+                        {loan.label}
                       </Link>
-                    );
-                  })}
-                </div>
-              )}
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <Link
-              href="/#how-it-works"
+              href="/advisor"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-1 text-slate-200 hover:text-white"
+              className="block py-2 text-slate-200 hover:text-white border-b border-slate-700/40"
             >
-              How DhanSetu Works
-            </Link>
-
-            <Link
-              href="/#about"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-1 text-slate-200 hover:text-white"
-            >
-              About Us
+              Loan Advisor
             </Link>
 
             <Link
               href="/rag"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-1 text-slate-200 hover:text-white"
+              className="block py-2 text-slate-200 hover:text-white border-b border-slate-700/40"
             >
-              Knowledge Base
+              Policy Knowledge Base
             </Link>
 
             <Link
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2 text-xs font-mono text-slate-300 bg-slate-800/80 px-3 rounded-lg border border-slate-700"
+              className="block py-2 text-emerald-400 font-semibold"
             >
-              <span>Bank Dashboard</span>
-              <span className="rounded bg-[#1F7A63]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#4ade80]">
-                DEMO ↗
-              </span>
+              Bank Dashboard (Underwriter Portal)
             </Link>
           </motion.div>
         )}

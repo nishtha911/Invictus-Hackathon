@@ -194,7 +194,7 @@ def get_grounded_policy_chunks(product_id: str, user_query: str, top_k: int = 3)
 
 
 def save_customer_profile(extracted_json: dict):
-    """Saves extracted profile to Supabase. Silent no-op if unavailable."""
+    """Saves extracted profile to Supabase public.customer_profiles. Silent no-op if unavailable."""
     if not supabase:
         return None
     try:
@@ -203,21 +203,31 @@ def save_customer_profile(extracted_json: dict):
         db_row = {
             "session_id": extracted_json.get("session_id"),
             "user_type": extracted_json.get("user_type", "guest"),
-            "applicant_name": profile.get("name"),
+            "applicant_name": profile.get("customer_name") or profile.get("name"),
             "intent": profile.get("intent"),
-            "age": profile.get("age"),
-            "monthly_income": profile.get("monthly_income"),
+            "age": profile.get("age", 30),
+            "monthly_income": profile.get("income") or profile.get("monthly_income"),
             "employment_type": profile.get("employment_type"),
-            "requested_loan_amount": profile.get("requested_loan_amount"),
-            "preferred_tenure_months": profile.get("preferred_tenure_months"),
-            "existing_emi_obligations": profile.get("existing_emi_obligations", 0.0),
-            "has_existing_loans": profile.get("has_existing_loans", False),
-            "credit_score_band": profile.get("credit_score_band", "unknown"),
-            "urgency": profile.get("urgency", "exploring"),
-            "completeness_pct": meta.get("completeness_pct", 0),
-            "turns_taken": meta.get("turns_taken", 0),
+            "employer_type": profile.get("employer_type"),
+            "years_at_current_job": profile.get("years_at_current_job"),
+            "years_in_business": profile.get("years_in_business"),
+            "requested_loan_amount": profile.get("loan_amount") or profile.get("requested_loan_amount"),
+            "preferred_tenure_months": (profile.get("tenure_years") or 20) * 12 if profile.get("tenure_years") else profile.get("preferred_tenure_months"),
+            "existing_emi_obligations": profile.get("existing_emi") or profile.get("existing_emi_obligations", 0.0),
+            "has_existing_loans": (profile.get("existing_emi") or 0) > 0,
+            "credit_score_band": profile.get("credit_band") or profile.get("credit_score_band", "unknown"),
+            "urgency": profile.get("urgency", "Immediate (Within 7 Days)"),
+            "home_loan_details": {"property_status": profile.get("property_status")} if profile.get("property_status") else profile.get("home_loan_details"),
+            "vehicle_loan_details": {"vehicle_condition": profile.get("vehicle_condition")} if profile.get("vehicle_condition") else profile.get("vehicle_loan_details"),
+            "education_loan_details": {"education_country": profile.get("education_country")} if profile.get("education_country") else profile.get("education_loan_details"),
+            "business_loan_details": {"annual_turnover": profile.get("annual_turnover"), "business_type": profile.get("business_type")} if profile.get("annual_turnover") or profile.get("business_type") else profile.get("business_loan_details"),
+            "personal_loan_details": {"gold_weight_grams": profile.get("gold_weight_grams")} if profile.get("gold_weight_grams") else profile.get("personal_loan_details"),
+            "completeness_pct": meta.get("completeness_pct", 100),
+            "turns_taken": meta.get("turns_taken", 8),
         }
-        res = supabase.table("customer_profiles").upsert(db_row).execute()
+        # Clean null values if needed or let PostgreSQL handle defaults
+        cleaned_row = {k: v for k, v in db_row.items() if v is not None}
+        res = supabase.table("customer_profiles").upsert(cleaned_row).execute()
         return res.data
     except Exception as e:
         logger.error(f"Failed to save profile to Supabase: {e}")
@@ -232,25 +242,41 @@ def get_customer_profile(session_id: str):
         res = supabase.table("customer_profiles").select("*").eq("session_id", session_id).limit(1).execute()
         if res.data and len(res.data) > 0:
             row = res.data[0]
+            tenure_months = row.get("preferred_tenure_months")
+            tenure_years = (tenure_months // 12) if tenure_months else 20
             return {
                 "session_id": row.get("session_id"),
                 "user_type": row.get("user_type", "guest"),
                 "profile": {
                     "applicant_name": row.get("applicant_name"),
+                    "name": row.get("applicant_name"),
                     "intent": row.get("intent"),
                     "age": row.get("age"),
                     "monthly_income": row.get("monthly_income"),
+                    "income": row.get("monthly_income"),
                     "employment_type": row.get("employment_type"),
+                    "employer_type": row.get("employer_type"),
+                    "years_at_current_job": row.get("years_at_current_job"),
+                    "years_in_business": row.get("years_in_business"),
                     "requested_loan_amount": row.get("requested_loan_amount"),
-                    "preferred_tenure_months": row.get("preferred_tenure_months"),
+                    "loan_amount": row.get("requested_loan_amount"),
+                    "preferred_tenure_months": tenure_months,
+                    "tenure_years": tenure_years,
                     "existing_emi_obligations": row.get("existing_emi_obligations", 0.0),
+                    "existing_emi": row.get("existing_emi_obligations", 0.0),
                     "has_existing_loans": row.get("has_existing_loans", False),
                     "credit_score_band": row.get("credit_score_band", "unknown"),
+                    "credit_band": row.get("credit_score_band", "unknown"),
                     "urgency": row.get("urgency", "exploring"),
+                    "home_loan_details": row.get("home_loan_details"),
+                    "vehicle_loan_details": row.get("vehicle_loan_details"),
+                    "education_loan_details": row.get("education_loan_details"),
+                    "business_loan_details": row.get("business_loan_details"),
+                    "personal_loan_details": row.get("personal_loan_details"),
                 },
                 "extraction_meta": {
-                    "completeness_pct": row.get("completeness_pct", 0),
-                    "turns_taken": row.get("turns_taken", 0),
+                    "completeness_pct": row.get("completeness_pct", 100),
+                    "turns_taken": row.get("turns_taken", 8),
                 }
             }
     except Exception as e:

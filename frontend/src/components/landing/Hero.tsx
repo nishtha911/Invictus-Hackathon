@@ -29,16 +29,16 @@ export function Hero() {
 
             {/* Supporting Copy */}
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-              DhanSetu helps you explore suitable home, vehicle, business and gold loan options through a guided digital experience designed to make borrowing easier to understand.
+              Cognis Bank helps you explore suitable home, vehicle, business, gold, personal and education loan options through a dynamic digital advisor designed to make borrowing clear and effortless.
             </p>
 
             {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-3.5">
               <Link
-                href="/#loan-information"
+                href="/advisor"
                 className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01] cursor-pointer"
               >
-                <span>Explore Loans</span>
+                <span>Check Loan Eligibility</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
 
@@ -46,7 +46,7 @@ export function Hero() {
                 href="/#how-it-works"
                 className="inline-flex items-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
               >
-                <span>How DhanSetu Works</span>
+                <span>How Cognis Bank Works</span>
               </Link>
             </div>
           </motion.div>

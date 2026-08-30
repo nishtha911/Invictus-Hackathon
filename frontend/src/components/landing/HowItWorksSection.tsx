@@ -39,10 +39,10 @@ export function HowItWorksSection() {
             Simple 4-Step Process
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
-            How DhanSetu Works
+            How Cognis Bank Works
           </h2>
           <p className="text-sm text-slate-600">
-            DhanSetu simplifies loan discovery through a guided digital experience designed for clarity and confidence.
+            Cognis Bank simplifies loan discovery through a guided digital experience designed for clarity and confidence.
           </p>
         </div>
 

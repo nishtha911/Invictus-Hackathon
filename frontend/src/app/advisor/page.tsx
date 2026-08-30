@@ -23,7 +23,6 @@ function AdvisorContent() {
     sessionId,
     userType,
     selectedCustomer,
-    selectedLoan,
     updateProfile,
     setRecommendations,
     isExtracting,
@@ -65,8 +64,6 @@ function AdvisorContent() {
           customer_context: selectedCustomer,
         });
       } catch (contextError) {
-        // Recommendations can still use mock mode during UI development. The
-        // RAG page also sends this in-memory profile as a one-time fallback.
         console.warn("Unable to save Knowledge Base context.", contextError);
       }
 
@@ -89,7 +86,7 @@ function AdvisorContent() {
             <h1 className="text-xl sm:text-2xl font-bold text-[#081C2D] tracking-tight flex items-center gap-2">
               <span>Loan Advisory Session</span>
               <span className="rounded-md bg-[#E8F5F1] px-2.5 py-0.5 text-xs font-semibold text-[#1F7A63] border border-emerald-100">
-                Interactive Intake
+                Dynamic Intake
               </span>
             </h1>
             <p className="text-xs text-slate-500">
@@ -124,12 +121,13 @@ function AdvisorContent() {
 
         {/* 3-Column Desktop Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Journey Roadmap Rail (3 cols) */}
+          {/* Left Column: Dynamic Journey Roadmap Rail (3 cols) */}
           <div className="hidden lg:block lg:col-span-3">
             <AdvisorJourneyRail
               currentStepIndex={currentStepIndex}
               onSelectStep={(idx) => setStepIndex(idx)}
               completedSteps={{}}
+              profile={profile}
             />
           </div>
 

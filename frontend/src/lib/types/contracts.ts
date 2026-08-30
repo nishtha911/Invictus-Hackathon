@@ -30,12 +30,22 @@ export interface ProfileIntake {
   intent?: string;
   // Extended fields captured during conversational intake
   employment_type?: string;
+  employer_type?: string;
+  years_at_current_job?: number;
+  business_type?: string;
+  years_in_business?: number;
   tenure_years?: number;
   existing_emi?: number;
   credit_band?: string;
   urgency?: string;
   customer_name?: string;
   customer_id?: string;
+  // Loan-specific details
+  property_status?: string;
+  vehicle_condition?: string;
+  education_country?: string;
+  gold_weight_grams?: number;
+  annual_turnover?: number;
 }
 
 export interface ExtractedProfileData {

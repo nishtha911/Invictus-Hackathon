@@ -1,5 +1,4 @@
 import { Hero } from "@/components/landing/Hero";
-import { PersonalisedIntakeSection } from "@/components/landing/PersonalisedIntakeSection";
 import { LoanInfoSection } from "@/components/landing/LoanInfoSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { AboutSection } from "@/components/landing/AboutSection";
@@ -10,16 +9,13 @@ export default function HomePage() {
       {/* 1. Main Hero Section */}
       <Hero />
 
-      {/* 2. Personalised Loan Question Intake Section */}
-      <PersonalisedIntakeSection />
-
-      {/* 3. Loan Information Section */}
+      {/* 2. Loan Information & Selection Section */}
       <LoanInfoSection />
 
-      {/* 4. How DhanSetu Works Section */}
+      {/* 3. How Cognis Bank Works Section */}
       <HowItWorksSection />
 
-      {/* 5. Combined About DhanSetu & Trust Section */}
+      {/* 4. Combined About Cognis Bank & Trust Section */}
       <AboutSection />
     </main>
   );
