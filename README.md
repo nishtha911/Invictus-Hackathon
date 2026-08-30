@@ -1,12 +1,20 @@
 <div align="center">
-  <img src="images/logo.png" alt="DhanSetu Logo" width="120" />
-  <h1>🌉 DhanSetu</h1>
-  <p><strong>Intelligent AI-Powered Loan Advisory & Customer Onboarding Platform</strong></p>
+  <img src="frontend/public/logo.png" alt="Cognis Bank Logo" width="120" />
+  
+  # 🌉 Cognis Bank — DhanSetu
+  
+  **Next-Generation Generative AI Loan Advisory & Intelligent Lead Conversion Platform**
+  
+  [![Tech Stack](https://img.shields.io/badge/Tech_Stack-Next.js_16_|_FastAPI_|_Supabase-0D9488?style=for-the-badge)](https://github.com/nishtha911/Invictus-Hackathon)
+  [![Build Status](https://img.shields.io/badge/Build-Passing-22C55E?style=for-the-badge)](https://github.com/nishtha911/Invictus-Hackathon)
+  [![AI Engine](https://img.shields.io/badge/AI_Engine-RAG_+_Llama_3.3_--_Groq-6366F1?style=for-the-badge)](https://github.com/nishtha911/Invictus-Hackathon)
+
   <p>
-    <a href="#features">Features</a> •
-    <a href="#architecture">Architecture</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#installation">Installation</a>
+    <a href="#-core-workflows">Core Workflows</a> •
+    <a href="#%EF%B8%8F-architecture--data-flow">Architecture & Data Flow</a> •
+    <a href="#-technical-stack">Technical Stack</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-api-endpoints">API Routes</a>
   </p>
 </div>
 
@@ -14,147 +22,171 @@
 
 ## 🌟 Overview
 
-**DhanSetu** (translating to "Bridge to Wealth") is a next-generation conversational AI loan advisor. Built during the Invictus Hackathon, it seamlessly bridges the gap between potential borrowers and complex financial products. By leveraging Advanced Generative AI and RAG (Retrieval-Augmented Generation), DhanSetu interacts with customers to understand their needs, analyze their profiles, and provide personalized, highly accurate loan product recommendations.
+**DhanSetu** (translating to "Bridge to Wealth") is Cognis Bank's premium, conversational AI loan advisor. Built for the Invictus Hackathon, it bridges the gap between potential borrowers and complex bank policies. 
 
-## ✨ Key Features
-
-- 💬 **Conversational AI Intake**: Dynamic, adaptive chat interface that collects user requirements through conversation.
-- 🎯 **Smart Recommendations**: Algorithmic scoring matches users to the absolute best loan products based on their profile.
-- 📚 **RAG-Powered Knowledge Base**: Instant answers strictly grounded in actual banking policies and product brochures using `pgvector`.
-- 📊 **Banker Dashboard**: Dedicated portal for bank agents to track leads, monitor completeness, and review the AI's data extraction.
-- ⚡ **Real-time Extraction**: Instantly parses conversational context into structured JSON profiles.
-
-## 🏗 Architecture
-
-The platform uses a robust, separated architecture:
-
-- **Frontend**: A highly responsive, glassmorphic UI built with Next.js 13+ (App Router) and Tailwind CSS.
-- **Backend Orchestrator**: FastAPI powering the API layer.
-- **AI Engine**: LangGraph state machine handling conversational states, prompt routing, and entity extraction.
-- **Database / RAG**: Supabase (PostgreSQL) powering both relational data (leads/users) and vector embeddings (`pgvector`) for the document knowledge base.
-
-## 💻 Tech Stack
-
-| Domain | Technologies |
-| :--- | :--- |
-| **Frontend** | Next.js, React, TailwindCSS, Motion, Lucide Icons |
-| **Backend** | Python, FastAPI, Uvicorn |
-| **AI & LLM** | LangGraph, LangChain, Google Gemini |
-| **Database** | PostgreSQL, pgvector (Supabase) |
-
-## 🚀 Installation & Running Instructions
-
-### Prerequisites
-- **Node.js**: v18+ or v20+
-- **Python**: 3.10+ or 3.11+
-- **Supabase Account**: (with `public` and `rag` schemas, or use fallback static catalogue)
+By integrating **Retrieval-Augmented Generation (RAG)** over bank policy brochures with real-time profile extraction, the platform captures structured customer requirements, recommends matches with strict underwriting checks, and converts interest into scored, actionable sales leads.
 
 ---
 
-### Step 1: Clone the Repository & Checkout Branch
-```bash
-git clone https://github.com/nishtha911/Invictus-Hackathon.git
-cd Invictus-Hackathon
-git checkout paras-siddhi-rag-integration
+## ⚡ Core Workflows
+
+```mermaid
+graph TD
+    A[Landing Page / Chatbot] -->|1. Intake Questionnaire| B(Advisor Journey)
+    B -->|2. Build Session Profile| C{Generate Unique UUID}
+    C -->|3. POST /recommend-loans| D[FastAPI Recommendation Engine]
+    D -->|4. Retrieve vector chunks| E[(Supabase pgvector)]
+    D -->|5. Groq Llama 3.3 LLM Match| F[Tailored Loan Schemes]
+    F -->|6. I'm Interested Click| G[Lead Capture Form]
+    G -->|7. POST /api/leads| H[Deterministic Underwriting Scorer]
+    H -->|8. Save Scored Lead| I[(Supabase qualified_leads)]
+    I -->|9. Sales Intelligence| J[Banker Sales Dashboard]
+```
+
+### 💬 1. Conversational AI Assistant & Intake
+- **Dynamic Guided Intake**: Structured advisor steps adapt based on loan intent (Home, Vehicle, Business, Gold, Education, or Personal) and employment type.
+- **Session Isolation**: Every user gets a unique, client-persisted UUID session token preventing profile collisions.
+
+### 🔍 2. RAG Policy & Scheme Matching
+- **Grounding with Citations**: Evaluates applicant attributes against policy documents ingested in `pgvector`. Recommendations show confidence scores and matching clauses.
+- **Strict Number Verification**: Backend validation ensures financial rates presented to the customer exist in the source policies.
+
+### 📊 3. Lead Conversion & Scoring
+- **Deterministic Underwriting**: Automatically computes Debt-to-Income (DTI) / Fixed Obligation to Income Ratio (FOIR) and credit-band assessments.
+- **Banker Dashboard**: Equips sales agents with lead priority rankings (HOT, WARM, NURTURE), automated AI briefing write-ups, and custom talking points.
+
+---
+
+## 🛠️ Architecture & Data Flow
+
+```
+                      +-----------------------------+
+                      |     Next.js 16 Frontend     |
+                      |   (Zustand, Tailwind, v4)   |
+                      +--------------+--------------+
+                                     |
+             (JSON Profile Payload)  |  (UUID Session ID)
+                                     v
+                      +-----------------------------+
+                      |     FastAPI Backend Core    |
+                      +------|---------------+------+
+                             |               |
+       (Cosine Similarity)   |               |   (Prompt + Chunks + Context)
+                             v               v
+            +--------------------+       +--------------------+
+            | Supabase pgvector  |       |   Groq LLM API     |
+            |   (RAG Chunks)     |       | (Llama-3.3-70b)    |
+            +--------------------+       +--------------------+
 ```
 
 ---
 
-### Step 2: Backend Setup & Execution (FastAPI - Port 8080)
+## 💻 Technical Stack
+
+### Frontend
+- **Framework**: `Next.js 16.3.3` (App Router)
+- **Styling**: `Tailwind CSS v4` (Modern CSS-first engine)
+- **Animations**: `Framer Motion` (Fluid, hardware-accelerated transitions)
+- **State Management**: `Zustand` (Persisted client state)
+- **Forms**: `React Hook Form` & `Zod` (Underwriting boundary checks)
+- **Charts**: `Recharts` (Dashboard pipelines & distribution)
+- **Toasts**: `Sonner` (Live warnings & API health banners)
+
+### Backend
+- **Framework**: `FastAPI` (Python 3.10+)
+- **LLM Engine**: `Groq API` (`Llama-3.3-70b-versatile` or `OpenAI` compatible models)
+- **Embedding Model**: `sentence-transformers/all-MiniLM-L6-v2` (Local vector embedding)
+- **Database / Vector Search**: `Supabase` (PostgreSQL with `pgvector` extension)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js `v18+` or `v20+`
+- Python `3.10+`
+- A Supabase project with `pgvector` enabled
+
+---
+
+### Step 1: Clone & Configure
+
+```bash
+git clone https://github.com/nishtha911/Invictus-Hackathon.git
+cd Invictus-Hackathon
+git checkout paras-siddhi-clean
+```
+
+---
+
+### Step 2: Backend Setup (Port 8080)
 
 1. Navigate to the `backend/` directory:
    ```bash
    cd backend
    ```
-
 2. Create and activate a Python virtual environment:
-   - **Windows (PowerShell)**:
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\Activate.ps1
-     ```
-   - **Linux / macOS**:
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1   # Windows PowerShell
+   # source venv/bin/activate    # Linux / macOS
+   ```
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-
-4. Configure environment variables:
-   Create or edit `backend/.env`:
+4. Create a `backend/.env` file:
    ```env
-   # LLM Configuration
    LLM_PROVIDER=groq
-   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_API_KEY=your-groq-api-key
    GROQ_MODEL=llama-3.3-70b-versatile
-
-   # Supabase Database & Vector RAG Configuration
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_KEY=your_supabase_anon_or_service_key
-   SUPABASE_DB_URL=postgresql://postgres.your-ref:your-password@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
-
-   # Application settings
-   ENVIRONMENT=development
-   LOG_LEVEL=INFO
+   
+   SUPABASE_URL=https://your-supabase-url.supabase.co
+   SUPABASE_KEY=your-supabase-service-key
+   SUPABASE_DB_URL=postgresql://postgres:password@your-supabase-db-host:5432/postgres
    ```
-
-5. Run the backend server:
+5. Launch the backend:
    ```bash
    python run.py
    ```
-   > ℹ️ The backend will start on **http://localhost:8080** and will automatically initialize the `rag` schema and sample policy document embeddings.
+   > 💡 On boot, the server automatically reads files in `sample_docs/` (including our new **Gold Loan** schemes) and indexes them into the `pgvector` store.
 
 ---
 
-### Step 3: Frontend Setup & Execution (Next.js - Port 3000)
+### Step 3: Frontend Setup (Port 3000)
 
 1. In a new terminal, navigate to the `frontend/` directory:
    ```bash
    cd frontend
    ```
-
-2. Install Node dependencies:
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-3. Configure frontend environment variables:
-   Create or edit `frontend/.env.local`:
+3. Create a `frontend/.env.local` file:
    ```env
-   # Set to false to connect directly to live FastAPI backend
    NEXT_PUBLIC_USE_MOCK_API=false
-
-   # FastAPI Backend Base URL
    NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
    ```
-
-4. Start the Next.js development server:
+4. Start the development server:
    ```bash
    npm run dev
    ```
 
-5. Open your browser and navigate to **[http://localhost:3000](http://localhost:3000)**.
-
 ---
 
-## 🧭 Application Workflows & Routes
+## 🧭 API Endpoints
 
-| Route | Feature | Description |
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| **`/`** | **Home Page** | Loan category discovery, overview, and access to Floating AI Assistant. |
-| **`/advisor`** | **Loan Advisory Intake** | Paras's structured intake: asks personalized questions (Income, Loan Amount, Tenure, Existing EMIs, Employment, Credit Score). |
-| **`/chat`** | **Conversational Advisor** | LangGraph dynamic conversational advisor profiling state. |
-| **`/recommendations`** | **Product Recommendations** | Deterministic FOIR match, interest calculations, and bank policy grounding. |
-| **`/rag/query`** | **Policy Knowledge Base** | Siddhi's RAG chatbot: asks bank policy questions using extracted user advisory answers and pgvector search. |
-| **`/rag/upload`** | **Document Ingestion** | Upload bank policy PDFs / brochures into `rag.documents` and `rag.chunks`. |
-| **`/dashboard`** | **Bank Sales Intelligence** | Real-time underwriter pipeline and lead scoring intelligence. |
+| `POST` | `/api/v1/recommend-loans` | Matches profiles against policies using RAG + Groq. |
+| `POST` | `/api/leads` | Persists scored, validated leads to the database. |
+| `GET` | `/api/dashboard` | Fetches sales conversion pipelines and scoring analytics. |
+| `POST` | `/query` | Directly queries the grounded policy RAG chatbot. |
+| `POST` | `/api/v1/auth/employee-login` | Authenticates bank employees. |
 
 ---
 
 <div align="center">
-  <i>Built with ❤️ by the Invictus Hackathon Team</i>
+  <i>Crafted with ❤️ for the Invictus Hackathon Team</i>
 </div>
