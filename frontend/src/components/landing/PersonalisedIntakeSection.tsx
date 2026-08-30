@@ -104,7 +104,7 @@ export function PersonalisedIntakeSection() {
             Find Your Personalised Loan Options
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            Answer a few guided questions so DhanSetu can understand your needs and prepare suitable loan options.
+            Answer a few guided questions so Cognis Bank can understand your needs and prepare suitable loan options.
           </p>
         </div>
 

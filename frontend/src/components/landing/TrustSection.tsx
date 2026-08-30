@@ -29,11 +29,11 @@ export function TrustSection() {
 
   return (
     <>
-      <section id="why-dhansetu" className="scroll-mt-24 py-16 sm:py-20 border-t border-[#E2E8F0] bg-[#F5F7FA]">
+      <section id="why-cognis-bank" className="scroll-mt-24 py-16 sm:py-20 border-t border-[#E2E8F0] bg-[#F5F7FA]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto space-y-2.5">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
-              Why DhanSetu
+              Why Cognis Bank
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#081C2D]">
               Transparent Lending Guidance Built on Trust

@@ -420,7 +420,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
       employment_type: profile.employment_type || "Salaried",
     },
     explanation_meta: {
-      model: "DhanSetu Policy-Grounded Underwriting Model",
+      model: "Cognis Bank Policy-Grounded Underwriting Engine",
       numbers_verified: true,
       rule_engine_verified: true,
       policy_grounded: true,

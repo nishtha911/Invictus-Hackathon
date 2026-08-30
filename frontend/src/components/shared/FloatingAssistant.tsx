@@ -235,7 +235,7 @@ export function FloatingAssistant() {
       {!isOpen && (
         <motion.button
           onClick={() => setIsOpen(true)}
-          aria-label="Open DhanSetu Assistant"
+          aria-label="Open Cognis Bank Assistant"
           animate={{ scale: [1, 1.04, 1], y: [0, -2.5, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1F7A63] text-white shadow-xl hover:bg-[#186350] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:ring-offset-2"

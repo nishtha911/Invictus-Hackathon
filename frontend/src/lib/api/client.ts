@@ -40,7 +40,8 @@ export async function apiClient<T>(
   } catch (error) {
     // If backend is unreachable and a fallback mock is provided, seamlessly fallback with warning
     if (mockFallback) {
-      console.warn(`[DhanSetu API] Backend unavailable at ${url}, using mock response.`, error);
+      console.warn(`[Cognis Bank API] Backend unavailable at ${url}, using mock response.`, error);
+
       return mockFallback();
     }
     throw error;

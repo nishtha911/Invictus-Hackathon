@@ -2,9 +2,9 @@
 
 @layer base {
   :root {
-    /* Cognis Bank Master Palette - Crisp Corporate Light Banking Theme */
-    --background: #F8FAFC;
-    --foreground: #0F172A;
+    /* Cognis Bank Master Palette */
+    --background: #F5F7FA;
+    --foreground: #081C2D;
 
     --navy: #081C2D;
     --navy-hover: #0D263D;
@@ -13,16 +13,16 @@
     --emerald-hover: #186350;
     --emerald-light: #E8F5F1;
     --emerald-tint: #F0FDF9;
-    --soft-white: #F8FAFC;
-    --cool-gray: #64748B;
+    --soft-white: #F5F7FA;
+    --cool-gray: #9AA3A8;
     --gray-border: #E2E8F0;
     --gray-subtle: #F1F5F9;
 
     --card: #FFFFFF;
-    --card-foreground: #0F172A;
+    --card-foreground: #081C2D;
 
     --popover: #FFFFFF;
-    --popover-foreground: #0F172A;
+    --popover-foreground: #081C2D;
 
     --primary: #1F7A63;
     --primary-foreground: #FFFFFF;
@@ -43,10 +43,11 @@
     --input: #E2E8F0;
     --ring: #1F7A63;
 
+    /* Sharp corners throughout — professional banking aesthetic */
     --radius: 0.25rem;
 
     /* Banking Surface Tokens */
-    --surface-page: #F8FAFC;
+    --surface-page: #F5F7FA;
     --surface-white: #FFFFFF;
     --surface-card: #FFFFFF;
     --surface-navy: #081C2D;
@@ -65,6 +66,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
+  /* Geist Sans applied globally via layout.tsx — consistent font everywhere */
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   max-width: 100vw;
@@ -78,12 +80,12 @@ section[id] {
   scroll-margin-top: 5.5rem;
 }
 
-/* Sharp Professional Banking Cards — Zero Glassmorphism */
+/* Sharp Banking Cards — Zero Glassmorphism, Zero Excessive Rounding */
 .bank-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.05);
   transition: all 0.2s ease-in-out;
 }
 
@@ -91,28 +93,19 @@ section[id] {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(8, 28, 45, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bank-card-interactive:hover {
   border-color: #1F7A63;
-  box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 6px 18px -4px rgba(8, 28, 45, 0.09);
   transform: translateY(-1px);
 }
 
 .bank-card-selected {
-  background-color: #F0FDF4;
-  border: 2px solid #1F7A63;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(31, 122, 99, 0.10);
-}
-
-/* Inset Panel Utility */
-.neo-inset {
-  background-color: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  box-shadow: inset 0 2px 4px 0 rgba(15, 23, 42, 0.04);
+  background-color: #F0FDF9;
+  border: 1.5px solid #1F7A63;
   border-radius: 4px;
 }
 
@@ -122,7 +115,6 @@ section[id] {
   color: #FFFFFF;
   font-weight: 600;
   border-radius: 4px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -132,22 +124,22 @@ section[id] {
 }
 
 .btn-navy-outline {
-  background-color: #FFFFFF;
-  color: #0F172A;
-  border: 1.5px solid #CBD5E1;
+  background-color: transparent;
+  color: #081C2D;
+  border: 1px solid #081C2D;
   font-weight: 600;
   border-radius: 4px;
   transition: all 0.15s ease-in-out;
 }
 
 .btn-navy-outline:hover {
-  border-color: #0F172A;
-  background-color: #F8FAFC;
+  background-color: #081C2D;
+  color: #FFFFFF;
 }
 
 .btn-secondary-neutral {
   background-color: #FFFFFF;
-  color: #0F172A;
+  color: #081C2D;
   border: 1px solid #E2E8F0;
   font-weight: 500;
   border-radius: 4px;
@@ -159,12 +151,6 @@ section[id] {
   border-color: #CBD5E1;
 }
 
-/* Global sharp corner override for common Tailwind patterns */
-/* Remove excessive rounding from all standard elements */
-*, *::before, *::after {
-  --tw-radius: 0px;
-}
-
 /* Accessible focus visible rings */
 a:focus-visible,
 button:focus-visible,
@@ -173,4 +159,20 @@ select:focus-visible {
   outline: 2px solid #1F7A63;
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Subtle Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F7FA;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
