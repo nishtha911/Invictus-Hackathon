@@ -179,27 +179,101 @@ def verify_numbers(answer: str, source_chunks: List[Dict[str, Any]]) -> Dict[str
 # ---------------------------------------------------------------------------
 
 def _profile_for_prompt(profile: dict | None) -> dict:
-    """Normalize saved and direct frontend profile formats for the LLM."""
-    if not isinstance(profile, dict):
+    """Normalize saved, direct frontend, and database profile formats for the LLM prompt."""
+    if not isinstance(profile, dict) or not profile:
         return {}
 
-    loan_profile = profile.get("profile", profile)
-    if not isinstance(loan_profile, dict):
-        loan_profile = {}
+    # Unpack nested profile if present
+    raw_loan_profile = profile.get("profile", profile)
+    if not isinstance(raw_loan_profile, dict):
+        raw_loan_profile = {}
+
+    # Extract all known fields across different naming conventions
+    monthly_income = (
+        raw_loan_profile.get("monthly_income")
+        or raw_loan_profile.get("income")
+        or profile.get("monthly_income")
+        or profile.get("income")
+    )
+    loan_amount = (
+        raw_loan_profile.get("requested_loan_amount")
+        or raw_loan_profile.get("loan_amount")
+        or profile.get("requested_loan_amount")
+        or profile.get("loan_amount")
+    )
+    tenure_months = (
+        raw_loan_profile.get("preferred_tenure_months")
+        or raw_loan_profile.get("tenure_months")
+        or (raw_loan_profile.get("tenure_years") * 12 if raw_loan_profile.get("tenure_years") else None)
+        or (profile.get("tenure_years") * 12 if profile.get("tenure_years") else None)
+    )
+    existing_emi = (
+        raw_loan_profile.get("existing_emi_obligations")
+        or raw_loan_profile.get("existing_emi")
+        or profile.get("existing_emi_obligations")
+        or profile.get("existing_emi")
+        or 0.0
+    )
+    intent = (
+        raw_loan_profile.get("intent")
+        or profile.get("intent")
+        or "General Loan Advisory"
+    )
+    employment_type = (
+        raw_loan_profile.get("employment_type")
+        or profile.get("employment_type")
+    )
+    credit_band = (
+        raw_loan_profile.get("credit_score_band")
+        or raw_loan_profile.get("credit_band")
+        or profile.get("credit_score_band")
+        or profile.get("credit_band")
+    )
+    urgency = (
+        raw_loan_profile.get("urgency")
+        or profile.get("urgency")
+    )
+    applicant_name = (
+        raw_loan_profile.get("name")
+        or raw_loan_profile.get("applicant_name")
+        or profile.get("applicant_name")
+        or profile.get("customer_name")
+    )
+
+    clean_profile = {}
+    if applicant_name:
+        clean_profile["applicant_name"] = applicant_name
+    if intent:
+        clean_profile["loan_category"] = str(intent).replace("_", " ").title()
+    if monthly_income is not None and float(monthly_income) > 0:
+        clean_profile["monthly_income_inr"] = float(monthly_income)
+    if loan_amount is not None and float(loan_amount) > 0:
+        clean_profile["requested_loan_amount_inr"] = float(loan_amount)
+    if tenure_months is not None and int(tenure_months) > 0:
+        clean_profile["preferred_tenure_months"] = int(tenure_months)
+        clean_profile["preferred_tenure_years"] = round(int(tenure_months) / 12, 1)
+    if existing_emi is not None:
+        clean_profile["existing_monthly_emi_inr"] = float(existing_emi)
+    if employment_type:
+        clean_profile["employment_type"] = str(employment_type).replace("_", " ").title()
+    if credit_band:
+        clean_profile["credit_score_band"] = str(credit_band).title()
+    if urgency:
+        clean_profile["urgency"] = str(urgency).replace("_", " ").title()
+
+    # Pass specific sub-profile fields if present
+    for sub in ("home_loan_details", "vehicle_loan_details", "education_loan_details", "personal_loan_details", "business_loan_details"):
+        if raw_loan_profile.get(sub):
+            clean_profile[sub] = raw_loan_profile[sub]
 
     normalized = {
-        "user_type": profile.get("user_type", loan_profile.get("user_type", "new")),
-        "loan_profile": loan_profile,
+        "user_type": profile.get("user_type", raw_loan_profile.get("user_type", "guest")),
+        "advisory_intake_answers": clean_profile,
     }
 
     selected_loan = profile.get("selected_loan")
-    # Only include selected_loan when it matches the current intent so a stale
-    # Home Loan result does not colour a Gold Loan answer.
-    if (
-        isinstance(selected_loan, dict)
-        and selected_loan.get("category") == loan_profile.get("intent")
-    ):
-        normalized["selected_loan"] = selected_loan
+    if isinstance(selected_loan, dict):
+        normalized["selected_loan_product"] = selected_loan
 
     customer_context = profile.get("customer_context")
     if isinstance(customer_context, dict):
@@ -212,20 +286,21 @@ def _profile_for_prompt(profile: dict | None) -> dict:
 # Grounded answer generation
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are a friendly and expert Bank Loan Policy Assistant. \
-Your goal is to answer the user's question accurately and helpfully, using ONLY the retrieved bank policy excerpts provided below.
+SYSTEM_PROMPT = """You are DhanSetu's AI Bank Loan Policy and Advisory Assistant. \
+Your purpose is to answer customer questions with extreme accuracy, professionalism, and warmth, grounding your answers in retrieved bank policy documents while personalizing guidance using the customer's Verified Advisory Intake Answers.
 
 Rules you MUST follow:
-1. Base your answer strictly on the provided policy excerpts. Do not use outside knowledge.
-2. If the excerpts do not contain enough information to answer, say exactly:
-   "I could not find this information in the available bank policy documents."
-3. Format your response beautifully using Markdown: use bolding for key parameters, bullet points for lists, and headers if organizing multiple points.
-4. Structure the response to be highly readable, conversational, and clear, like a helpful bank support assistant.
-5. If multiple policies or values apply, clearly state them and mention the source document they come from.
-6. Policy figures, rates, limits, and requirements must match the retrieved excerpts exactly. Values in the "Verified Advisory Profile" are user-supplied facts and may be repeated, but you must not invent a calculation or a missing profile value.
-7. Use every relevant field from the Verified Advisory Profile. Never say a field is "not provided" when it appears there. If the credit field is "Not Sure / New to Credit", say the credit score is unknown and state that any policy score threshold cannot yet be confirmed.
-8. Never write "assumed", infer eligibility from employment or income alone, or claim the user is eligible unless every policy criterion required for that claim is both present in the profile and satisfied. Clearly identify outstanding checks.
-9. When the profile has a requested tenure, mention it for eligibility, tenure, or product-fit questions. Compare it with a policy tenure limit only when that limit appears in a retrieved excerpt."""
+1. Policy Grounding: Base all bank policy statements, interest rates, eligibility criteria, tenure limits, FOIR rules, and document requirements strictly on the retrieved policy excerpts provided. Do not invent bank rules.
+2. Advisory Personalization: The "Verified Advisory Intake Answers" contain the customer's real responses extracted from their loan advisory intake (e.g. Monthly Income, Requested Loan Amount, Existing EMIs, Employment Type, Credit Band, Preferred Tenure). Actively personalize your answers using these facts whenever relevant!
+   - For Eligibility Questions: Evaluate their specific income, requested amount, and existing obligations against the bank's FOIR and policy criteria from the excerpts.
+   - For Tenure / EMI Questions: Compare their preferred tenure and requested amount against the policy limits in the excerpts.
+   - For Documentation Questions: Tailor the document requirements to their specific employment type (e.g. Salaried vs Self-Employed).
+3. If Policy Information is Missing: If the retrieved excerpts do not contain sufficient bank policy information to answer, say:
+   "I could not find this specific detail in our available bank policy documents, but our loan officers can assist you during formal processing."
+4. Tone & Formatting:
+   - Use clear, structured GitHub-flavored Markdown with bold key terms, readable bullet points, and clean sections.
+   - Speak like a top-tier retail lending advisor: empathetic, clear, objective, and transparent.
+5. Accuracy Guarantee: Never assume or hallucinate missing data. If a profile field is not provided, state what the general policy is and invite the borrower to provide that detail."""
 
 
 def answer(query: str, loan_category: str = None, top_k: int = 5, profile: dict = None) -> Dict[str, Any]:

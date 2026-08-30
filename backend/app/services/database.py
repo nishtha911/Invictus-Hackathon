@@ -222,3 +222,37 @@ def save_customer_profile(extracted_json: dict):
     except Exception as e:
         logger.error(f"Failed to save profile to Supabase: {e}")
         return None
+
+
+def get_customer_profile(session_id: str):
+    """Fetches saved profile from Supabase public.customer_profiles table."""
+    if not supabase or not session_id:
+        return None
+    try:
+        res = supabase.table("customer_profiles").select("*").eq("session_id", session_id).limit(1).execute()
+        if res.data and len(res.data) > 0:
+            row = res.data[0]
+            return {
+                "session_id": row.get("session_id"),
+                "user_type": row.get("user_type", "guest"),
+                "profile": {
+                    "applicant_name": row.get("applicant_name"),
+                    "intent": row.get("intent"),
+                    "age": row.get("age"),
+                    "monthly_income": row.get("monthly_income"),
+                    "employment_type": row.get("employment_type"),
+                    "requested_loan_amount": row.get("requested_loan_amount"),
+                    "preferred_tenure_months": row.get("preferred_tenure_months"),
+                    "existing_emi_obligations": row.get("existing_emi_obligations", 0.0),
+                    "has_existing_loans": row.get("has_existing_loans", False),
+                    "credit_score_band": row.get("credit_score_band", "unknown"),
+                    "urgency": row.get("urgency", "exploring"),
+                },
+                "extraction_meta": {
+                    "completeness_pct": row.get("completeness_pct", 0),
+                    "turns_taken": row.get("turns_taken", 0),
+                }
+            }
+    except Exception as e:
+        logger.warning(f"Could not fetch profile from Supabase: {e}")
+    return None

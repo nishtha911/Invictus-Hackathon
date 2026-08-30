@@ -17,7 +17,7 @@ interface ChatMessage {
 export function FloatingAssistant() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, updateProfile, setExtractedData } = useJourneyStore();
+  const { sessionId, profile, userType, selectedCustomer, selectedLoan, updateProfile, setExtractedData } = useJourneyStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -169,10 +169,21 @@ export function FloatingAssistant() {
     try {
       const apiBase =
         process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const fullContext = {
+        user_type: userType || profile.user_type,
+        profile,
+        selected_loan: selectedLoan || null,
+        customer_context: selectedCustomer || null,
+      };
       const res = await fetch(`${apiBase}/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: userText, top_k: 3, profile: profile }),
+        body: JSON.stringify({
+          question: userText,
+          top_k: 4,
+          session_id: sessionId || null,
+          profile: fullContext,
+        }),
       });
 
       if (!res.ok) {

@@ -982,10 +982,78 @@ class KnowledgeBaseProfileRequest(BaseModel):
     customer_context: Optional[dict[str, Any]] = None
 
 
+def _resolve_advisory_profile(session_id: str | None, payload_profile: dict | None = None) -> dict:
+    """
+    Resolve user advisory profile across all stores:
+    1. In-memory SESSION_STORE (Paras's conversational LangGraph state)
+    2. KNOWLEDGE_BASE_PROFILE_STORE (Interactive advisory intake cache)
+    3. user_profiles.json on disk
+    4. Supabase public.customer_profiles table
+    5. Direct payload profile overlay
+    """
+    merged_profile: dict[str, Any] = {}
+
+    if session_id:
+        # 1. Check in-memory SESSION_STORE
+        if session_id in SESSION_STORE:
+            state = SESSION_STORE[session_id]
+            merged_profile = {
+                "session_id": session_id,
+                "user_type": state.user_type.value if hasattr(state.user_type, "value") else str(state.user_type),
+                "profile": state.profile.model_dump(exclude_none=True) if hasattr(state.profile, "model_dump") else dict(state.profile),
+                "turn_count": state.turn_count,
+            }
+
+        # 2. Check KNOWLEDGE_BASE_PROFILE_STORE
+        if not merged_profile and session_id in KNOWLEDGE_BASE_PROFILE_STORE:
+            merged_profile = dict(KNOWLEDGE_BASE_PROFILE_STORE[session_id])
+
+        # 3. Check user_profiles.json on disk
+        if not merged_profile and PROFILES_FILE.exists():
+            try:
+                profiles_data = json.loads(PROFILES_FILE.read_text(encoding="utf-8"))
+                if isinstance(profiles_data, list):
+                    for item in profiles_data:
+                        if item.get("session_id") == session_id:
+                            merged_profile = item
+                            break
+            except Exception as e:
+                logger.warning("Error reading user_profiles.json for %s: %s", session_id, e)
+
+        # 4. Check Supabase public schema customer_profiles table
+        if not merged_profile:
+            try:
+                from app.services.database import get_customer_profile
+                db_profile = get_customer_profile(session_id)
+                if db_profile:
+                    merged_profile = db_profile
+            except Exception as e:
+                logger.warning("Error fetching customer profile from Supabase for %s: %s", session_id, e)
+
+    # 5. Overlay with direct payload profile if passed
+    if isinstance(payload_profile, dict) and payload_profile:
+        if not merged_profile:
+            merged_profile = dict(payload_profile)
+        else:
+            base_profile = merged_profile.get("profile", {})
+            if isinstance(base_profile, dict):
+                overlay = payload_profile.get("profile", payload_profile)
+                if isinstance(overlay, dict):
+                    base_profile.update({k: v for k, v in overlay.items() if v is not None})
+                merged_profile["profile"] = base_profile
+            if "selected_loan" in payload_profile and payload_profile["selected_loan"]:
+                merged_profile["selected_loan"] = payload_profile["selected_loan"]
+            if "customer_context" in payload_profile and payload_profile["customer_context"]:
+                merged_profile["customer_context"] = payload_profile["customer_context"]
+
+    return merged_profile
+
+
 @app.put("/api/knowledge-base/profile")
 def save_knowledge_base_profile(payload: KnowledgeBaseProfileRequest):
     """Persist the active advisory profile so the RAG chat can reuse it."""
     KNOWLEDGE_BASE_PROFILE_STORE[payload.session_id] = {
+        "session_id": payload.session_id,
         "user_type": payload.user_type,
         "profile": payload.profile,
         "selected_loan": payload.selected_loan,
@@ -1002,20 +1070,16 @@ def save_knowledge_base_profile(payload: KnowledgeBaseProfileRequest):
 
 @app.get("/api/knowledge-base/profile/{session_id}")
 def get_knowledge_base_profile(session_id: str):
-    """Restore a saved RAG context after a browser refresh."""
-    saved_profile = KNOWLEDGE_BASE_PROFILE_STORE.get(session_id)
-    if saved_profile is None:
+    """Restore a saved RAG context after a browser refresh across all stores."""
+    saved_profile = _resolve_advisory_profile(session_id)
+    if not saved_profile:
         raise HTTPException(404, "No saved knowledge-base profile for this session.")
     return {"session_id": session_id, "context": saved_profile}
 
 
 @app.post("/query")
 def query_knowledge_base(req: QueryRequest):
-    profile_context = req.profile
-    if req.session_id:
-        saved_context = KNOWLEDGE_BASE_PROFILE_STORE.get(req.session_id)
-        if saved_context:
-            profile_context = saved_context
+    profile_context = _resolve_advisory_profile(req.session_id, req.profile)
 
     if not req.question or not req.question.strip():
         raise HTTPException(status_code=422, detail="Question cannot be empty.")

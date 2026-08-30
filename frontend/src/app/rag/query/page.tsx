@@ -346,22 +346,57 @@ export default function QueryPage() {
       <div className="flex flex-col h-[70vh] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden">
         {/* Category selector panel */}
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 shrink-0 space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="text-blue-600 animate-pulse" size={18} />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="text-[#1F7A63] mt-0.5 shrink-0" size={18} />
               <div>
-                <span className="text-sm font-semibold text-gray-700">Your profile is active</span>
-                <p className="text-[11px] text-gray-500">
-                  {activeContext.user_type === 'existing'
-                    ? 'Using your existing-customer details and selected loan profile.'
-                    : 'Using the details you provided in Loan Advisory.'}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-gray-800">Advisory Profile Connected</span>
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#1F7A63] border border-emerald-200">
+                    Live RAG Integration
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  {activeContext.profile.income || activeContext.profile.loan_amount || activeContext.profile.intent
+                    ? `Answers from your advisory intake are powering personalized policy answers.`
+                    : `Ask bank policy questions or complete your Loan Advisory intake for personalized terms.`}
                 </p>
+                {/* Profile Pills */}
+                {(activeContext.profile.intent || activeContext.profile.income || activeContext.profile.loan_amount || activeContext.profile.employment_type) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {activeContext.profile.intent && (
+                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
+                        Goal: <strong className="text-slate-900">{activeContext.profile.intent}</strong>
+                      </span>
+                    )}
+                    {activeContext.profile.income ? (
+                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
+                        Income: <strong className="text-slate-900">₹{activeContext.profile.income.toLocaleString('en-IN')}/mo</strong>
+                      </span>
+                    ) : null}
+                    {activeContext.profile.loan_amount ? (
+                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
+                        Amount: <strong className="text-slate-900">₹{activeContext.profile.loan_amount.toLocaleString('en-IN')}</strong>
+                      </span>
+                    ) : null}
+                    {activeContext.profile.employment_type && (
+                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
+                        Type: <strong className="text-slate-900">{activeContext.profile.employment_type}</strong>
+                      </span>
+                    )}
+                    {activeContext.profile.credit_band && (
+                      <span className="rounded bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-gray-200 shadow-2xs">
+                        Credit: <strong className="text-slate-900">{activeContext.profile.credit_band}</strong>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <select
               value={category}
               onChange={e => setCategory(e.target.value)}
-              className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+              className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:border-transparent transition-all cursor-pointer shrink-0"
             >
               {CATEGORIES.map(c => <option key={c}>{c}</option>)}
             </select>
