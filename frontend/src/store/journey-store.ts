@@ -9,8 +9,19 @@ import {
   UserType,
 } from "../lib/types/contracts";
 
+export interface AuthUser {
+  name: string;
+  mobile_number: string;
+  email?: string;
+  customer_id?: string;
+  employer?: string;
+  employment_type?: string;
+  monthly_income?: number;
+}
+
 export interface JourneyState {
   sessionId: string;
+  authUser: AuthUser | null;
   userType: UserType | null;
   selectedCustomer: DemoCustomer | null;
   profile: ProfileIntake;
@@ -24,6 +35,8 @@ export interface JourneyState {
   extractionStatusMessage: string;
 
   // Actions
+  login: (user: AuthUser, customer?: DemoCustomer) => void;
+  logout: () => void;
   setUserType: (type: UserType, customer?: DemoCustomer) => void;
   updateProfile: (partial: Partial<ProfileIntake>) => void;
   setExtractedData: (data: ExtractedProfileData | null) => void;
@@ -57,7 +70,8 @@ const dummyStorage: StateStorage = {
 export const useJourneyStore = create<JourneyState>()(
   persist(
     (set) => ({
-      sessionId: `SESSION-${Date.now()}`,
+      sessionId: "SESSION-DEFAULT",
+      authUser: null,
       userType: null,
       selectedCustomer: null,
       profile: { ...initialProfile },
@@ -70,6 +84,39 @@ export const useJourneyStore = create<JourneyState>()(
       isExtracting: false,
       extractionStatusMessage: "Understanding your requirements...",
 
+      login: (user, customer) =>
+        set((state) => {
+          const activeCustomer = customer || state.selectedCustomer;
+          return {
+            ...state,
+            authUser: user,
+            userType: "existing",
+            selectedCustomer: activeCustomer || null,
+            profile: {
+              ...state.profile,
+              user_type: "existing",
+              customer_name: user.name,
+              customer_id: user.customer_id || activeCustomer?.id,
+              employment_type: user.employment_type || activeCustomer?.employment_type || state.profile.employment_type,
+              income: user.monthly_income || activeCustomer?.monthly_income || state.profile.income,
+            },
+          };
+        }),
+
+      logout: () =>
+        set((state) => ({
+          ...state,
+          authUser: null,
+          userType: null,
+          selectedCustomer: null,
+          profile: {
+            ...state.profile,
+            user_type: "new",
+            customer_id: undefined,
+            customer_name: undefined,
+          },
+        })),
+
       setUserType: (type, customer) =>
         set((state) => {
           if (type === "existing" && customer) {
@@ -81,9 +128,18 @@ export const useJourneyStore = create<JourneyState>()(
               existing_emi: customer.existing_emi,
               credit: customer.credit_band,
             };
+            const authUser: AuthUser = {
+              name: customer.name,
+              mobile_number: customer.phone.replace(/\D/g, "").slice(-10),
+              email: customer.email,
+              customer_id: customer.id,
+              employer: customer.employer,
+              employment_type: customer.employment_type,
+              monthly_income: customer.monthly_income,
+            };
             return {
               ...state,
-              sessionId: `SESSION-${Date.now()}`,
+              authUser,
               userType: type,
               selectedCustomer: customer,
               profile: {
@@ -99,25 +155,19 @@ export const useJourneyStore = create<JourneyState>()(
                 tenure_years: 20,
                 urgency: "Immediate (Within 7 Days)",
               },
-              recommendations: [],
-              selectedLoan: null,
-              submittedLead: null,
               answers: existingAnswers,
               currentStepIndex: 3,
             };
           }
           return {
             ...state,
-            sessionId: `SESSION-${Date.now()}`,
+            authUser: null,
             userType: type,
             selectedCustomer: null,
             profile: {
               ...initialProfile,
               user_type: "new",
             },
-            recommendations: [],
-            selectedLoan: null,
-            submittedLead: null,
             answers: {},
             currentStepIndex: 0,
           };
@@ -142,7 +192,8 @@ export const useJourneyStore = create<JourneyState>()(
 
       resetDemo: () =>
         set({
-          sessionId: `SESSION-${Date.now()}`,
+          sessionId: "SESSION-DEFAULT",
+          authUser: null,
           userType: null,
           selectedCustomer: null,
           profile: { ...initialProfile },

@@ -84,7 +84,7 @@ const LOAN_DETAILS = [
 
 export function LoanInfoSection() {
   return (
-    <section className="py-16 sm:py-20 bg-[#F5F7FA] border-t border-[#E2E8F0]">
+    <section id="loan-information" className="scroll-mt-24 py-16 sm:py-20 bg-[#F5F7FA] border-t border-[#E2E8F0]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">

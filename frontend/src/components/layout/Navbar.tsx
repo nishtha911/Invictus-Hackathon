@@ -62,14 +62,18 @@ export function Navbar() {
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo Left */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F7A63] text-white font-bold text-lg shadow-xs group-hover:bg-[#28967b] transition-colors">
-            D
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white/10 p-1 flex items-center justify-center border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
+            <img
+              src="/images/logo.png"
+              alt="Cognis Bank Logo"
+              className="h-full w-full object-contain"
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
               {BRAND.name}
             </span>
-            <span className="text-[11px] font-normal text-slate-300 tracking-wide">
+            <span className="text-[11px] font-normal text-emerald-400 tracking-wide">
               {BRAND.tagline}
             </span>
           </div>

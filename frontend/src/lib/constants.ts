@@ -4,9 +4,10 @@
  */
 
 export const BRAND = {
-  name: "DHANSETU",
+  name: "Cognis Bank",
   tagline: "Smart Lending, Simplified.",
-  subtext: "Explore suitable loan options for your home, car, business, or gold with clear guidance, transparent recommendations, and a simpler borrowing experience.",
+  subtext: "Explore suitable loan options for your home, car, business, or gold with clear guidance, transparent recommendations, and a simpler borrowing experience with Cognis Bank.",
+  logo: "/images/logo.png",
 };
 
 import { API_ENDPOINTS } from "./api/endpoints";

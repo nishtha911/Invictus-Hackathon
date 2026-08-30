@@ -6,11 +6,15 @@ export function Footer() {
     <footer className="border-t border-[#0f2c44] bg-[#081C2D] text-slate-300 text-xs">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Column 1: DhanSetu Brand */}
+          {/* Column 1: Cognis Bank Brand */}
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1F7A63] text-white font-bold text-sm shadow-xs">
-                D
+              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-white/10 p-1 flex items-center justify-center border border-white/20 shadow-xs">
+                <img
+                  src="/images/logo.png"
+                  alt="Cognis Bank Logo"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <span className="text-sm font-bold text-white tracking-tight">{BRAND.name}</span>
             </div>

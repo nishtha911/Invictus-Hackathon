@@ -17,11 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DhanSetu | Smart Loan Guidance",
+  title: "Cognis Bank | Smart Loan Guidance",
   description:
-    "Explore suitable home, car, business, gold and other loan options through a guided digital lending experience.",
+    "Explore suitable home, car, business, gold and other loan options with Cognis Bank through a guided digital lending experience for the Cognizant Hackathon.",
   keywords: [
-    "DhanSetu",
+    "Cognis Bank",
+    "Cognizant Hackathon",
     "Home Loan",
     "Car Loan",
     "Business Loan",
@@ -30,7 +31,10 @@ export const metadata: Metadata = {
     "EMI Calculator",
     "Digital Lending Advisor",
   ],
-  authors: [{ name: "DhanSetu Banking Architecture" }],
+  authors: [{ name: "Cognis Bank Engineering Team" }],
+  icons: {
+    icon: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({

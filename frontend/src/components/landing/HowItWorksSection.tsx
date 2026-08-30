@@ -14,20 +14,20 @@ export function HowItWorksSection() {
     {
       number: "02",
       icon: FileText,
-      title: "Tell Us About Yourself",
-      description: "Share your monthly income, employment profile, and target repayment timeline in a guided flow.",
+      title: "Answer Guided Questions",
+      description: "Share your monthly income, employment profile, and target loan requirements in a simple guided flow.",
     },
     {
       number: "03",
       icon: CheckCircle2,
-      title: "Explore Suitable Options",
-      description: "Review calculated EMIs, verified eligibility limits, and policy-grounded terms.",
+      title: "Explore Personalised Options",
+      description: "Review calculated EMIs, verified eligibility limits, and policy-grounded terms tailored to your profile.",
     },
     {
       number: "04",
       icon: PhoneCall,
       title: "Connect With a Specialist",
-      description: "Submit a request to connect directly with a dedicated retail lending officer.",
+      description: "Submit a request to connect directly with a dedicated retail lending officer without repeating your details.",
     },
   ];
 
@@ -61,7 +61,7 @@ export function HowItWorksSection() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl font-extrabold font-mono text-slate-300">
+                    <span className="text-3xl font-extrabold text-slate-300 tabular-nums tracking-tight">
                       {step.number}
                     </span>
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1F7A63] border border-[#E2E8F0] shadow-2xs">
