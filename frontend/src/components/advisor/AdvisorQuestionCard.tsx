@@ -716,22 +716,45 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Range Slider: Max 40,000 */}
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min={0}
+                  max={40000}
+                  step={1000}
+                  value={profile.existing_emi || 0}
+                  onChange={(e) => updateProfile({ existing_emi: parseInt(e.target.value, 10) })}
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                />
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                  <span>₹0 (None)</span>
+                  <span>₹10,000</span>
+                  <span>₹20,000</span>
+                  <span>₹30,000</span>
+                  <span>₹40,000 (Max)</span>
+                </div>
+              </div>
+
+              {/* All Clickable Preset Options in One Single Row */}
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5">
                 {[0, 5000, 12000, 25000, 40000].map((emi) => (
                   <button
                     key={emi}
                     type="button"
                     onClick={() => updateProfile({ existing_emi: emi })}
-                    className={`rounded-xl border p-3 text-center transition-all cursor-pointer ${
+                    className={`rounded-xl border py-2.5 px-1 sm:px-3 text-center transition-all cursor-pointer ${
                       profile.existing_emi === emi
                         ? "border-[#1F7A63] bg-[#F0FDF4] text-[#081C2D] font-bold ring-1 ring-[#1F7A63]"
                         : "border-[#E2E8F0] bg-[#F5F7FA] text-slate-600 hover:border-slate-300"
                     }`}
                   >
-                    <span className="text-xs block text-slate-500">
+                    <span className="text-[10px] sm:text-xs block text-slate-500 truncate">
                       {emi === 0 ? "No Active EMI" : "Existing EMI"}
                     </span>
-                    <span className="text-sm font-mono mt-0.5 block">{formatINR(emi)}</span>
+                    <span className="text-xs sm:text-sm font-mono mt-0.5 block font-semibold">
+                      {formatINR(emi)}
+                    </span>
                   </button>
                 ))}
               </div>
