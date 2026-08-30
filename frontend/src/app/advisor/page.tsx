@@ -2,11 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, ChevronUp, ChevronDown } from "lucide-react";
 import { AdvisorJourneyRail } from "@/components/advisor/AdvisorJourneyRail";
 import { AdvisorQuestionCard } from "@/components/advisor/AdvisorQuestionCard";
-import { AdvisorProfileRail } from "@/components/advisor/AdvisorProfileRail";
-import { ExtractionIndicator } from "@/components/advisor/ExtractionIndicator";
 import { useJourneyStore } from "@/store/journey-store";
 import { fetchLoanRecommendations } from "@/lib/api/recommendations";
 import { saveKnowledgeBaseContext } from "@/knowledge-base-api";
@@ -95,10 +92,10 @@ function AdvisorContent() {
           </div>
         </div>
 
-        {/* 3-Column Desktop Grid Layout */}
+        {/* 2-Column Clean Desktop Grid Layout (Roadmap 4 cols + Question Engine 8 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Dynamic Journey Roadmap Rail (3 cols) */}
-          <div className="hidden lg:block lg:col-span-3">
+          {/* Left Column: Dynamic Journey Roadmap Rail (4 cols) */}
+          <div className="hidden lg:block lg:col-span-4">
             <AdvisorJourneyRail
               currentStepIndex={currentStepIndex}
               onSelectStep={(idx) => setStepIndex(idx)}
@@ -107,14 +104,9 @@ function AdvisorContent() {
             />
           </div>
 
-          {/* Center Column: Question & Controls (6 cols) */}
-          <div className="lg:col-span-6 space-y-4">
+          {/* Center/Main Column: Question & Controls (8 cols) */}
+          <div className="lg:col-span-8 space-y-4">
             <AdvisorQuestionCard onCompleteJourney={handleFindMatches} />
-          </div>
-
-          {/* Right Column: Live Profile Rail (3 cols) */}
-          <div className="hidden lg:block lg:col-span-3">
-            <AdvisorProfileRail onFindMatches={handleFindMatches} isLoading={isLoading} />
           </div>
         </div>
       </div>
