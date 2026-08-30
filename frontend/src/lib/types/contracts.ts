@@ -1,5 +1,5 @@
 /**
- * TypeScript Contracts for DHANSETU Architecture
+ * TypeScript Contracts for Cognis Bank Architecture
  * Aligned with Backend FastAPI Models and Underwriting Policy Pipelines
  */
 

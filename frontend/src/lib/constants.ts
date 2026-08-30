@@ -1,5 +1,5 @@
 /**
- * DHANSETU Global Constants
+ * Cognis Bank Global Constants
  * Brand, Navigation & Domain Configs
  */
 

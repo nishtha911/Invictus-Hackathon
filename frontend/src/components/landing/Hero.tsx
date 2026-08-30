@@ -36,7 +36,7 @@ export function Hero() {
             <div className="pt-2 flex flex-wrap items-center gap-3.5">
               <Link
                 href="/advisor"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01] cursor-pointer"
+                className="inline-flex items-center gap-2 bg-[#1F7A63] hover:bg-[#186350] px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>Check Loan Eligibility</span>
                 <ArrowRight className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function Hero() {
 
               <Link
                 href="/#how-it-works"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
+                className="inline-flex items-center gap-2 border border-[#081C2D] bg-white px-5 py-3.5 text-sm font-semibold text-[#081C2D] hover:bg-[#081C2D] hover:text-white transition-all hover:scale-[1.01] cursor-pointer"
               >
                 <span>How Cognis Bank Works</span>
               </Link>
@@ -58,10 +58,10 @@ export function Hero() {
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             className="lg:col-span-6 relative"
           >
-            <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-[#E2E8F0] shadow-md bg-white">
+            <div className="relative aspect-4/3 w-full overflow-hidden border border-[#E2E8F0] shadow-md bg-white">
               <Image
                 src="/images/dhansetu-family-loans.jpg"
-                alt="Family planning financial milestones with DhanSetu"
+              alt="Family planning financial milestones with Cognis Bank"
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"

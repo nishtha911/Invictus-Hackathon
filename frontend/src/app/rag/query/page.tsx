@@ -217,7 +217,7 @@ export default function QueryPage() {
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Hello! I am your Invictus Bank Loan Policy Assistant. Feel free to ask me any questions about our loan guidelines, interest rates, tenures, or eligibility rules.',
+      text: 'Hello! I am your Cognis Bank Loan Policy Assistant. Feel free to ask me any questions about our loan guidelines, interest rates, tenures, or eligibility rules.',
       sources: []
     }
   ])
