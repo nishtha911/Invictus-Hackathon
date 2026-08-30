@@ -849,6 +849,13 @@ async def capture_lead(payload: LeadCapturePayload):
     }
     LEAD_STORE.append(lead_record)
 
+    # Persist to Supabase qualified_leads table
+    try:
+        from app.services.database import save_lead
+        save_lead(lead_record)
+    except Exception as e:
+        logger.error(f"Error syncing lead to Supabase: {e}")
+
     logger.info(f"Lead captured: {scoring['lead_id']} — {scoring['score_band']} ({scoring['score']}/100)")
 
     return {
@@ -886,10 +893,39 @@ async def capture_lead(payload: LeadCapturePayload):
 @app.get("/api/v1/dashboard")
 @app.get("/api/dashboard")
 async def get_dashboard():
-    """Return sales intelligence dashboard data."""
+    """Return sales intelligence dashboard data from Supabase and memory."""
+    from app.services.database import fetch_leads
+
     formatted_leads = []
-    for l in reversed(LEAD_STORE):
+    
+    # 1. Fetch live leads from Supabase qualified_leads
+    db_leads = fetch_leads()
+    for dl in db_leads:
+        band_raw = str(dl.get("lead_band", "warm")).upper()
+        score_band_display = f"{band_raw} LEAD" if "LEAD" not in band_raw else band_raw
         formatted_leads.append({
+            "id": str(dl.get("lead_id", "LEAD-001")),
+            "customer_name": dl.get("full_name", "Borrower"),
+            "email": dl.get("email", ""),
+            "phone": dl.get("phone", ""),
+            "product_name": dl.get("interested_product_id", "Loan"),
+            "loan_category": "Loan",
+            "requested_amount": 500000.0,
+            "estimated_emi": 0.0,
+            "lead_score": int(dl.get("lead_score", 80)),
+            "score_band": score_band_display,
+            "urgency": "Immediate",
+            "status": str(dl.get("status", "new")).capitalize(),
+            "created_at": str(dl.get("created_at", "Just now")),
+            "preferred_time": dl.get("preferred_contact_time", "Morning (9 AM - 12 PM)"),
+            "ai_briefing": dl.get("chat_summary", ""),
+            "scoring_factors": dl.get("score_factors", []),
+            "talking_points": dl.get("recommended_talking_points", []),
+        })
+
+    # 2. Append any session in-memory leads if not already present
+    for l in reversed(LEAD_STORE):
+        formatted_leads.insert(0, {
             "id": l.get("lead_id", "LEAD-001"),
             "customer_name": l.get("customer_name", "Borrower"),
             "email": l.get("email", ""),
@@ -909,9 +945,9 @@ async def get_dashboard():
             "talking_points": l.get("talking_points", []),
         })
 
-    total_leads = max(len(formatted_leads), 142)
-    hot_leads = sum(1 for l in formatted_leads if l.get("score_band") == "HOT LEAD") or 38
-    warm_leads = sum(1 for l in formatted_leads if l.get("score_band") == "WARM LEAD") or 58
+    total_leads = len(formatted_leads)
+    hot_leads = sum(1 for l in formatted_leads if "HOT" in str(l.get("score_band", "")).upper())
+    warm_leads = sum(1 for l in formatted_leads if "WARM" in str(l.get("score_band", "")).upper())
     total_demand = sum(l.get("requested_amount", 0) for l in formatted_leads) or 24000000.0
 
     return {
