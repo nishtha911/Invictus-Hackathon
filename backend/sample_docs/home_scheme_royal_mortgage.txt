@@ -1,0 +1,23 @@
+Royal Mortgage - Heritage Bank
+
+Scheme Name: Royal Mortgage
+Bank: Heritage Bank
+
+Overview:
+Full-featured home loan for salaried and self-employed applicants with competitive interest rates and long tenures.
+
+Eligibility:
+- Age 21-65 for primary applicant.
+- Minimum monthly income: ₹30,000 for salaried applicants.
+
+Financials:
+- Loan amount: ₹500,000 to ₹100,000,000
+- Interest rate: From 7.25% p.a. (floating)
+- Tenure: Up to 30 years
+- Processing fee: 0.5% of sanctioned amount
+
+Special Conditions:
+- Part prepayment allowed with no penalty after 12 months.
+- LTV and FOIR checks applied per policy.
+
+Documentation: Property documents, title search, income proof, bank statements.

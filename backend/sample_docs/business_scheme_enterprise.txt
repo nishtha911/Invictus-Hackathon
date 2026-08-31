@@ -1,0 +1,21 @@
+EnterpriseEdge Loan - CorpLend
+
+Scheme Name: EnterpriseEdge Loan
+Bank: CorpLend
+
+Overview:
+Large-ticket financing for established enterprises with tailored terms and advisory support.
+
+Eligibility:
+- Corporates with multi-year revenue history and audited financials.
+
+Financials:
+- Loan amount: ₹5,000,000 and above
+- Interest rate: Custom pricing based on credit profile
+- Tenure: Up to 15 years
+- Processing fee: Negotiated per deal
+
+Special Conditions:
+- Custom covenants and monitoring clauses as part of sanction.
+
+Documentation: Audited financials, board resolutions, collateral documentation.

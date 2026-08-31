@@ -1,0 +1,121 @@
+[
+  {
+    "session_id": "f9c9edf6-0ed7-44ba-a080-cea91fd3e0eb",
+    "user_type": "guest",
+    "profile": {
+      "name": null,
+      "intent": null,
+      "monthly_income": null,
+      "employment_type": null,
+      "employer_type": null,
+      "years_at_current_job": null,
+      "years_in_business": null,
+      "requested_loan_amount": null,
+      "preferred_tenure_months": null,
+      "existing_emi_obligations": 0.0,
+      "has_existing_loans": null,
+      "credit_score_band": null,
+      "credit_score_numeric": null,
+      "urgency": null,
+      "age": null,
+      "has_co_applicant": null,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "preferred_emi": null,
+      "interest_type": null,
+      "home_loan_details": null,
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 9,
+      "turns_taken": 1,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-29T13:25:07.444655",
+      "fields_filled": [
+        "existing_emi_obligations"
+      ],
+      "fields_remaining": [
+        "name",
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "occupation_vintage",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "preferred_emi",
+        "interest_type",
+        "has_co_applicant"
+      ]
+    }
+  },
+  {
+    "session_id": "7a3cd837-ea83-4bca-acad-8f879308a69e",
+    "user_type": "guest",
+    "profile": {
+      "name": "Sylvester",
+      "intent": "home_loan",
+      "monthly_income": 2500000.0,
+      "employment_type": "salaried",
+      "employer_type": null,
+      "years_at_current_job": 24,
+      "years_in_business": null,
+      "requested_loan_amount": 5000000.0,
+      "preferred_tenure_months": 60,
+      "existing_emi_obligations": 500000.0,
+      "has_existing_loans": true,
+      "credit_score_band": "unknown",
+      "credit_score_numeric": null,
+      "urgency": "exploring",
+      "age": 39,
+      "has_co_applicant": false,
+      "co_applicant_income": null,
+      "has_collateral": null,
+      "preferred_emi": "fast_repayment",
+      "interest_type": "floating",
+      "home_loan_details": {
+        "property_value": 5000000.0,
+        "down_payment": 5000000.0,
+        "property_location": "Pune",
+        "is_first_property": false,
+        "property_status": "under_construction"
+      },
+      "vehicle_loan_details": null,
+      "education_loan_details": null,
+      "personal_loan_details": null,
+      "business_loan_details": null
+    },
+    "extraction_meta": {
+      "completeness_pct": 100,
+      "turns_taken": 21,
+      "model": "llama-3.3-70b-versatile",
+      "extracted_at": "2026-08-29T13:25:07.444818",
+      "fields_filled": [
+        "name",
+        "intent",
+        "monthly_income",
+        "employment_type",
+        "occupation_vintage",
+        "requested_loan_amount",
+        "preferred_tenure_months",
+        "existing_emi_obligations",
+        "has_existing_loans",
+        "credit_score_band",
+        "urgency",
+        "age",
+        "preferred_emi",
+        "interest_type",
+        "has_co_applicant",
+        "home_loan_details.property_value",
+        "home_loan_details.down_payment"
+      ],
+      "fields_remaining": []
+    }
+  }
+]

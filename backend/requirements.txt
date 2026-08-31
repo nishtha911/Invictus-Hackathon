@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+psycopg2-binary
+pdfplumber
+sentence-transformers
+groq
+openai
+python-multipart
+python-dotenv
+pydantic
+pydantic-settings
+langgraph
+langchain-core
+langchain-groq
+httpx
+supabase
+

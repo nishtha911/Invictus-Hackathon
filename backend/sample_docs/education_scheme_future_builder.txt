@@ -1,0 +1,23 @@
+FutureBuilder Education Loan - Horizon Bank
+
+Scheme Name: FutureBuilder Education Loan
+Bank: Horizon Bank
+
+Overview:
+FutureBuilder supports undergraduate and postgraduate studies with flexible repayment options and partial loan disbursement directly to the educational institute.
+
+Eligibility:
+- Applicants aged 18-35.
+- Parent or guardian may co-sign for applicants under 21.
+
+Financials:
+- Loan amount: ₹1,00,000 to ₹1,500,000
+- Interest rate: 10.25% p.a. fixed for first 2 years, then floating
+- Tenure: Up to 12 years
+- Processing fee: Flat ₹2,500 or 0.75%
+
+Special Conditions:
+- Subsidised interest rates available for merit scholarship holders.
+- Flexible EMI holiday options during internships if income proof is provided.
+
+Documentation: Admission letter, fee invoice, ID and address proof, bank statements for guardian.
