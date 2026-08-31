@@ -1,5 +1,5 @@
 /**
- * DhanSetu Personalised Intake Question Schema
+ * Cognis Bank Personalised Intake Question Schema
  * Modular, schema-driven frontend architecture ready for dynamic backend delivery
  */
 

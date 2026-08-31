@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { CheckCircle, Home, RotateCcw } from "lucide-react";
+import { CheckCircle, Home, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useJourneyStore } from "@/store/journey-store";
 import { BRAND } from "@/lib/constants";
@@ -28,6 +28,11 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
     router.push("/advisor");
   };
 
+  const handlePolicyDesk = () => {
+    onClose();
+    router.push("/rag");
+  };
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -49,29 +54,37 @@ export function SessionCompleteModal({ open, onClose }: SessionCompleteModalProp
             <CheckCircle className="h-7 w-7" />
           </div>
 
-          <h3 className="mt-4 text-xl font-bold tracking-tight text-[#132443]">Session Complete</h3>
+          <h3 className="mt-4 text-xl font-bold tracking-tight text-[#132443]">Advisory Session Complete</h3>
           <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             Thank you for exploring your loan options with <strong>{BRAND.name}</strong>. Your session is securely closed without capturing personal contact details.
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            You can start another advisory session whenever you are ready to explore or apply.
+            Want to dig into the eligibility rules, documents or rate policy for these loans? Our Policy Desk has your profile ready.
           </p>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="mt-6 space-y-3">
             <button
-              onClick={handleReturnHome}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+              onClick={handlePolicyDesk}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
-              <Home className="h-4 w-4 text-slate-500" />
-              <span>Return Home</span>
+              <BookOpen className="h-4 w-4" />
+              <span>Explore the Policy Desk</span>
             </button>
-            <button
-              onClick={handleStartAgain}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>Start Again</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleReturnHome}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+              >
+                <Home className="h-4 w-4 text-slate-500" />
+                <span>Return Home</span>
+              </button>
+              <button
+                onClick={handleStartAgain}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-xs font-semibold text-[#132443] hover:bg-[#F5F7FA] transition-colors cursor-pointer"
+              >
+                <span>Start a New Session</span>
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

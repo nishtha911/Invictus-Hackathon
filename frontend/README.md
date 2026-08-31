@@ -1,4 +1,4 @@
-# DHANSETU — Frontend (Pod 4)
+# COGNIS BANK — Frontend (Pod 4)
 **Cognizant Invictus Hackathon — Smart Lending, Simplified.**
 
 A production-grade, policy-grounded Next.js banking web application delivering conversational financial intake, deterministic EMI calculations, transparent loan recommendations, and underwriting sales intelligence.
@@ -92,7 +92,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 
 | Route | View | Description |
 | :--- | :--- | :--- |
-| `/` | **DhanSetu Homepage** | Clean hero with family lifestyle photography, comprehensive loan solutions catalogue, 4-step process, and trust matrix. |
+| `/` | **Cognis Bank Homepage** | Clean hero with family lifestyle photography, comprehensive loan solutions catalogue, 4-step process, and trust matrix. |
 | `/login` | **Existing Customer Login** | Fast sign-in for registered borrowers using Full Name and 10-digit mobile number with quick demo fill. |
 | `/advisor` | **Intelligent Loan Advisor** | 8-step conversational intake with options, smart sliders, live profile summary, and category pre-selection. |
 | `/recommendations` | **Loan Recommendations** | Recommended product card, verified calculations, policy citations, comparison drawer, and interest decisions. |

@@ -1,7 +1,7 @@
 <div align="center">
   <img src="frontend/public/logo.png" alt="Cognis Bank Logo" width="120" />
   
-  # 🌉 Cognis Bank — DhanSetu
+  # 🌉 Cognis Bank
   
   **Next-Generation Generative AI Loan Advisory & Intelligent Lead Conversion Platform**
   
@@ -22,7 +22,7 @@
 
 ## 🌟 Overview
 
-**DhanSetu** (translating to "Bridge to Wealth") is Cognis Bank's premium, conversational AI loan advisor. Built for the Invictus Hackathon, it bridges the gap between potential borrowers and complex bank policies. 
+**Cognis Bank**'s premium, conversational AI loan advisor. Built for the Invictus Hackathon, it bridges the gap between potential borrowers and complex bank policies. 
 
 By integrating **Retrieval-Augmented Generation (RAG)** over bank policy brochures with real-time profile extraction, the platform captures structured customer requirements, recommends matches with strict underwriting checks, and converts interest into scored, actionable sales leads.
 

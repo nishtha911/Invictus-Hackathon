@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, XCircle } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, XCircle, BookOpen } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { BestMatchHeroCard } from "@/components/recommendations/BestMatchHeroCard";
 import { LoanCardItem } from "@/components/recommendations/LoanCardItem";
@@ -193,7 +194,7 @@ export default function RecommendationsPage() {
               Would you like to proceed with this loan application?
             </h3>
             <p className="text-xs text-slate-500">
-              Select <strong>&quot;I&apos;m Interested&quot;</strong> to request a prioritized advisory callback with pre-filled terms, or <strong>&quot;Not Right Now&quot;</strong> to end your session.
+              Select <strong>&quot;I&apos;m Interested&quot;</strong> to request a prioritized advisory callback with pre-filled terms. Not ready to decide? Read the policy details below or explore the Policy Desk.
             </p>
           </div>
 
@@ -215,6 +216,30 @@ export default function RecommendationsPage() {
             </button>
           </div>
         </div>
+
+        {/* 4. Continue to the Policy Knowledge Base */}
+        <Link
+          href="/rag"
+          className="group flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[#1F7A63]/25 bg-[#F0FDF9] p-5 sm:p-6 transition-colors hover:bg-[#E8F5F1]"
+        >
+          <div className="flex items-start gap-3.5 text-center sm:text-left">
+            <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1F7A63] text-white">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-sm sm:text-base font-bold text-[#132443]">
+                Questions about the fine print?
+              </h3>
+              <p className="text-xs text-slate-600">
+                Ask our Policy Assistant anything about eligibility, documents, foreclosure or rates — it already has your profile.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#1F7A63] bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#1F7A63] transition-transform group-hover:translate-x-0.5">
+            <span>Open Policy Desk</span>
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
       </div>
 
       {/* Modals */}

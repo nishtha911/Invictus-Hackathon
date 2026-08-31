@@ -60,7 +60,7 @@ export function Hero() {
           >
             <div className="relative aspect-4/3 w-full overflow-hidden border border-[#E2E8F0] shadow-md bg-white">
               <Image
-                src="/images/dhansetu-family-loans.jpg"
+                src="/images/cognis-family-loans.jpg"
               alt="Family planning financial milestones with Cognis Bank"
                 fill
                 priority

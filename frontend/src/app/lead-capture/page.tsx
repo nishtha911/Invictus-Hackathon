@@ -15,6 +15,7 @@ import {
   Clock,
   Lock,
   Home,
+  BookOpen,
 } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { submitLead } from "@/lib/api/leads";
@@ -172,7 +173,14 @@ export default function LeadCapturePage() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-center pt-4 border-t border-[#E2E8F0]">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-[#E2E8F0]">
+              <button
+                onClick={() => router.push("/rag")}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-colors cursor-pointer"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Explore Loan Policies</span>
+              </button>
               <button
                 onClick={() => {
                   resetDemo();

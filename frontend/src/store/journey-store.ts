@@ -241,7 +241,7 @@ export const useJourneyStore = create<JourneyState>()(
         }),
     }),
     {
-      name: "dhansetu-journey-storage",
+      name: "cognis-bank-journey-storage",
       storage: createJSONStorage(() => (typeof window !== "undefined" ? window.localStorage : dummyStorage)),
     }
   )

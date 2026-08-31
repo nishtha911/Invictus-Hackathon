@@ -1,5 +1,5 @@
 /**
- * DhanSetu Centralized API Endpoint Definitions
+ * Cognis Bank Centralized API Endpoint Definitions
  * Aligned with FastAPI Backend Architecture
  */
 

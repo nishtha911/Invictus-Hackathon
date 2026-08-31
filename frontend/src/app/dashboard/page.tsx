@@ -129,13 +129,15 @@ export default function DashboardPage() {
               <span>Last 7 Days</span>
             </div>
 
-            <button
-              onClick={() => router.push("/dashboard/voice-assistant")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1F7A63] bg-[#e8f5f1] px-3.5 py-2 text-xs font-semibold text-[#1F7A63] hover:bg-[#d1eae2] transition-colors cursor-pointer"
-            >
-              <Phone className="h-3.5 w-3.5" />
-              <span>AI Voice CRM</span>
-            </button>
+            {process.env.NEXT_PUBLIC_VOICE_ASSISTANT_URL && (
+              <button
+                onClick={() => router.push("/dashboard/voice-assistant")}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#1F7A63] bg-[#e8f5f1] px-3.5 py-2 text-xs font-semibold text-[#1F7A63] hover:bg-[#d1eae2] transition-colors cursor-pointer"
+              >
+                <Phone className="h-3.5 w-3.5" />
+                <span>AI Voice CRM</span>
+              </button>
+            )}
 
             <button
               onClick={handleExportCSV}

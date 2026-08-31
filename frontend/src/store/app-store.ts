@@ -65,7 +65,7 @@ export const useStore = create<AppState>()(
       reset: () => set(initial),
     }),
     {
-      name: "dhansetu-session",
+      name: "cognis-bank-session",
       storage: createJSONStorage(() => (typeof window !== "undefined" ? window.sessionStorage : { getItem: () => null, setItem: () => {}, removeItem: () => {} })),
     }
   )
