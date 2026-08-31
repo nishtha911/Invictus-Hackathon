@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef } from 'react'
-import { UploadCloud, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { UploadCloud, FileText, CheckCircle, XCircle, Loader2, Lock, ShieldAlert } from 'lucide-react'
+import { useJourneyStore } from '@/store/journey-store'
+import Link from 'next/link'
 
 const CATEGORIES = ['Education Loan', 'Home Loan', 'Personal Loan', 'Vehicle Loan', 'Business Loan', 'Other']
 
@@ -17,6 +19,8 @@ export default function UploadPage() {
   const [files, setFiles] = useState<UploadFileEntry[]>([])
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { role } = useJourneyStore()
+  const isEmployee = role === "employee"
 
   function addFiles(newFiles: FileList | null) {
     if (!newFiles) return;
@@ -56,7 +60,13 @@ export default function UploadPage() {
         const fd = new FormData()
         fd.append('file', files[i].file)
         fd.append('loan_category', files[i].category)
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/upload`, { method: 'POST', body: fd })
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/upload`, {
+          method: 'POST',
+          headers: {
+            'X-Role': role || ''
+          },
+          body: fd
+        })
         const data = await res.json()
         if (!res.ok) throw new Error(data.detail || 'Upload failed')
         setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'done', result: data } : f))
@@ -65,6 +75,38 @@ export default function UploadPage() {
         setFiles(prev => prev.map((f, j) => j === i ? { ...f, status: 'error', error: errorMsg } : f))
       }
     }
+  }
+
+  if (!isEmployee) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 my-8 bg-white border border-amber-200 rounded-2xl shadow-sm">
+        <div className="flex items-start gap-4 p-4">
+          <div className="p-3 bg-amber-50 rounded-xl text-amber-600 shrink-0">
+            <ShieldAlert size={28} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <span>Employee Authentication Required</span>
+              <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">Restricted</span>
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Modifying the bank&apos;s Knowledge Base vector database by uploading new policy documents is strictly reserved for authorized Cognis Bank Employees.
+            </p>
+            <p className="text-xs text-slate-500">
+              Customers can interact with existing bank guidelines in read-only mode via the Policy Inquiry Assistant.
+            </p>
+            <div className="pt-3 flex gap-3">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1F7A63] text-white text-xs font-semibold rounded-lg hover:bg-[#186350] transition-colors"
+              >
+                <Lock size={14} /> Employee Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const hasPending = files.some(f => f.status === 'pending')
@@ -140,3 +182,4 @@ export default function UploadPage() {
     </div>
   )
 }
+

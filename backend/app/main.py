@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, File, Form, UploadFile
+from fastapi import FastAPI, HTTPException, File, Form, UploadFile, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import io
@@ -199,7 +199,7 @@ async def lifespan(app: FastAPI):
     # Auto-ingest sample documents with metadata enrichment into PostgreSQL RAG tables
     try:
         from ingest import auto_ingest_sample_docs
-        ingested = auto_ingest_sample_docs(force=True)
+        ingested = auto_ingest_sample_docs(force=False)
         logger.info(f"Sample docs auto-ingestion completed. Ingested/refreshed {len(ingested)} documents.")
     except Exception as exc:
         logger.error(f"Failed to verify sample documents: {exc}", exc_info=True)
@@ -1087,7 +1087,11 @@ def get_config():
 async def upload_document(
     file: UploadFile = File(...),
     loan_category: str = Form(...),
+    x_role: Optional[str] = Header(None, alias="X-Role"),
 ):
+    if x_role != "employee":
+        raise HTTPException(403, "Access restricted. Only bank employees can upload policy documents to the knowledge base.")
+
     allowed = {"pdf", "txt", "md"}
     ext = file.filename.rsplit(".", 1)[-1].lower()
     if ext not in allowed:
@@ -1258,7 +1262,13 @@ def list_documents():
 
 
 @app.delete("/documents/{doc_id}")
-def delete_document(doc_id: int):
+def delete_document(
+    doc_id: int,
+    x_role: Optional[str] = Header(None, alias="X-Role"),
+):
+    if x_role != "employee":
+        raise HTTPException(403, "Access restricted. Only bank employees can delete policy documents from the knowledge base.")
+
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM rag.documents WHERE id = %s RETURNING id;", (doc_id,))
