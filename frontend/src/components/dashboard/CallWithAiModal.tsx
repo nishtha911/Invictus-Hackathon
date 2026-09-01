@@ -172,12 +172,13 @@ export function CallWithAiModal({ lead, onClose, onCallLogged }: CallWithAiModal
     const ctx = contextRef.current || localContext();
     pushTurn({ role: "user", text });
     setNotice("AI agent is thinking…");
+    const prevAssistant = [...transcriptRef.current].reverse().find((t) => t.role === "assistant")?.text || "";
     let reply: { speech_reply: string; requires_human: boolean };
     try {
       const res = await fetchTurn(ctx, transcriptRef.current, text);
       reply = { speech_reply: res.speech_reply, requires_human: res.requires_human };
     } catch {
-      reply = localTurn(text); // slow / offline — keep the conversation moving
+      reply = localTurn(text, ctx, prevAssistant); // slow / offline — keep the conversation moving
     }
     pushTurn({ role: "assistant", text: reply.speech_reply });
     if (reply.requires_human) setNotice("Customer asked for a human — flagged for a manager call-back.");

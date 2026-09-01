@@ -162,7 +162,6 @@ def build_call_context(lead: Dict[str, Any]) -> Dict[str, Any]:
         "emi": lead.get("estimated_emi") or 0,
         "status": lead.get("status") or "New",
         "briefing": lead.get("ai_briefing") or "",
-        "pending": lead.get("pending_documents") or ["6-month bank statement"],
     }
 
 
@@ -181,55 +180,79 @@ def generate_opening_line(context: Dict[str, Any]) -> str:
     loan = context["loan_type"]
     amt = _amount_str(context["loan_amount"])
     system = (
-        "You are Alex, a calm, warm customer-care executive at Cognis Bank making a "
-        "follow-up call to a loan applicant. Greet them by name, say you're following up "
-        f"on the {loan} of {amt} they reviewed on the Cognis Bank website, and ask if now "
-        "is a good time. Two short conversational sentences. Never sound robotic."
+        "You are Alex, a warm, professional relationship manager at Cognis Bank making a "
+        "friendly follow-up call to someone who showed interest in a loan on the bank's "
+        f"website. Greet {name} by name, say you're calling about their interest in a {loan} "
+        f"of {amt}, and ask if it's a good time for a quick chat. Exactly two short, natural "
+        "sentences. Do NOT mention documents, links, or portals."
     )
     out = _groq_chat(
         [{"role": "system", "content": system},
          {"role": "user", "content": f"Opening greeting for {name}."}],
-        temperature=0.5, max_tokens=220,
+        temperature=0.5, max_tokens=200,
     )
     out = (out or "").strip().strip('"')
-    # Guard against a truncated / too-short generation.
     if len(out) > 40 and out[-1] in ".?!":
         return out
     return (
-        f"Hi {name}, this is Alex from Cognis Bank, following up on the {loan} of {amt} "
-        "you looked at on our website. Do you have a minute to talk through the next steps?"
+        f"Hi {name}, this is Alex from Cognis Bank. I'm calling about your interest in a "
+        f"{loan} of {amt} — is now a good time for a quick chat?"
     )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Per-turn reply
 # ─────────────────────────────────────────────────────────────────────────────
+def _last_assistant_line(history: List[Dict[str, str]]) -> str:
+    for t in reversed(history or []):
+        if t.get("role") == "assistant":
+            return (t.get("text") or t.get("content") or "").strip()
+    return ""
+
+
 def generate_turn(context: Dict[str, Any], history: List[Dict[str, str]],
                   user_speech: str) -> Dict[str, Any]:
     name = context["name"]
     loan = context["loan_type"]
     amt = _amount_str(context["loan_amount"])
-    pending = ", ".join(context.get("pending") or []) or "no pending documents"
+    prev = _last_assistant_line(history)
 
-    system = f"""You are Alex, a calm, patient bank loan customer-care representative at Cognis Bank,
-on a live call with applicant {name}.
+    system = f"""You are Alex, a warm, upbeat relationship manager at Cognis Bank on a short
+follow-up phone call with {name}, who showed interest in a {loan} of {amt} on the bank's website.
 
-CONTEXT:
-- Loan product: {loan}
-- Amount discussed: {amt}
-- Pending document: {pending}
+YOUR GOAL: keep it light and conversational, gauge how interested they are, answer any quick
+questions at a high level, and — if they're keen — tell them a loan officer will call to take
+it forward. This is a friendly check-in, NOT a processing call.
 
-RULES:
-- If they want to talk later / reschedule: agree warmly and ask what time suits them. intent = NEEDS_TIME.
-- If they ask how/where to upload: tell them to use the secure link on their phone or the website portal under Document Uploads, and offer to resend it.
-- If they ask the bank name / rate / EMI / timeline: answer directly and briefly using the context (funds disburse 24-48h after the document is uploaded).
-- If they agree / say yes: tell them you just need the {pending} to verify income, and offer the upload link.
-- If they ask for a human / manager: say a senior loan manager will contact them shortly. requires_human = true.
-- Never repeat a robotic opener like "Thank you for confirming that". Speak like a real, calm person.
-- Keep speech_reply to at most 2 short sentences (it will be spoken aloud).
+HARD RULES:
+- NEVER talk about documents, bank statements, upload links, portals, or paperwork. If they
+  bring it up, just say their dedicated loan officer will guide them through everything.
+- NEVER repeat your previous sentence. Your last line was: "{prev or '(this is the first reply)'}".
+  Always move the conversation forward with something new.
+- At most 2 short spoken sentences. Sound like a real person, not a script.
+
+HOW TO RESPOND:
+- Greeting / "hello" / "yes" / small talk  -> thank them and ask if they're looking to move
+  ahead with the {loan} soon or still comparing options. intent = INTERESTED
+- Keen / "yes I want to proceed" / "go ahead" / "what next"  -> "That's great. I'll mark your
+  file as a priority and one of our loan officers will call you within a business day to walk
+  you through the next steps and lock in your rate." intent = READY_TO_APPLY
+- Asks about rate / EMI / eligibility  -> "For a {loan} of {amt}, our rates currently start
+  around 8.4% per annum, and your officer will confirm the exact figure for your profile."
+  intent = INTERESTED
+- Asks about timeline / "when will I get the funds"  -> "Once your application is in, funds
+  are usually disbursed within a few working days." intent = INTERESTED
+- Wants to talk later / busy / "call me in the evening"  -> agree warmly, ask what time suits.
+  intent = NEEDS_TIME
+- Wants a human / manager  -> "Of course, I'll have a senior loan officer call you back shortly."
+  intent = CALLBACK_REQUESTED, requires_human = true
+- Not interested / "no thanks"  -> "No problem at all, thanks for your time. We won't follow up
+  unless you reach out to us." intent = NOT_INTERESTED
+- Anything unclear  -> a warm one-liner that gently moves toward: would they like to proceed,
+  or do they have any questions. intent = INTERESTED
 
 Return ONLY valid JSON:
-{{"speech_reply": "...", "extracted_intent": "INTERESTED|NOT_INTERESTED|NEEDS_TIME|CALLBACK_REQUESTED|READY_TO_APPLY|APPLICATION_IN_PROGRESS|UNKNOWN", "requires_human": false}}"""
+{{"speech_reply": "...", "extracted_intent": "INTERESTED|NOT_INTERESTED|NEEDS_TIME|CALLBACK_REQUESTED|READY_TO_APPLY|UNKNOWN", "requires_human": false}}"""
 
     msgs: List[Dict[str, str]] = [{"role": "system", "content": system}]
     for t in history or []:
@@ -238,38 +261,57 @@ Return ONLY valid JSON:
     if user_speech:
         msgs.append({"role": "user", "content": user_speech})
 
-    parsed = _safe_json(_groq_chat(msgs, json_mode=True, temperature=0.5, max_tokens=260))
+    parsed = _safe_json(_groq_chat(msgs, json_mode=True, temperature=0.6, max_tokens=260))
     if parsed and parsed.get("speech_reply"):
+        reply = str(parsed["speech_reply"]).strip()
+        # Anti-loop guard: if the model echoed its last line, nudge forward.
+        if prev and _similar(reply, prev):
+            return {"speech_reply": f"Understood. Would you like to go ahead with the {loan}, or is there anything you'd like me to clarify first?",
+                    "intent": "INTERESTED", "requires_human": False}
         intent = str(parsed.get("extracted_intent", "INTERESTED")).upper()
         return {
-            "speech_reply": str(parsed["speech_reply"]).strip(),
+            "speech_reply": reply,
             "intent": intent if intent in _INTENTS else "INTERESTED",
             "requires_human": bool(parsed.get("requires_human")),
         }
-    return _fallback_turn(context, user_speech)
+    return _fallback_turn(context, history, user_speech)
 
 
-def _fallback_turn(context: Dict[str, Any], user_speech: str) -> Dict[str, Any]:
+def _similar(a: str, b: str) -> bool:
+    a2 = re.sub(r"[^a-z0-9 ]", "", a.lower()).strip()
+    b2 = re.sub(r"[^a-z0-9 ]", "", b.lower()).strip()
+    return a2 == b2 or (len(a2) > 20 and (a2 in b2 or b2 in a2))
+
+
+def _fallback_turn(context: Dict[str, Any], history: List[Dict[str, str]],
+                   user_speech: str) -> Dict[str, Any]:
     t = (user_speech or "").lower()
-    pending = (context.get("pending") or ["bank statement"])[0]
     loan = context["loan_type"]
-    if any(w in t for w in ("evening", "morning", "afternoon", "later", "busy", "call me", "tomorrow")):
-        return {"speech_reply": "Of course, no problem. What time works best for you?",
-                "intent": "NEEDS_TIME", "requires_human": False}
-    if any(w in t for w in ("where", "how", "upload", "portal", "link", "send")):
-        return {"speech_reply": "You can upload it through the secure link on your phone or on our website under Document Uploads. Shall I resend the link?",
-                "intent": "INTERESTED", "requires_human": False}
-    if any(w in t for w in ("manager", "human", "officer", "person")):
-        return {"speech_reply": "I understand. I'll have a senior loan manager reach out to you shortly.",
-                "intent": "CALLBACK_REQUESTED", "requires_human": True}
-    if any(w in t for w in ("rate", "interest", "emi", "cost")):
-        return {"speech_reply": f"Your indicative EMI and rate are on the offer page. Once the {pending} is in, disbursal is within 24 to 48 hours. Does that work for you?",
-                "intent": "INTERESTED", "requires_human": False}
-    if any(w in t for w in ("not interested", "cancel", "no thanks", "don't want")):
-        return {"speech_reply": "Understood, thank you for your time. I'll close this follow-up for now.",
-                "intent": "NOT_INTERESTED", "requires_human": False}
-    return {"speech_reply": f"Got it. To move your {loan} forward we just need the {pending}. Would you like me to send the upload link now?",
-            "intent": "INTERESTED", "requires_human": False}
+    amt = _amount_str(context["loan_amount"])
+    prev = _last_assistant_line(history)
+
+    def out(reply: str, intent: str = "INTERESTED", human: bool = False) -> Dict[str, Any]:
+        if prev and _similar(reply, prev):
+            reply = f"Understood. Shall I go ahead and have a loan officer call you to take your {loan} forward?"
+            intent = "INTERESTED"
+        return {"speech_reply": reply, "intent": intent, "requires_human": human}
+
+    if any(w in t for w in ("evening", "morning", "afternoon", "later", "busy", "call me back", "tomorrow", "not now")):
+        return out("Of course — what time would suit you best?", "NEEDS_TIME")
+    if any(w in t for w in ("manager", "human", "officer", "speak to a person", "real person")):
+        return out("Of course, I'll have a senior loan officer call you back shortly.", "CALLBACK_REQUESTED", True)
+    if any(w in t for w in ("not interested", "cancel", "no thanks", "don't want", "stop calling")):
+        return out("No problem at all, thanks for your time. We won't follow up unless you reach out to us.", "NOT_INTERESTED")
+    if any(w in t for w in ("rate", "interest", "emi", "how much", "cost")):
+        return out(f"For a {loan} of {amt}, our rates currently start around 8.4% per annum, and your officer will confirm the exact figure for your profile.")
+    if any(w in t for w in ("when", "how long", "timeline", "disburse", "get the money", "funds")):
+        return out("Once your application is in, funds are usually disbursed within a few working days.")
+    if any(w in t for w in ("yes", "sure", "go ahead", "proceed", "interested", "sounds good", "okay let", "what next", "next step")):
+        return out(f"That's great to hear. I'll flag your file as a priority and one of our loan officers will call you within a business day to walk you through the next steps.", "READY_TO_APPLY")
+    if any(w in t for w in ("document", "statement", "link", "upload", "paperwork")):
+        return out("No need to worry about any of that now — your dedicated loan officer will guide you through everything when they call.")
+    # greeting / acknowledgement / unclear
+    return out(f"Thanks for taking the call. Are you looking to move ahead with the {loan} soon, or still weighing your options?")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -281,11 +323,13 @@ def analyze_transcript(context: Dict[str, Any], transcript: List[Dict[str, str]]
         for t in (transcript or [])
     )
     system = (
-        "You are an analyst for a bank loan platform. Analyse this call between Alex (AI "
-        "agent) and a loan applicant. Return ONLY valid JSON: "
-        '{"summary": "1-2 sentences", "intent": "INTERESTED|NOT_INTERESTED|NEEDS_TIME|CALLBACK_REQUESTED|READY_TO_APPLY|APPLICATION_IN_PROGRESS|UNKNOWN", '
+        "You are a sales analyst for a bank. Analyse this short follow-up call between Alex "
+        "(Cognis Bank relationship manager) and a prospective borrower. Judge how interested "
+        "the customer is and what the next step should be. Return ONLY valid JSON: "
+        '{"summary": "1-2 sentences on how the call went and the customer\'s interest level", '
+        '"intent": "INTERESTED|NOT_INTERESTED|NEEDS_TIME|CALLBACK_REQUESTED|READY_TO_APPLY|UNKNOWN", '
         '"sentiment": "POSITIVE|NEUTRAL|NEGATIVE", "outcome": "FOLLOW_UP_REQUIRED|COMPLETED|ESCALATED_TO_HUMAN|UNREACHABLE", '
-        '"next_action": "short next step", "follow_up_required": true, "requires_human": false}'
+        '"next_action": "one concrete next step for the loan officer", "follow_up_required": true, "requires_human": false}'
     )
     parsed = _safe_json(_groq_chat(
         [{"role": "system", "content": system},
@@ -318,9 +362,12 @@ def _fallback_analysis(context: Dict[str, Any], transcript_text: str) -> Dict[st
     elif any(w in t for w in ("evening", "later", "busy", "tomorrow")):
         intent, sentiment, human = "NEEDS_TIME", "NEUTRAL", False
         nxt = "Re-attempt the call at the customer's preferred time."
+    elif any(w in t for w in ("go ahead", "proceed", "what next", "next step", "yes")):
+        intent, sentiment, human = "READY_TO_APPLY", "POSITIVE", False
+        nxt = "Priority follow-up: a loan officer should call within a business day to finalise."
     else:
         intent, sentiment, human = "INTERESTED", "POSITIVE", False
-        nxt = f"Send the upload link for the pending document and check back in 2 days."
+        nxt = "Have a loan officer call the customer to take the application forward."
     return {
         "summary": f"Call with {context['name']} about their {context['loan_type']} completed. Customer appears {intent.lower().replace('_', ' ')}.",
         "intent": intent, "sentiment": sentiment, "outcome": "ESCALATED_TO_HUMAN" if human else "FOLLOW_UP_REQUIRED",

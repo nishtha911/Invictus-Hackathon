@@ -91,32 +91,54 @@ export function completeCall(context: CallContext, transcript: TranscriptTurn[],
   );
 }
 
-/** Local heuristic opening / turn / analysis for when the backend is slow or down. */
+/** Local heuristic opening / turn / analysis for when the backend is slow or down.
+ *  Friendly "checking in on your interest" script — never mentions documents/links. */
 export function localOpening(ctx: Pick<CallContext, "name" | "loan_type" | "loan_amount">): string {
   const amt = ctx.loan_amount ? `₹${Math.round(ctx.loan_amount).toLocaleString("en-IN")}` : "your loan";
-  return `Hi ${ctx.name}, this is Alex from Cognis Bank, following up on the ${ctx.loan_type} of ${amt} you looked at on our website. Do you have a minute to talk through the next steps?`;
+  return `Hi ${ctx.name}, this is Alex from Cognis Bank. I'm calling about your interest in a ${ctx.loan_type} of ${amt} — is now a good time for a quick chat?`;
 }
 
-export function localTurn(userText: string): { speech_reply: string; intent: string; requires_human: boolean } {
+export function localTurn(
+  userText: string,
+  ctx: Pick<CallContext, "loan_type" | "loan_amount">,
+  prevAssistant = "",
+): { speech_reply: string; intent: string; requires_human: boolean } {
   const t = userText.toLowerCase();
-  if (/(evening|morning|later|busy|tomorrow|call me)/.test(t))
-    return { speech_reply: "Of course — what time works best for you?", intent: "NEEDS_TIME", requires_human: false };
-  if (/(manager|human|officer|person)/.test(t))
-    return { speech_reply: "Understood. I'll have a senior loan officer call you back shortly.", intent: "CALLBACK_REQUESTED", requires_human: true };
-  if (/(where|how|upload|link|portal|send)/.test(t))
-    return { speech_reply: "You can upload it via the secure link on your phone, or on our website under Document Uploads. Shall I resend it?", intent: "INTERESTED", requires_human: false };
-  if (/(not interested|cancel|no thanks)/.test(t))
-    return { speech_reply: "No problem, thank you for your time. I'll close this follow-up for now.", intent: "NOT_INTERESTED", requires_human: false };
-  return { speech_reply: "Got it. To move things forward we just need your latest bank statement — would you like me to send the upload link now?", intent: "INTERESTED", requires_human: false };
+  const amt = ctx.loan_amount ? `₹${Math.round(ctx.loan_amount).toLocaleString("en-IN")}` : "your loan";
+  const loan = ctx.loan_type || "loan";
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+
+  const pick = (speech_reply: string, intent = "INTERESTED", requires_human = false) => {
+    if (prevAssistant && norm(speech_reply) === norm(prevAssistant))
+      return { speech_reply: `Understood. Would you like me to have a loan officer call you to take your ${loan} forward?`, intent: "INTERESTED", requires_human: false };
+    return { speech_reply, intent, requires_human };
+  };
+
+  if (/(evening|morning|later|busy|tomorrow|call me back|not now)/.test(t))
+    return pick("Of course — what time would suit you best?", "NEEDS_TIME");
+  if (/(manager|human|officer|real person|speak to a person)/.test(t))
+    return pick("Of course, I'll have a senior loan officer call you back shortly.", "CALLBACK_REQUESTED", true);
+  if (/(not interested|cancel|no thanks|stop calling)/.test(t))
+    return pick("No problem at all, thanks for your time. We won't follow up unless you reach out to us.", "NOT_INTERESTED");
+  if (/(rate|interest|emi|how much|cost)/.test(t))
+    return pick(`For a ${loan} of ${amt}, our rates currently start around 8.4% per annum, and your officer will confirm the exact figure for your profile.`);
+  if (/(when|how long|timeline|disburse|get the money|funds)/.test(t))
+    return pick("Once your application is in, funds are usually disbursed within a few working days.");
+  if (/(yes|sure|go ahead|proceed|interested|sounds good|what next|next step)/.test(t))
+    return pick(`That's great to hear. I'll flag your file as a priority and one of our loan officers will call you within a business day to walk you through the next steps.`, "READY_TO_APPLY");
+  if (/(document|statement|link|upload|paperwork)/.test(t))
+    return pick("No need to worry about any of that now — your dedicated loan officer will guide you through everything when they call.");
+  return pick(`Thanks for taking the call. Are you looking to move ahead with the ${loan} soon, or still weighing your options?`);
 }
 
 export function localAnalysis(transcript: TranscriptTurn[]): CallAnalysis {
   const text = transcript.map((t) => t.text).join(" ").toLowerCase();
   let intent = "INTERESTED", sentiment: CallAnalysis["sentiment"] = "POSITIVE", human = false;
-  let next = "Send the document upload link and check back in 2 days.";
-  if (/not interested|cancel/.test(text)) { intent = "NOT_INTERESTED"; sentiment = "NEGATIVE"; next = "Pause automated follow-ups; mark not interested."; }
-  else if (/manager|human|officer/.test(text)) { intent = "CALLBACK_REQUESTED"; sentiment = "NEUTRAL"; human = true; next = "Assign a loan officer for a manual call-back."; }
+  let next = "Have a loan officer call the customer to take the application forward.";
+  if (/not interested|cancel|no thanks/.test(text)) { intent = "NOT_INTERESTED"; sentiment = "NEGATIVE"; next = "Mark not interested; pause follow-ups."; }
+  else if (/manager|human|officer/.test(text)) { intent = "CALLBACK_REQUESTED"; sentiment = "NEUTRAL"; human = true; next = "Assign a senior loan officer for a manual call-back."; }
   else if (/evening|later|busy|tomorrow/.test(text)) { intent = "NEEDS_TIME"; sentiment = "NEUTRAL"; next = "Re-attempt the call at the customer's preferred time."; }
+  else if (/go ahead|proceed|yes|what next/.test(text)) { intent = "READY_TO_APPLY"; next = "Priority follow-up: officer to call within a business day to finalise."; }
   return {
     summary: "Call completed. " + (transcript.length > 2 ? "Customer engaged in the conversation." : "Short call."),
     intent, sentiment, outcome: human ? "ESCALATED_TO_HUMAN" : "FOLLOW_UP_REQUIRED",
