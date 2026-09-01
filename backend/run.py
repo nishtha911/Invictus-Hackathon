@@ -13,12 +13,16 @@ backend_dir = Path(__file__).resolve().parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
+import os
+
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    is_dev = os.environ.get("ENVIRONMENT", "development").lower() == "development"
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8080,
-        reload=True,
+        port=port,
+        reload=is_dev,
         app_dir=str(backend_dir),
         log_level="info",
     )
