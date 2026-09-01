@@ -17,7 +17,11 @@ import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
+    # Default to production if on Render, otherwise check ENVIRONMENT
     is_dev = os.environ.get("ENVIRONMENT", "development").lower() == "development"
+    if os.environ.get("RENDER") == "true" or os.environ.get("RENDER") == "1":
+        is_dev = False
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
