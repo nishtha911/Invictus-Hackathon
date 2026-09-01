@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Home,
@@ -18,11 +19,17 @@ import {
   Globe,
   Scale,
   Percent,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { LOAN_PURPOSES, EMPLOYMENT_TYPES, CREDIT_BANDS, URGENCY_OPTIONS, EMI_PRIORITY_OPTIONS, INTEREST_TYPE_OPTIONS } from "@/lib/constants";
 import { useJourneyStore } from "@/store/journey-store";
 import { formatINR } from "@/lib/utils/currency";
 import { getDynamicSteps, DynamicJourneyStep } from "./AdvisorJourneyRail";
+
+const RELATION_OPTIONS = ["Spouse", "Father", "Mother", "Son", "Daughter", "Brother", "Sister", "Other"];
+const GUARANTOR_MIN_INCOME = 25000;
+const SOLO_MIN_INCOME = 20000;
 
 const purposeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "Home Loan": Home,
@@ -72,7 +79,89 @@ interface AdvisorQuestionCardProps {
   onCompleteJourney: () => void;
 }
 
+/** Shared name / relation / monthly-income capture for a co-applicant or guarantor. */
+function PartyFields({
+  idPrefix,
+  name,
+  relation,
+  income,
+  onName,
+  onRelation,
+  onIncome,
+}: {
+  idPrefix: string;
+  name: string;
+  relation: string;
+  income: number;
+  onName: (v: string) => void;
+  onRelation: (v: string) => void;
+  onIncome: (v: number) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <label htmlFor={`${idPrefix}-name`} className="text-xs font-semibold text-[#132443]">
+            Full name
+          </label>
+          <input
+            id={`${idPrefix}-name`}
+            value={name}
+            onChange={(e) => onName(e.target.value)}
+            placeholder="As per PAN / Aadhaar"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm text-[#132443] placeholder-slate-400 focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63]"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor={`${idPrefix}-relation`} className="text-xs font-semibold text-[#132443]">
+            Relation to you
+          </label>
+          <select
+            id={`${idPrefix}-relation`}
+            value={relation}
+            onChange={(e) => onRelation(e.target.value)}
+            className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm text-[#132443] focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63]"
+          >
+            <option value="">Select…</option>
+            {RELATION_OPTIONS.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+            Their monthly income
+          </span>
+          <span className="text-lg font-extrabold text-[#132443] font-mono">
+            {income > 0 ? formatINR(income) : "—"}
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={300000}
+          step={5000}
+          value={income || 0}
+          onChange={(e) => onIncome(parseInt(e.target.value, 10))}
+          className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+        />
+        <div className="flex justify-between text-[11px] font-mono text-slate-400">
+          <span>₹0</span>
+          <span>₹1.5 L</span>
+          <span>₹3 L</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardProps) {
+  const router = useRouter();
   const {
     currentStepIndex,
     setStepIndex,
@@ -88,7 +177,25 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
   const safeIndex = Math.min(currentStepIndex, totalSteps - 1);
   const currentStep = dynamicSteps[safeIndex] || dynamicSteps[0];
 
+  const guarantorOwnIncome = profile.income || 0;
+
+  // Per-step gates: a named guarantor must clear the ₹25k minimum before we let
+  // the questionnaire move on.
+  const blockNext =
+    (currentStep.id === "guarantor_details" &&
+      !!profile.guarantor_name?.trim() &&
+      (profile.guarantor_income || 0) < GUARANTOR_MIN_INCOME) ||
+    (currentStep.id === "co_applicant_details" && !profile.co_applicant_name?.trim());
+
   const handleNext = () => {
+    if (blockNext) return;
+
+    // Guarantor path ends at the eligibility check — no loan matching for them.
+    if (currentStep.id === "guarantor_check") {
+      router.push("/");
+      return;
+    }
+
     setIsExtracting(true, "Evaluating policy limits & risk criteria...");
     setTimeout(() => {
       setIsExtracting(false);
@@ -150,6 +257,10 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
           {currentStep.id === "existing_emi" && "Do you have ongoing monthly EMI obligations?"}
           {currentStep.id === "credit" && "How would you describe your credit score profile?"}
           {currentStep.id === "co_applicant" && "Will you add a co-applicant to this loan?"}
+          {currentStep.id === "co_applicant_details" && "Tell us about your co-applicant"}
+          {currentStep.id === "guarantor" && "Would you like to add a guarantor?"}
+          {currentStep.id === "guarantor_details" && "Tell us about your guarantor"}
+          {currentStep.id === "guarantor_check" && "Let's check your guarantor eligibility"}
           {currentStep.id === "age" && "What is your current age?"}
           {currentStep.id === "urgency" && "When do you require the loan disbursement?"}
         </h2>
@@ -359,26 +470,67 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               <div className="space-y-2">
                 <input
                   type="range"
-                  min={25000}
+                  min={10000}
                   max={500000}
                   step={5000}
                   value={profile.income || 120000}
-                  onChange={(e) => updateProfile({ income: parseInt(e.target.value, 10) })}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    updateProfile(v >= SOLO_MIN_INCOME ? { income: v, applying_as: "self" } : { income: v });
+                  }}
                   className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                  <span>₹25,000/mo</span>
+                  <span>₹10,000/mo</span>
                   <span>₹2.5 Lakhs</span>
                   <span>₹5.0 Lakhs+</span>
                 </div>
               </div>
 
+              {(profile.income || 0) < SOLO_MIN_INCOME && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 space-y-3">
+                  <p className="text-xs text-amber-900 leading-relaxed flex gap-2">
+                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                    <span>
+                      Most lenders look for a monthly income of at least{" "}
+                      {formatINR(SOLO_MIN_INCOME)} for an individual applicant. Are you here to
+                      borrow, or to back someone else&apos;s loan?
+                    </span>
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { id: "self", label: "A loan for myself", desc: "Continue — a co-applicant can help you qualify" },
+                      { id: "guarantor", label: "I'm a guarantor for someone", desc: "We'll check if you meet the guarantor criteria" },
+                    ].map((opt) => {
+                      const active = (profile.applying_as || "self") === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => updateProfile({ applying_as: opt.id as "self" | "guarantor" })}
+                          className={`rounded-lg border p-3 text-left transition-all ${
+                            active
+                              ? "border-[#1F7A63] bg-white ring-1 ring-[#1F7A63]"
+                              : "border-amber-200 bg-white/60 hover:border-slate-300"
+                          }`}
+                        >
+                          <span className="text-xs font-semibold text-[#132443] block">{opt.label}</span>
+                          <span className="text-[11px] text-slate-500">{opt.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                {[50000, 80000, 120000, 180000, 250000, 350000].map((amt) => (
+                {[15000, 25000, 50000, 120000, 250000, 350000].map((amt) => (
                   <button
                     key={amt}
                     type="button"
-                    onClick={() => updateProfile({ income: amt })}
+                    onClick={() =>
+                      updateProfile(amt >= SOLO_MIN_INCOME ? { income: amt, applying_as: "self" } : { income: amt })
+                    }
                     className={`rounded-lg border px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
                       profile.income === amt
                         ? "border-[#1F7A63] bg-[#1F7A63] text-white font-bold"
@@ -399,8 +551,9 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
               initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              className="space-y-5"
             >
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PROPERTY_STATUSES.map((prop) => {
                 const isSelected = profile.property_status === prop.id;
                 return (
@@ -430,6 +583,33 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
                   </div>
                 );
               })}
+             </div>
+
+              {/* Property market value — drives the RBI LTV ceiling (90 / 80 / 75%) */}
+              <div className="rounded-2xl border border-[#E2E8F0] bg-[#F5F7FA] p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+                    Property Market Value
+                  </span>
+                  <span className="text-lg font-extrabold text-[#132443] font-mono">
+                    {formatINR(profile.property_value || profile.loan_amount || 5000000, true)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={1000000}
+                  max={100000000}
+                  step={500000}
+                  value={profile.property_value || profile.loan_amount || 5000000}
+                  onChange={(e) => updateProfile({ property_value: parseInt(e.target.value, 10) })}
+                  className="w-full h-2.5 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-[#1F7A63]"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Max loan-to-value: <strong className="text-[#132443]">90%</strong> up to ₹30L ·{" "}
+                  <strong className="text-[#132443]">80%</strong> ₹30L–₹75L ·{" "}
+                  <strong className="text-[#132443]">75%</strong> above ₹75L
+                </p>
+              </div>
             </motion.div>
           )}
 
@@ -935,6 +1115,154 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
             </motion.div>
           )}
 
+          {/* Co-Applicant details (name / relation / income) */}
+          {currentStep.id === "co_applicant_details" && (
+            <motion.div
+              key="co-applicant-details-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="space-y-4"
+            >
+              <PartyFields
+                idPrefix="co_applicant"
+                name={profile.co_applicant_name || ""}
+                relation={profile.co_applicant_relation || ""}
+                income={profile.co_applicant_income || 0}
+                onName={(v) => updateProfile({ co_applicant_name: v })}
+                onRelation={(v) => updateProfile({ co_applicant_relation: v })}
+                onIncome={(v) => updateProfile({ co_applicant_income: v })}
+              />
+              <p className="text-[11px] text-slate-500">
+                Their income is added to yours when we assess how much you can borrow.
+              </p>
+            </motion.div>
+          )}
+
+          {/* Guarantor yes / no */}
+          {currentStep.id === "guarantor" && (
+            <motion.div
+              key="guarantor-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              {[
+                { id: true, label: "Yes, add a guarantor", desc: "A third party guarantees repayment — helps thinner profiles" },
+                { id: false, label: "No guarantor", desc: "Proceed on the applicant (and co-applicant) alone" },
+              ].map((opt) => {
+                const isSelected = profile.has_guarantor === opt.id;
+                return (
+                  <div
+                    key={String(opt.id)}
+                    onClick={() => updateProfile({ has_guarantor: opt.id })}
+                    className={`cursor-pointer rounded-xl border p-4 transition-all flex items-start gap-3.5 ${
+                      isSelected
+                        ? "border-[#1F7A63] bg-[#F0FDF4] ring-1 ring-[#1F7A63] shadow-xs"
+                        : "border-[#E2E8F0] bg-[#F5F7FA] hover:border-slate-300 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <div
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected ? "bg-[#1F7A63] text-white" : "bg-white border border-[#E2E8F0] text-[#1F7A63]"
+                      }`}
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[#132443] text-sm">{opt.label}</span>
+                        {isSelected && <Check className="h-4 w-4 text-[#1F7A63]" />}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
+          {/* Guarantor details (name / relation / income) */}
+          {currentStep.id === "guarantor_details" && (
+            <motion.div
+              key="guarantor-details-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="space-y-4"
+            >
+              <PartyFields
+                idPrefix="guarantor"
+                name={profile.guarantor_name || ""}
+                relation={profile.guarantor_relation || ""}
+                income={profile.guarantor_income || 0}
+                onName={(v) => updateProfile({ guarantor_name: v })}
+                onRelation={(v) => updateProfile({ guarantor_relation: v })}
+                onIncome={(v) => updateProfile({ guarantor_income: v })}
+              />
+              {!!profile.guarantor_name?.trim() &&
+                (profile.guarantor_income || 0) < GUARANTOR_MIN_INCOME && (
+                  <p className="text-[11px] text-rose-600">
+                    A guarantor must earn at least {formatINR(GUARANTOR_MIN_INCOME)} per month to be accepted.
+                  </p>
+                )}
+            </motion.div>
+          )}
+
+          {/* Guarantor eligibility check (for someone who is not the borrower) */}
+          {currentStep.id === "guarantor_check" && (
+            <motion.div
+              key="guarantor-check-step"
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -15 }}
+              className="space-y-4"
+            >
+              {(() => {
+                const eligible = guarantorOwnIncome >= GUARANTOR_MIN_INCOME;
+                return (
+                  <div
+                    className={`rounded-2xl border p-5 space-y-2 ${
+                      eligible ? "border-emerald-200 bg-[#F0FDF9]" : "border-rose-200 bg-rose-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {eligible ? (
+                        <Check className="h-5 w-5 text-[#1F7A63]" />
+                      ) : (
+                        <Info className="h-5 w-5 text-rose-500" />
+                      )}
+                      <span className="text-sm font-bold text-[#132443]">
+                        {eligible ? "You can act as a guarantor" : "Guarantor criterion not met"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {eligible
+                        ? `Your monthly income of ${formatINR(
+                            guarantorOwnIncome,
+                          )} meets the ${formatINR(
+                            GUARANTOR_MIN_INCOME,
+                          )} minimum. Ask the primary applicant to add your name, relation and income to their application — the branch will collect your KYC and signature later.`
+                        : `A guarantor needs a monthly income of at least ${formatINR(
+                            GUARANTOR_MIN_INCOME,
+                          )}. Your current figure of ${formatINR(
+                            guarantorOwnIncome,
+                          )} is below that, so the bank cannot record you as a guarantor right now.`}
+                    </p>
+                  </div>
+                );
+              })()}
+              <button
+                type="button"
+                onClick={() => updateProfile({ applying_as: "self" })}
+                className="text-xs font-semibold text-[#1F7A63] hover:underline"
+              >
+                ← Actually, I want a loan for myself
+              </button>
+            </motion.div>
+          )}
+
           {/* Age (drives max tenure / loan-maturity cap) */}
           {currentStep.id === "age" && (
             <motion.div
@@ -1051,9 +1379,16 @@ export function AdvisorQuestionCard({ onCompleteJourney }: AdvisorQuestionCardPr
 
         <button
           onClick={handleNext}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all cursor-pointer"
+          disabled={blockNext}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <span>{safeIndex === totalSteps - 1 ? "Evaluate & Find Matches" : "Next Question"}</span>
+          <span>
+            {currentStep.id === "guarantor_check"
+              ? "Return to Home"
+              : safeIndex === totalSteps - 1
+              ? "Evaluate & Find Matches"
+              : "Next Question"}
+          </span>
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>

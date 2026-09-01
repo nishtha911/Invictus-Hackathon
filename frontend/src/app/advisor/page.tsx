@@ -21,7 +21,6 @@ function AdvisorContent() {
     sessionId,
     userType,
     selectedCustomer,
-    recommendations,
     updateProfile,
     setRecommendations,
     setPersonalizedOffer,
@@ -30,13 +29,10 @@ function AdvisorContent() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // If an existing customer returns to /advisor but already has cached
-  // recommendations (e.g. they left and came back), skip straight to results.
-  useEffect(() => {
-    if (userType === "existing" && recommendations.length > 0) {
-      router.replace("/recommendations");
-    }
-  }, [userType, recommendations.length, router]);
+  // Note: returning customers are intentionally NOT auto-forwarded to
+  // /recommendations. They land here with their profile pre-filled so they can
+  // review and edit every answer before asking for matches. The "Skip Questions"
+  // banner is still available for a one-click fast path.
 
   // Only reset to step 0 when an explicit ?intent= URL param is present.
   // Without this guard the effect fires on every mount — including when the

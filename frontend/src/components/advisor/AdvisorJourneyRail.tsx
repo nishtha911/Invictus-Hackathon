@@ -138,19 +138,42 @@ export function getDynamicSteps(profile: ProfileIntake): DynamicJourneyStep[] {
     }
   );
 
-  // Value-adaptive: a co-applicant materially changes eligibility on higher-ticket
-  // or education loans, so we only ask when it actually matters.
-  const annualIncome = (profile.income || 0) * 12;
-  const coApplicantMatters =
-    profile.intent === "Education Loan" ||
-    (profile.loan_amount || 0) > annualIncome * 4;
-  if (coApplicantMatters) {
+  // Co-applicant — a standard lending question. Ask everyone; capture details
+  // only when they say yes.
+  steps.push({
+    id: "co_applicant",
+    title: "Co-Applicant",
+    field: "has_co_applicant",
+    description: "A joint applicant can lift your borrowing limit",
+  });
+  if (profile.has_co_applicant) {
     steps.push({
-      id: "co_applicant",
-      title: "Co-Applicant",
-      field: "has_co_applicant",
-      description: "A joint applicant can lift your borrowing limit",
+      id: "co_applicant_details",
+      title: "Co-Applicant Details",
+      field: "co_applicant_name",
+      description: "Name, relation and their monthly income",
     });
+  }
+
+  // Guarantor — only relevant where the policy actually asks for one:
+  // education loans, or any loan above the ₹7.5 lakh collateral threshold.
+  const guarantorMatters =
+    profile.intent === "Education Loan" || (profile.loan_amount || 0) > 750000;
+  if (guarantorMatters) {
+    steps.push({
+      id: "guarantor",
+      title: "Guarantor",
+      field: "has_guarantor",
+      description: "Optional third-party guarantee for the loan",
+    });
+    if (profile.has_guarantor) {
+      steps.push({
+        id: "guarantor_details",
+        title: "Guarantor Details",
+        field: "guarantor_name",
+        description: "Name, relation and their monthly income",
+      });
+    }
   }
 
   steps.push(
@@ -167,6 +190,21 @@ export function getDynamicSteps(profile: ProfileIntake): DynamicJourneyStep[] {
       description: "When you require loan funds",
     }
   );
+
+  // If, at the income step, the person said they're backing someone else's loan
+  // rather than borrowing themselves, collapse to a short guarantor eligibility
+  // check — the rest of the borrower questionnaire doesn't apply to them.
+  if (profile.applying_as === "guarantor") {
+    const incomeIdx = steps.findIndex((s) => s.id === "income");
+    const trimmed = steps.slice(0, incomeIdx + 1);
+    trimmed.push({
+      id: "guarantor_check",
+      title: "Guarantor Eligibility",
+      field: "income",
+      description: "Confirm you meet the guarantor income criterion",
+    });
+    return trimmed;
+  }
 
   return steps;
 }

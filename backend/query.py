@@ -248,6 +248,20 @@ def _profile_for_prompt(profile: dict | None) -> dict:
         or profile.get("applicant_name")
         or profile.get("customer_name")
     )
+    age = raw_loan_profile.get("age") or profile.get("age")
+    property_value = raw_loan_profile.get("property_value") or profile.get("property_value")
+    property_status = raw_loan_profile.get("property_status") or profile.get("property_status")
+    annual_turnover = raw_loan_profile.get("annual_turnover") or profile.get("annual_turnover")
+    education_country = raw_loan_profile.get("education_country") or profile.get("education_country")
+    vehicle_condition = raw_loan_profile.get("vehicle_condition") or profile.get("vehicle_condition")
+    applying_as = raw_loan_profile.get("applying_as") or profile.get("applying_as")
+    has_co_applicant = raw_loan_profile.get("has_co_applicant")
+    if has_co_applicant is None:
+        has_co_applicant = profile.get("has_co_applicant")
+    co_applicant_income = raw_loan_profile.get("co_applicant_income") or profile.get("co_applicant_income")
+    co_applicant_relation = raw_loan_profile.get("co_applicant_relation") or profile.get("co_applicant_relation")
+    guarantor_income = raw_loan_profile.get("guarantor_income") or profile.get("guarantor_income")
+    guarantor_relation = raw_loan_profile.get("guarantor_relation") or profile.get("guarantor_relation")
 
     clean_profile = {}
     if applicant_name:
@@ -273,6 +287,45 @@ def _profile_for_prompt(profile: dict | None) -> dict:
         clean_profile["repayment_priority"] = str(preferred_emi).replace("_", " ").title()
     if interest_type:
         clean_profile["interest_rate_preference"] = str(interest_type).replace("_", " ").title()
+    try:
+        if age is not None and int(age) > 0:
+            clean_profile["applicant_age_years"] = int(age)
+    except (TypeError, ValueError):
+        pass
+    if applying_as:
+        clean_profile["applying_as"] = str(applying_as).replace("_", " ").title()
+    try:
+        if property_value is not None and float(property_value) > 0:
+            clean_profile["property_market_value_inr"] = float(property_value)
+    except (TypeError, ValueError):
+        pass
+    if property_status:
+        clean_profile["property_status"] = str(property_status)
+    try:
+        if annual_turnover is not None and float(annual_turnover) > 0:
+            clean_profile["annual_business_turnover_inr"] = float(annual_turnover)
+    except (TypeError, ValueError):
+        pass
+    if education_country:
+        clean_profile["study_destination"] = str(education_country)
+    if vehicle_condition:
+        clean_profile["vehicle_type"] = str(vehicle_condition)
+    if has_co_applicant is not None:
+        clean_profile["has_co_applicant"] = bool(has_co_applicant)
+    try:
+        if co_applicant_income is not None and float(co_applicant_income) > 0:
+            clean_profile["co_applicant_monthly_income_inr"] = float(co_applicant_income)
+            if co_applicant_relation:
+                clean_profile["co_applicant_relation"] = str(co_applicant_relation)
+    except (TypeError, ValueError):
+        pass
+    try:
+        if guarantor_income is not None and float(guarantor_income) > 0:
+            clean_profile["guarantor_monthly_income_inr"] = float(guarantor_income)
+            if guarantor_relation:
+                clean_profile["guarantor_relation"] = str(guarantor_relation)
+    except (TypeError, ValueError):
+        pass
 
     # Pass specific sub-profile fields if present
     for sub in ("home_loan_details", "vehicle_loan_details", "education_loan_details", "personal_loan_details", "business_loan_details"):

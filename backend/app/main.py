@@ -24,7 +24,7 @@ from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, File, Form, UploadFile, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import io
 
 from app.config import get_settings
@@ -273,6 +273,10 @@ class RecommendLoansRequest(BaseModel):
     has_co_applicant: Optional[bool] = None
     customer_name: Optional[str] = None
     session_id: Optional[str] = None
+    # RBI compliance / affordability inputs
+    property_value: Optional[float] = None          # home-loan LTV tiering
+    co_applicant_income: Optional[float] = None     # added to assessed income
+    guarantor_income: Optional[float] = None        # guarantor monthly salary
 
 
 @app.post("/api/v1/recommend-loans")
@@ -410,6 +414,9 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
                 offer_profile = payload.dict().get("profile", {})
                 offer_profile["age"] = req.age
                 offer_profile["has_co_applicant"] = req.has_co_applicant
+                offer_profile["property_value"] = req.property_value
+                offer_profile["co_applicant_income"] = req.co_applicant_income
+                offer_profile["guarantor_income"] = req.guarantor_income
                 if req.customer_name:
                     offer_profile["name"] = req.customer_name
                 offer_ctx = {"user_type": user_type_val, "profile": offer_profile}
@@ -508,6 +515,9 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
                 offer_profile = payload.dict().get("profile", {})
                 offer_profile["age"] = req.age
                 offer_profile["has_co_applicant"] = req.has_co_applicant
+                offer_profile["property_value"] = req.property_value
+                offer_profile["co_applicant_income"] = req.co_applicant_income
+                offer_profile["guarantor_income"] = req.guarantor_income
                 if req.customer_name:
                     offer_profile["name"] = req.customer_name
                 offer_ctx = {"user_type": user_type_val, "profile": offer_profile}
@@ -530,6 +540,16 @@ LEAD_STORE: list[dict] = []
 
 # ── Lead Capture Endpoint ──────────────────────────────────────────────
 
+GUARANTOR_MIN_MONTHLY_SALARY = 25000.0  # a declared guarantor must earn at least this
+
+
+class PartyDetails(BaseModel):
+    """Optional guarantor / co-applicant block."""
+    name: Optional[str] = None
+    relation: Optional[str] = None
+    monthly_salary: Optional[float] = None
+
+
 class LeadCapturePayload(BaseModel):
     session_id: Optional[str] = None
     name: str
@@ -543,6 +563,21 @@ class LeadCapturePayload(BaseModel):
     estimated_emi: Optional[float] = None
     preferred_contact_time: Optional[str] = "Morning"
     notes: Optional[str] = None
+    lead_source: Optional[str] = "genai"        # 'genai' | 'manual_employee_call'
+    guarantor: Optional[PartyDetails] = None    # optional
+    co_applicant: Optional[PartyDetails] = None # optional
+
+    @field_validator("guarantor")
+    @classmethod
+    def _guarantor_min_salary(cls, v: Optional[PartyDetails]) -> Optional[PartyDetails]:
+        if v and (v.name or "").strip():
+            salary = v.monthly_salary or 0.0
+            if salary < GUARANTOR_MIN_MONTHLY_SALARY:
+                raise ValueError(
+                    f"Guarantor must have a minimum monthly salary of ₹{GUARANTOR_MIN_MONTHLY_SALARY:,.0f} "
+                    f"to be eligible (received ₹{salary:,.0f})."
+                )
+        return v
 
 
 @app.post("/api/v1/leads")
@@ -563,10 +598,37 @@ async def capture_lead(payload: LeadCapturePayload):
     urgency = kb_profile.get("urgency")
     intent = kb_profile.get("intent")
 
+    # Optional guarantor / co-applicant — {name, relation, monthly_salary}
+    def _party(block) -> Optional[dict]:
+        if not block:
+            return None
+        data = block.dict() if hasattr(block, "dict") else dict(block)
+        if not (data.get("name") or "").strip():
+            return None
+        try:
+            data["monthly_salary"] = float(data.get("monthly_salary") or 0) or 0.0
+        except (TypeError, ValueError):
+            data["monthly_salary"] = 0.0
+        return data
+
+    guarantor = _party(payload.guarantor)
+    co_applicant = _party(payload.co_applicant)
+
+    # A co-applicant's salary is assessable income; a guarantor's is supporting
+    # security but not primary income — count half of it toward affordability.
+    assessed_income = float(monthly_income) if monthly_income else 0.0
+    if co_applicant:
+        assessed_income += co_applicant["monthly_salary"]
+    if guarantor:
+        assessed_income += guarantor["monthly_salary"] * 0.5
+
+    source_raw = str(payload.lead_source or "genai").lower().strip()
+    lead_source = source_raw if source_raw in ("genai", "manual_employee_call") else "genai"
+
     scoring = score_lead(
         session_id=sid or f"SESSION-{int(datetime.utcnow().timestamp())}",
         completeness_pct=85,
-        monthly_income=float(monthly_income) if monthly_income else None,
+        monthly_income=assessed_income if assessed_income > 0 else None,
         existing_emi_obligations=float(existing_emi) if existing_emi else 0.0,
         requested_loan_amount=float(req_amount) if req_amount else None,
         preferred_tenure_months=int(tenure) if tenure else 240,
@@ -589,6 +651,9 @@ async def capture_lead(payload: LeadCapturePayload):
         "estimated_emi": payload.estimated_emi,
         "preferred_contact_time": payload.preferred_contact_time or "Morning",
         "notes": payload.notes,
+        "lead_source": lead_source,
+        "guarantor": guarantor,
+        "co_applicant": co_applicant,
         "status": "New",
         "created_at": datetime.utcnow().isoformat(),
     }
@@ -617,6 +682,9 @@ async def capture_lead(payload: LeadCapturePayload):
             "loan_id": lead_id_val,
             "loan_amount": payload.loan_amount or req_amount,
             "estimated_emi": payload.estimated_emi,
+            "lead_source": lead_source,
+            "guarantor": guarantor,
+            "co_applicant": co_applicant,
         },
         "scoring": {
             "lead_score": scoring["score"],
@@ -698,6 +766,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
             "ai_briefing": dl.get("chat_summary", ""),
             "scoring_factors": dl.get("score_factors", []),
             "talking_points": dl.get("recommended_talking_points", []),
+            "lead_source": str(dl.get("lead_source") or "genai"),
         })
 
     # 2. Append any session in-memory leads if not already present
@@ -720,6 +789,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
             "ai_briefing": l.get("ai_briefing", ""),
             "scoring_factors": l.get("key_scoring_factors", []),
             "talking_points": l.get("talking_points", []),
+            "lead_source": str(l.get("lead_source") or "genai"),
         })
 
     total_leads = len(formatted_leads)
@@ -774,6 +844,14 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
         round((hot_leads + warm_leads) / total_leads * 100) if total_leads else 0
     )
 
+    # Lead-source split: GenAI voice/advisory agent vs manual employee phone calls
+    genai_count = sum(1 for l in formatted_leads if str(l.get("lead_source") or "genai") == "genai")
+    manual_count = sum(1 for l in formatted_leads if str(l.get("lead_source")) == "manual_employee_call")
+    lead_source_breakdown = [
+        {"key": "genai", "name": "GenAI Voice Agent", "value": genai_count, "color": "#6366F1"},
+        {"key": "manual_employee_call", "name": "Manual Employee Calls", "value": manual_count, "color": "#F59E0B"},
+    ]
+
     return {
         "kpis": {
             "total_leads": total_leads,
@@ -785,6 +863,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
         },
         "trends": trends,
         "productDemand": product_demand,
+        "leadSourceBreakdown": lead_source_breakdown,
         "scoreDistribution": [
             {"range": "Hot (70-100)", "count": hot_leads, "fill": "#1F7A63"},
             {"range": "Warm (50-69)", "count": warm_leads, "fill": "#6366f1"},
@@ -864,6 +943,31 @@ async def voice_complete(req: VoiceCompleteRequest, x_role: Optional[str] = Head
     analysis = voice_service.analyze_transcript(context, req.transcript)
     record = voice_service.log_call(context, req.transcript, req.duration, analysis)
     logger.info("Voice call logged: %s (%s / %s)", record["call_id"], analysis["intent"], analysis["sentiment"])
+
+    # A positive manual phone call becomes a qualified lead, attributed to the
+    # employee call channel so the dashboard can compare it against GenAI leads.
+    positive = str(analysis.get("intent", "")).upper() in {
+        "READY_TO_APPLY", "INTERESTED", "NEEDS_TIME", "CALLBACK_REQUESTED"
+    }
+    if positive:
+        try:
+            from app.services.database import save_lead
+            band = "hot" if analysis.get("intent", "").upper() == "READY_TO_APPLY" else "warm"
+            save_lead({
+                "customer_name": context.get("name") or "Phone Enquiry",
+                "phone": context.get("phone") or "N/A",
+                "email": context.get("email") or "N/A",
+                "loan_id": context.get("lead_id"),
+                "lead_score": 82 if band == "hot" else 68,
+                "score_band": band,
+                "lead_source": "manual_employee_call",
+                "chat_summary": analysis.get("summary") or record.get("summary") or "",
+                "key_objections_or_notes": analysis.get("next_action") or "",
+                "preferred_contact_time": "Morning",
+            })
+        except Exception as exc:
+            logger.warning("Could not persist manual-call lead: %s", exc)
+
     return {"call": record, "analysis": analysis}
 
 

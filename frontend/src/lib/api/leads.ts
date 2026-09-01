@@ -19,6 +19,9 @@ export async function submitLead(payload: LeadCapturePayload): Promise<LeadRespo
         estimated_emi: payload.estimated_emi,
         preferred_contact_time: payload.preferred_contact_time,
         notes: payload.notes,
+        lead_source: payload.lead_source ?? "genai",
+        guarantor: payload.guarantor ?? null,
+        co_applicant: payload.co_applicant ?? null,
       }),
     },
     () => generateMockLeadResponse(payload)

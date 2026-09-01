@@ -39,7 +39,14 @@ export interface ProfileIntake {
   credit_band?: string;
   urgency?: string;
   age?: number;
+  // Who is filling the advisory — the borrower, or someone backing a borrower
+  applying_as?: "self" | "guarantor";
   has_co_applicant?: boolean;
+  has_guarantor?: boolean;
+  co_applicant_name?: string;
+  co_applicant_relation?: string;
+  guarantor_name?: string;
+  guarantor_relation?: string;
   // Repayment preferences
   preferred_emi?: string;
   interest_type?: string;
@@ -47,11 +54,23 @@ export interface ProfileIntake {
   customer_id?: string;
   // Loan-specific details
   property_status?: string;
+  property_value?: number;
   vehicle_condition?: string;
   education_country?: string;
   gold_weight_grams?: number;
   annual_turnover?: number;
+  // Guarantor / co-applicant (all optional)
+  co_applicant_income?: number;
+  guarantor_income?: number;
 }
+
+export interface PartyDetails {
+  name?: string;
+  relation?: string;
+  monthly_salary?: number;
+}
+
+export type LeadSource = "genai" | "manual_employee_call";
 
 export interface ExtractedProfileData {
   intent: string;
@@ -158,6 +177,9 @@ export interface LeadCapturePayload {
   loan_amount?: number;
   estimated_emi?: number;
   notes?: string;
+  lead_source?: LeadSource;
+  guarantor?: PartyDetails;
+  co_applicant?: PartyDetails;
 }
 
 export interface LeadScoringIntelligence {
@@ -197,6 +219,14 @@ export interface SalesDashboardLeadItem {
   ai_briefing: string;
   scoring_factors: string[];
   talking_points: string[];
+  lead_source?: LeadSource;
+}
+
+export interface LeadSourceDatum {
+  key: LeadSource;
+  name: string;
+  value: number;
+  color: string;
 }
 
 export interface DashboardKPIs {

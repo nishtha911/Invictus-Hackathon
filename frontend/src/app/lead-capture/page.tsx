@@ -16,6 +16,8 @@ import {
   Lock,
   Home,
   BookOpen,
+  Users,
+  Pencil,
 } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { submitLead } from "@/lib/api/leads";
@@ -88,6 +90,23 @@ export default function LeadCapturePage() {
     toast.loading("Scoring lead & preparing underwriter briefing...", { id: "lead" });
 
     try {
+      // Co-applicant / guarantor are captured during the advisory session.
+      const guarantor = profile.guarantor_name?.trim()
+        ? {
+            name: profile.guarantor_name.trim(),
+            relation: profile.guarantor_relation || undefined,
+            monthly_salary: profile.guarantor_income || 0,
+          }
+        : undefined;
+
+      const coApplicant = profile.co_applicant_name?.trim()
+        ? {
+            name: profile.co_applicant_name.trim(),
+            relation: profile.co_applicant_relation || undefined,
+            monthly_salary: profile.co_applicant_income || 0,
+          }
+        : undefined;
+
       const response = await submitLead({
         session_id: sessionId,
         name: data.name,
@@ -98,6 +117,9 @@ export default function LeadCapturePage() {
         loan_amount: profile.loan_amount || 4500000,
         estimated_emi: activeLoan.estimated_emi,
         preferred_contact_time: data.preferred_contact_time,
+        lead_source: "genai",
+        guarantor,
+        co_applicant: coApplicant,
       });
 
       setSubmittedLead(response);
@@ -272,6 +294,66 @@ export default function LeadCapturePage() {
                   {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
                 </div>
               </div>
+
+              {/* Application parties — captured during the advisory session */}
+              {(profile.co_applicant_name || profile.guarantor_name) ? (
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F9FAFB] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#132443] flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 text-[#1F7A63]" />
+                      Application Parties
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/advisor")}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1F7A63] hover:underline"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit in advisor
+                    </button>
+                  </div>
+                  <dl className="space-y-2 text-xs">
+                    {profile.co_applicant_name && (
+                      <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-slate-500">
+                          Co-applicant
+                          {profile.co_applicant_relation ? ` · ${profile.co_applicant_relation}` : ""}
+                        </dt>
+                        <dd className="font-medium text-[#132443] text-right">
+                          {profile.co_applicant_name}
+                          {profile.co_applicant_income
+                            ? ` — ${formatINR(profile.co_applicant_income)}/mo`
+                            : ""}
+                        </dd>
+                      </div>
+                    )}
+                    {profile.guarantor_name && (
+                      <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-slate-500">
+                          Guarantor
+                          {profile.guarantor_relation ? ` · ${profile.guarantor_relation}` : ""}
+                        </dt>
+                        <dd className="font-medium text-[#132443] text-right">
+                          {profile.guarantor_name}
+                          {profile.guarantor_income ? ` — ${formatINR(profile.guarantor_income)}/mo` : ""}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-400">
+                  No co-applicant or guarantor on file.{" "}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/advisor")}
+                    className="font-semibold text-[#1F7A63] hover:underline"
+                  >
+                    Add one in the Loan Advisor
+                  </button>
+                  .
+                </p>
+              )}
 
               {/* Preferred Contact Time */}
               <div className="space-y-2 pt-1">

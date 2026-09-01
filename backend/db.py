@@ -106,6 +106,28 @@ def init_db():
 
         conn.commit()
 
+    # Lead-source attribution + optional guarantor / co-applicant capture on the
+    # pre-existing public.qualified_leads table. Run in its own transaction so a
+    # failure here (e.g. the table isn't provisioned yet) can't roll back the RAG
+    # schema created above. See migrations/001_lead_source_and_guarantor.sql for
+    # the standalone script.
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    ALTER TABLE IF EXISTS public.qualified_leads
+                        ADD COLUMN IF NOT EXISTS lead_source  TEXT NOT NULL DEFAULT 'genai',
+                        ADD COLUMN IF NOT EXISTS guarantor     JSONB,
+                        ADD COLUMN IF NOT EXISTS co_applicant  JSONB;
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS qualified_leads_lead_source_idx
+                        ON public.qualified_leads (lead_source);
+                """)
+            conn.commit()
+    except Exception as exc:
+        print(f"[init_db] qualified_leads migration skipped: {exc}")
+
     # Supabase's REST layer (PostgREST) caches the schema; nudge it to pick up
     # any table just created above so inserts via the Supabase client succeed
     # immediately instead of erroring until the cache next refreshes on its own.

@@ -19,6 +19,7 @@ import {
   MOCK_LEAD_TREND_DATA,
   MOCK_PRODUCT_DEMAND_DATA,
   MOCK_SCORE_DISTRIBUTION_DATA,
+  MOCK_LEAD_SOURCE_DATA,
   MOCK_SALES_LEADS,
 } from "@/lib/mocks/dashboard";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ export default function DashboardPage() {
   const [trendData, setTrendData] = useState(MOCK_LEAD_TREND_DATA);
   const [productDemand, setProductDemand] = useState(MOCK_PRODUCT_DEMAND_DATA);
   const [scoreDistribution, setScoreDistribution] = useState(MOCK_SCORE_DISTRIBUTION_DATA);
+  const [leadSource, setLeadSource] = useState(MOCK_LEAD_SOURCE_DATA);
   const [leads, setLeads] = useState<SalesDashboardLeadItem[]>(MOCK_SALES_LEADS);
   const [selectedLead, setSelectedLead] = useState<SalesDashboardLeadItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +60,7 @@ export default function DashboardPage() {
       setTrendData(data.trends);
       setProductDemand(data.productDemand);
       setScoreDistribution(data.scoreDistribution);
+      if (data.leadSourceBreakdown?.length) setLeadSource(data.leadSourceBreakdown);
       setLeads(data.leads);
       toast.success("Dashboard data refreshed from underwriting API.", { id: "refresh" });
     } catch (e) {
@@ -169,6 +172,7 @@ export default function DashboardPage() {
           trendData={trendData}
           productDemandData={productDemand}
           scoreDistributionData={scoreDistribution}
+          leadSourceData={leadSource}
         />
 
         {/* 3. Inbound Leads Table */}

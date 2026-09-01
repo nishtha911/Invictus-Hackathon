@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, XCircle, BookOpen } from "lucide-react";
+import { ArrowRight, XCircle, BookOpen, SlidersHorizontal } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 import { BestMatchHeroCard } from "@/components/recommendations/BestMatchHeroCard";
 import { LoanCardItem } from "@/components/recommendations/LoanCardItem";
@@ -104,7 +104,14 @@ export default function RecommendationsPage() {
         {/* Top Header Summary */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
           <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
+            <button
+              onClick={() => router.push("/advisor")}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#1F7A63] transition-colors mb-1"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Adjust my answers
+            </button>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
               Personalized Lending Evaluation
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">

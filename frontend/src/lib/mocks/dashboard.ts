@@ -1,4 +1,4 @@
-import { DashboardKPIs, SalesDashboardLeadItem } from "../types/contracts";
+import { DashboardKPIs, LeadSourceDatum, SalesDashboardLeadItem } from "../types/contracts";
 
 export const MOCK_DASHBOARD_KPIS: DashboardKPIs = {
   total_leads: 142,
@@ -29,6 +29,11 @@ export const MOCK_PRODUCT_DEMAND_DATA = [
   { name: "Flexi Home", value: 4600000, count: 21, color: "#8b5cf6" },
   { name: "DrivePlus Auto", value: 3100000, count: 18, color: "#10b981" },
   { name: "Smart Finance", value: 1300000, count: 7, color: "#f59e0b" },
+];
+
+export const MOCK_LEAD_SOURCE_DATA: LeadSourceDatum[] = [
+  { key: "genai", name: "GenAI Voice Agent", value: 96, color: "#6366F1" },
+  { key: "manual_employee_call", name: "Manual Employee Calls", value: 46, color: "#F59E0B" },
 ];
 
 export const MOCK_SCORE_DISTRIBUTION_DATA = [

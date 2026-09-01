@@ -67,8 +67,18 @@ const initialProfile: ProfileIntake = {
   credit_band: "Excellent (780+)",
   urgency: "Immediate (Within 7 Days)",
   age: 32,
+  applying_as: "self",
   preferred_emi: "balanced",
   interest_type: "not_sure",
+};
+
+// Cleared whenever a new advisory run begins so a returning customer never lands
+// straight on stale scheme suggestions.
+const clearedAdvisoryResults = {
+  recommendations: [] as JourneyState["recommendations"],
+  personalizedOffer: null,
+  advisorNote: null,
+  selectedLoan: null,
 };
 
 const dummyStorage: StateStorage = {
@@ -109,6 +119,7 @@ export const useJourneyStore = create<JourneyState>()(
           const activeCustomer = customer || state.selectedCustomer;
           return {
             ...state,
+            ...clearedAdvisoryResults,
             authUser: user,
             userType: "existing",
             selectedCustomer: activeCustomer || null,
@@ -161,6 +172,7 @@ export const useJourneyStore = create<JourneyState>()(
             };
             return {
               ...state,
+              ...clearedAdvisoryResults,
               authUser,
               userType: type,
               selectedCustomer: customer,
@@ -177,6 +189,7 @@ export const useJourneyStore = create<JourneyState>()(
                 credit_band: customer.credit_band,
                 tenure_years: 20,
                 urgency: "Immediate (Within 7 Days)",
+                applying_as: "self",
                 preferred_emi: "balanced",
                 interest_type: "not_sure",
               },

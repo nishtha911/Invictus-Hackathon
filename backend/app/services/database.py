@@ -380,6 +380,30 @@ def save_lead(lead_dict: dict):
         if not prod_id.startswith("prod-"):
             prod_id = "prod-001"
 
+        # Lead source: 'genai' (advisory / voice agent) or 'manual_employee_call'.
+        source_raw = str(lead_dict.get("lead_source") or "genai").lower().strip()
+        lead_source = source_raw if source_raw in ("genai", "manual_employee_call") else "genai"
+
+        # Optional guarantor / co-applicant blocks — {name, relation, monthly_salary}
+        def _party(block):
+            if not isinstance(block, dict):
+                return None
+            name = (block.get("name") or "").strip()
+            if not name:
+                return None
+            try:
+                salary = float(block.get("monthly_salary") or 0) or 0.0
+            except (TypeError, ValueError):
+                salary = 0.0
+            return {
+                "name": name,
+                "relation": (block.get("relation") or "").strip() or None,
+                "monthly_salary": salary,
+            }
+
+        guarantor = _party(lead_dict.get("guarantor"))
+        co_applicant = _party(lead_dict.get("co_applicant"))
+
         db_row = {
             "full_name": lead_dict.get("customer_name") or lead_dict.get("name") or "Interested Borrower",
             "phone": str(lead_dict.get("phone") or "N/A"),
@@ -389,6 +413,9 @@ def save_lead(lead_dict: dict):
             "interested_product_id": prod_id,
             "lead_score": max(0, min(100, int(lead_dict.get("score") or lead_dict.get("lead_score") or 75))),
             "lead_band": clean_band,
+            "lead_source": lead_source,
+            "guarantor": guarantor,
+            "co_applicant": co_applicant,
             "score_factors": lead_dict.get("key_scoring_factors") or lead_dict.get("score_factors") or [],
             "chat_summary": lead_dict.get("ai_briefing") or lead_dict.get("chat_summary") or "",
             "key_objections_or_notes": lead_dict.get("notes") or "",
@@ -396,9 +423,21 @@ def save_lead(lead_dict: dict):
             "status": "new"
         }
 
+        def _insert(row):
+            try:
+                return supabase.table("qualified_leads").insert(row).execute()
+            except Exception as col_err:
+                # Older schema without the new columns — retry without them once.
+                msg = str(col_err).lower()
+                if any(c in msg for c in ("lead_source", "guarantor", "co_applicant")):
+                    logger.warning(f"qualified_leads missing new columns, retrying slim insert: {col_err}")
+                    slim = {k: v for k, v in row.items() if k not in ("lead_source", "guarantor", "co_applicant")}
+                    return supabase.table("qualified_leads").insert(slim).execute()
+                raise
+
         # Try inserting with session_id
         try:
-            res = supabase.table("qualified_leads").insert(db_row).execute()
+            res = _insert(db_row)
             logger.info(f"Successfully saved lead to Supabase: {res.data}")
             return res.data
         except Exception as insert_err:
@@ -406,7 +445,7 @@ def save_lead(lead_dict: dict):
             logger.warning(f"FK constraint retry without session_id: {insert_err}")
             db_row["session_id"] = None
             db_row["interested_product_id"] = "prod-001"
-            res = supabase.table("qualified_leads").insert(db_row).execute()
+            res = _insert(db_row)
             logger.info(f"Successfully saved lead with sanitized FKs: {res.data}")
             return res.data
     except Exception as e:

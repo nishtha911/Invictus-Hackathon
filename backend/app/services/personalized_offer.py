@@ -74,6 +74,30 @@ PERSONALIZATION_BOUNDS: Dict[str, Dict[str, Any]] = {
 
 _DEFAULT_BOUNDS = PERSONALIZATION_BOUNDS["home_loan"]
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  RBI-ALIGNED HARD LIMITS  (apply on top of the per-scheme bounds above)
+# ─────────────────────────────────────────────────────────────────────────────
+MAX_LOAN_AMOUNT = 100_000_000          # ₹10 crore absolute ceiling on any request
+
+# Home-loan Loan-to-Value ceilings by property value (RBI guidance):
+#   ≤ ₹30 lakh            → 90%
+#   ₹30 lakh – ₹75 lakh   → 80%
+#   > ₹75 lakh            → 75%
+HOME_LOAN_LTV_TIERS = (
+    (3_000_000, 0.90),
+    (7_500_000, 0.80),
+    (float("inf"), 0.75),
+)
+
+FOIR_CEILING_MIN, FOIR_CEILING_MAX = 50.0, 60.0   # eligibility FOIR band
+
+
+def _home_loan_ltv_cap(property_value: float) -> float:
+    for threshold, ltv in HOME_LOAN_LTV_TIERS:
+        if property_value <= threshold:
+            return ltv
+    return HOME_LOAN_LTV_TIERS[-1][1]
+
 
 def _emi(principal: float, annual_rate_pct: float, months: int) -> float:
     if principal <= 0 or months <= 0:
@@ -120,6 +144,21 @@ def build_personalized_offer(
             or base_loan.get("min_amount")
             or 0
         ) or 0.0
+
+        property_value = float(p.get("property_value") or 0) or 0.0
+        co_applicant_income = float(p.get("co_applicant_income") or 0) or 0.0
+        guarantor_income = float(p.get("guarantor_income") or 0) or 0.0
+
+        # ── RBI limits: ₹10 Cr hard cap + home-loan LTV tiering ─────────────
+        requested_principal = principal
+        principal = min(principal, float(MAX_LOAN_AMOUNT))
+        ltv_cap_amount = None
+        ltv_pct = None
+        if cat_key == "home_loan" and property_value > 0:
+            ltv_pct = _home_loan_ltv_cap(property_value)
+            ltv_cap_amount = round(property_value * ltv_pct)
+            principal = min(principal, float(ltv_cap_amount))
+
         age = p.get("age")
         try:
             age = int(age) if age is not None else None
@@ -133,7 +172,7 @@ def build_personalized_offer(
         emp = str(p.get("employment_type") or "").lower()
         emi_pref = str(p.get("preferred_emi") or "balanced").lower()
         rate_pref = str(p.get("interest_type") or "not_sure").lower()
-        has_co_applicant = bool(p.get("has_co_applicant"))
+        has_co_applicant = bool(p.get("has_co_applicant")) or co_applicant_income > 0
 
         base_rate = float(base_loan.get("interest_rate") or 8.5)
         base_tenure = int(base_loan.get("tenure_months") or p.get("preferred_tenure_months") or 240)
@@ -141,6 +180,27 @@ def build_personalized_offer(
         base_emi = _emi(principal, base_rate, base_tenure)
 
         adjustments = []
+
+        # ── 0. RBI ceilings: absolute cap + home-loan LTV ───────────────────
+        if requested_principal > MAX_LOAN_AMOUNT:
+            adjustments.append({
+                "parameter": "Loan amount",
+                "base": f"₹{requested_principal:,.0f} requested",
+                "personalized": f"₹{MAX_LOAN_AMOUNT:,.0f} (capped)",
+                "reason": "single-borrower requests are capped at ₹10 crore",
+                "policy_limit": "₹10,00,00,000 absolute ceiling",
+            })
+        if ltv_cap_amount is not None and ltv_cap_amount < min(requested_principal, MAX_LOAN_AMOUNT):
+            adjustments.append({
+                "parameter": "Loan amount (LTV)",
+                "base": f"₹{min(requested_principal, MAX_LOAN_AMOUNT):,.0f} requested",
+                "personalized": f"₹{ltv_cap_amount:,.0f} at {ltv_pct*100:.0f}% LTV",
+                "reason": (
+                    f"property valued at ₹{property_value:,.0f} — RBI LTV ceiling of "
+                    f"{ltv_pct*100:.0f}% applies for this value band"
+                ),
+                "policy_limit": "90% ≤ ₹30L · 80% ₹30L–₹75L · 75% > ₹75L",
+            })
 
         # ── 1. Interest rate — concession / loading, clamped to policy ───────
         rate_delta = 0.0
@@ -242,11 +302,37 @@ def build_personalized_offer(
 
         # ── Recompute the tailored EMI & affordability ───────────────────────
         personalized_emi = _emi(principal, personalized_rate, personalized_tenure)
-        foir = round(((personalized_emi + existing_emi) / income) * 100, 1) if income > 0 else None
 
-        # A co-applicant adds an assessable second income, widening FOIR headroom.
-        ceiling = bounds["foir_ceiling_pct"] + (8.0 if has_co_applicant else 0.0)
-        if has_co_applicant:
+        # Assessed income = applicant + full co-applicant salary + half of any
+        # guarantor salary (a guarantor is supporting security, not primary income).
+        assessed_income = income + co_applicant_income + guarantor_income * 0.5
+        foir = (
+            round(((personalized_emi + existing_emi) / assessed_income) * 100, 1)
+            if assessed_income > 0 else None
+        )
+
+        # FOIR eligibility band held to RBI's 50–60% window. A co-applicant with
+        # no stated income still earns a small headroom bump; a stated income is
+        # already in the denominator so the ceiling stays at the scheme value.
+        ceiling = bounds["foir_ceiling_pct"]
+        if has_co_applicant and co_applicant_income <= 0:
+            ceiling += 8.0
+        ceiling = _clamp(ceiling, FOIR_CEILING_MIN, FOIR_CEILING_MAX)
+
+        if co_applicant_income > 0 or guarantor_income > 0:
+            parts = []
+            if co_applicant_income > 0:
+                parts.append(f"co-applicant ₹{co_applicant_income:,.0f}/mo")
+            if guarantor_income > 0:
+                parts.append(f"guarantor ₹{guarantor_income:,.0f}/mo (50% weighted)")
+            adjustments.append({
+                "parameter": "Assessed income",
+                "base": f"Applicant ₹{income:,.0f}/mo",
+                "personalized": f"₹{assessed_income:,.0f}/mo combined",
+                "reason": "added: " + ", ".join(parts) + " — widens your affordability headroom",
+                "policy_limit": f"FOIR held within {FOIR_CEILING_MIN:.0f}–{FOIR_CEILING_MAX:.0f}% (RBI band)",
+            })
+        elif has_co_applicant:
             adjustments.append({
                 "parameter": "Assessed income",
                 "base": "Applicant income only",

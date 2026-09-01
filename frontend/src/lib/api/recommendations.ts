@@ -23,6 +23,9 @@ export async function fetchLoanRecommendations(profile: ProfileIntake): Promise<
         age: profile.age ?? null,
         has_co_applicant: profile.has_co_applicant ?? null,
         customer_name: profile.customer_name || null,
+        property_value: profile.property_value ?? null,
+        co_applicant_income: profile.co_applicant_income ?? null,
+        guarantor_income: profile.guarantor_income ?? null,
       }),
     },
     () => generateMockRecommendations(profile)
