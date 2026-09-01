@@ -6,7 +6,6 @@ import { useJourneyStore } from "@/store/journey-store";
 import {
   RefreshCw,
   Download,
-  Calendar,
   Phone,
 } from "lucide-react";
 import { DashboardKPIsSection } from "@/components/dashboard/DashboardKPIsSection";
@@ -96,7 +95,25 @@ export default function DashboardPage() {
   };
 
   const handleExportCSV = () => {
-    toast.success("Exported 142 leads to encrypted CSV queue.", { id: "export" });
+    if (!leads.length) {
+      toast.error("No leads to export yet.", { id: "export" });
+      return;
+    }
+    const headers = ["Lead ID", "Name", "Email", "Phone", "Product", "Category", "Requested Amount", "Score", "Band", "Status", "Created"];
+    const rows = leads.map((l) => [
+      l.id, l.customer_name, l.email, l.phone, l.product_name, l.loan_category,
+      l.requested_amount, l.lead_score, l.score_band, l.status, l.created_at,
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cognis-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${leads.length} lead${leads.length === 1 ? "" : "s"} to CSV.`, { id: "export" });
   };
 
   return (
@@ -105,30 +122,19 @@ export default function DashboardPage() {
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="rounded bg-[#E8F5F1] px-2 py-0.5 text-[11px] font-mono font-bold text-[#1F7A63] border border-emerald-100">
-                RETAIL LENDING INTELLIGENCE
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-xs text-[#1F7A63] font-medium">
-                <span className="h-2 w-2 rounded-full bg-[#1F7A63]" />
-                Live Underwriting Sync
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#132443] tracking-tight">
-              Retail Lending Command Center
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
+              Sales Dashboard
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#132443] tracking-tight">
+              Inbound Lead Pipeline
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Scored inbound borrower applications prioritized for retail loan sanction officers.
+              Scored borrower applications from completed advisory sessions.
             </p>
           </div>
 
           {/* Action Tools */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-slate-600 font-mono">
-              <Calendar className="h-3.5 w-3.5 text-[#1F7A63]" />
-              <span>Last 7 Days</span>
-            </div>
-
             {process.env.NEXT_PUBLIC_VOICE_ASSISTANT_URL && (
               <button
                 onClick={() => router.push("/dashboard/voice-assistant")}

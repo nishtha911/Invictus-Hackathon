@@ -972,24 +972,53 @@ async def capture_lead(payload: LeadCapturePayload):
 @app.get("/api/dashboard")
 async def get_dashboard():
     """Return sales intelligence dashboard data from Supabase and memory."""
+    import re
     from app.services.database import fetch_leads
 
+    _CATEGORY_HINTS = {
+        "home loan": "Home Loan", "personal loan": "Personal Loan",
+        "vehicle loan": "Vehicle Loan", "car loan": "Vehicle Loan",
+        "education loan": "Education Loan", "business loan": "Business Loan",
+        "gold loan": "Gold Loan",
+    }
+
+    def _amount_from_text(text: str) -> float:
+        # The AI briefing always contains "...requesting a <type> of ₹<amount>..."
+        m = re.search(r"of\s*₹\s*([\d,]+)", text or "")
+        if not m:
+            m = re.search(r"₹\s*([\d,]{4,})", text or "")
+        if m:
+            try:
+                return float(m.group(1).replace(",", ""))
+            except ValueError:
+                pass
+        return 0.0
+
+    def _category_from_text(text: str) -> str:
+        low = (text or "").lower()
+        for hint, label in _CATEGORY_HINTS.items():
+            if hint in low:
+                return label
+        return "Loan"
+
     formatted_leads = []
-    
+
     # 1. Fetch live leads from Supabase qualified_leads
     db_leads = fetch_leads()
     for dl in db_leads:
         band_raw = str(dl.get("lead_band", "warm")).upper()
         score_band_display = f"{band_raw} LEAD" if "LEAD" not in band_raw else band_raw
+        briefing = dl.get("chat_summary", "") or ""
+        req_amount = float(dl.get("requested_amount") or 0) or _amount_from_text(briefing)
         formatted_leads.append({
             "id": str(dl.get("lead_id", "LEAD-001")),
             "customer_name": dl.get("full_name", "Borrower"),
             "email": dl.get("email", ""),
             "phone": dl.get("phone", ""),
             "product_name": dl.get("interested_product_id", "Loan"),
-            "loan_category": "Loan",
-            "requested_amount": 500000.0,
-            "estimated_emi": 0.0,
+            "loan_category": _category_from_text(briefing),
+            "requested_amount": req_amount,
+            "estimated_emi": float(dl.get("estimated_emi") or 0.0),
             "lead_score": int(dl.get("lead_score", 80)),
             "score_band": score_band_display,
             "urgency": "Immediate",
@@ -1026,43 +1055,70 @@ async def get_dashboard():
     total_leads = len(formatted_leads)
     hot_leads = sum(1 for l in formatted_leads if "HOT" in str(l.get("score_band", "")).upper())
     warm_leads = sum(1 for l in formatted_leads if "WARM" in str(l.get("score_band", "")).upper())
-    total_demand = sum(l.get("requested_amount", 0) for l in formatted_leads) or 24000000.0
+    nurture_leads = max(0, total_leads - hot_leads - warm_leads)
+    total_demand = sum(float(l.get("requested_amount") or 0) for l in formatted_leads)
+
+    # Pipeline from real lead statuses
+    def _status_count(*names):
+        wanted = {n.lower() for n in names}
+        return sum(1 for l in formatted_leads if str(l.get("status", "")).lower() in wanted)
+
+    pipeline = {
+        "new": _status_count("new"),
+        "qualified": _status_count("qualified", "in review"),
+        "contacted": _status_count("contacted"),
+        "converted": _status_count("converted"),
+    }
+
+    # Product demand aggregated from real leads (by category)
+    _cat_agg: dict[str, dict] = {}
+    _palette = ["#1F7A63", "#6366f1", "#06b6d4", "#8b5cf6", "#f59e0b", "#64748b"]
+    for l in formatted_leads:
+        cat = l.get("loan_category") or "Loan"
+        _cat_agg.setdefault(cat, {"value": 0.0, "count": 0})
+        _cat_agg[cat]["value"] += float(l.get("requested_amount") or 0)
+        _cat_agg[cat]["count"] += 1
+    product_demand = [
+        {"name": name, "value": round(v["value"]), "count": v["count"], "color": _palette[i % len(_palette)]}
+        for i, (name, v) in enumerate(sorted(_cat_agg.items(), key=lambda kv: kv[1]["value"], reverse=True))
+    ]
+
+    # Weekly trend from created_at (best-effort parse; empty when timestamps unavailable)
+    from collections import OrderedDict
+    trend_buckets: "OrderedDict[str, dict]" = OrderedDict()
+    for l in formatted_leads:
+        raw = str(l.get("created_at", ""))
+        try:
+            day = datetime.fromisoformat(raw.replace("Z", "+00:00")).strftime("%a %d")
+        except (ValueError, TypeError):
+            continue
+        b = trend_buckets.setdefault(day, {"day": day, "total": 0, "hot": 0, "converted": 0})
+        b["total"] += 1
+        if "HOT" in str(l.get("score_band", "")).upper():
+            b["hot"] += 1
+        if str(l.get("status", "")).lower() == "converted":
+            b["converted"] += 1
+    trends = list(trend_buckets.values())
+
+    qualification_rate = (
+        round((hot_leads + warm_leads) / total_leads * 100) if total_leads else 0
+    )
 
     return {
         "kpis": {
             "total_leads": total_leads,
             "hot_leads": hot_leads,
             "warm_leads": warm_leads,
-            "qualification_rate": 67,
+            "qualification_rate": qualification_rate,
             "total_loan_demand": total_demand,
-            "conversion_pipeline": {
-                "new": len(formatted_leads) or 142,
-                "qualified": 96,
-                "contacted": 51,
-                "converted": 19,
-            },
+            "conversion_pipeline": pipeline,
         },
-        "trends": [
-            {"day": "Mon", "total": 18, "hot": 6, "converted": 2},
-            {"day": "Tue", "total": 24, "hot": 8, "converted": 3},
-            {"day": "Wed", "total": 31, "hot": 10, "converted": 5},
-            {"day": "Thu", "total": 28, "hot": 7, "converted": 4},
-            {"day": "Fri", "total": 35, "hot": 11, "converted": 6},
-            {"day": "Sat", "total": 22, "hot": 5, "converted": 3},
-            {"day": "Sun", "total": 14, "hot": 3, "converted": 1},
-        ],
-        "productDemand": [
-            {"name": "Prime Home", "value": 9800000, "count": 52, "color": "#6366f1"},
-            {"name": "Express Personal", "value": 5200000, "count": 44, "color": "#06b6d4"},
-            {"name": "Flexi Home", "value": 4600000, "count": 21, "color": "#8b5cf6"},
-            {"name": "DrivePlus Auto", "value": 3100000, "count": 18, "color": "#10b981"},
-            {"name": "Smart Finance", "value": 1300000, "count": 7, "color": "#f59e0b"},
-        ],
+        "trends": trends,
+        "productDemand": product_demand,
         "scoreDistribution": [
-            {"range": "90-100 (Hot)", "count": hot_leads, "fill": "#10b981"},
-            {"range": "75-89 (Warm)", "count": warm_leads, "fill": "#6366f1"},
-            {"range": "60-74 (Moderate)", "count": 32, "fill": "#f59e0b"},
-            {"range": "< 60 (Nurture)", "count": 14, "fill": "#64748b"},
+            {"range": "Hot (70-100)", "count": hot_leads, "fill": "#1F7A63"},
+            {"range": "Warm (50-69)", "count": warm_leads, "fill": "#6366f1"},
+            {"range": "Nurture (< 50)", "count": nurture_leads, "fill": "#94a3b8"},
         ],
         "leads": formatted_leads,
     }

@@ -68,7 +68,7 @@ export function Navbar() {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-gradient-to-r from-[#021812] via-[#041d30] to-[#031520] text-white border-b border-white/10 shadow-lg">
+    <header className="sticky top-0 z-40 w-full bg-[#132443] text-white border-b border-white/10 shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Brand Logo */}
@@ -109,7 +109,7 @@ export function Navbar() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.13 }}
-                    className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[420px] bg-white p-3 shadow-2xl border border-slate-200 grid grid-cols-2 gap-1 z-50"
+                    className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[420px] rounded-xl bg-white p-3 shadow-lg border border-slate-200 grid grid-cols-2 gap-1 z-50"
                   >
                     {LOAN_PURPOSES.map((loan) => {
                       const IconComp = LOAN_ICONS[loan.icon] || Home;

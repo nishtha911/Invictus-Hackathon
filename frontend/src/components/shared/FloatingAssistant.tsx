@@ -236,9 +236,9 @@ export function FloatingAssistant() {
         <motion.button
           onClick={() => setIsOpen(true)}
           aria-label="Open Cognis Bank Assistant"
-          animate={{ scale: [1, 1.04, 1], y: [0, -2.5, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1F7A63] text-white shadow-xl hover:bg-[#186350] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:ring-offset-2"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1F7A63] text-white shadow-lg hover:bg-[#186350] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F7A63] focus:ring-offset-2"
         >
           <MessageCircle className="h-6 w-6" />
         </motion.button>
@@ -252,17 +252,17 @@ export function FloatingAssistant() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="flex flex-col w-[calc(100vw-2rem)] sm:w-[380px] h-[520px] max-h-[85vh] rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl overflow-hidden"
+            className="flex flex-col w-[calc(100vw-2rem)] sm:w-[380px] h-[520px] max-h-[85vh] rounded-2xl border border-[#E2E8F0] bg-white shadow-lg overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#0f3448] bg-gradient-to-r from-[#031c18] via-[#052136] to-[#041a2e] px-4 py-3 text-white rounded-t-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 bg-[#132443] px-4 py-3 text-white rounded-t-2xl">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 border border-white/20 p-1">
                   <img src="/images/logo.png" alt="Cognis Bank" className="h-full w-full object-contain" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold tracking-tight">Cognis Bank Assistant</h3>
-                  <p className="text-[10px] text-emerald-400 font-medium">Online · Live Lending Guidance</p>
+                  <p className="text-[10px] text-emerald-400 font-medium">Policy Q&amp;A</p>
                 </div>
               </div>
 
@@ -345,10 +345,9 @@ export function FloatingAssistant() {
               </button>
             </form>
 
-            {/* Trust Caption */}
-            <div className="bg-slate-50 px-3 py-1.5 border-t border-[#E2E8F0] flex items-center justify-between text-[10px] text-slate-400">
-              <span>Cognis Bank AI Policy Assistant</span>
-              <span>256-Bit Encrypted</span>
+            {/* Caption */}
+            <div className="bg-slate-50 px-3 py-1.5 border-t border-[#E2E8F0] text-[10px] text-slate-400">
+              <span>Answers are grounded in Cognis Bank policy documents.</span>
             </div>
           </motion.div>
         )}

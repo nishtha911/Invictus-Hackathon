@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ShieldCheck, User, Phone, ArrowRight, CheckCircle2, Lock } from "lucide-react";
+import { ShieldCheck, User, Phone, ArrowRight, CheckCircle2, Lock, Eye, EyeOff } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { loginCustomer, loginEmployee } from "@/lib/api/auth";
 import { useJourneyStore } from "@/store/journey-store";
@@ -37,6 +37,7 @@ export default function LoginPage() {
   const { setUserType, setRole } = useJourneyStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"customer" | "employee">("customer");
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -321,12 +322,22 @@ export default function LoginPage() {
                         <Lock className="h-3.5 w-3.5 text-[#1F7A63]" />
                         Password
                       </label>
-                      <input
-                        {...registerEmployee("password")}
-                        type="password"
-                        placeholder="Enter password"
-                        className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 text-sm text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
-                      />
+                      <div className="relative">
+                        <input
+                          {...registerEmployee("password")}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter password"
+                          className="w-full rounded-xl border border-[#E2E8F0] bg-[#F5F7FA] px-4 py-3 pr-11 text-sm text-[#132443] placeholder-slate-400 focus:bg-white focus:border-[#1F7A63] focus:outline-none focus:ring-1 focus:ring-[#1F7A63] transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#1F7A63] transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                       {employeeErrors.password && (
                         <p className="text-xs text-rose-600 mt-1">{employeeErrors.password.message}</p>
                       )}

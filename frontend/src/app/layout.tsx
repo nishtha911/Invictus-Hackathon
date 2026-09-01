@@ -49,12 +49,14 @@ export default function RootLayout({
         <FloatingAssistant />
         <Toaster
           position="top-right"
+          closeButton
+          duration={4000}
           toastOptions={{
             style: {
               background: "#FFFFFF",
-              border: "1px solid #E2E8F0",
+              border: "1px solid #E4E9F0",
               color: "#132443",
-              boxShadow: "0 10px 25px -5px rgba(19, 36, 67, 0.1)",
+              boxShadow: "0 8px 24px -6px rgba(19, 36, 67, 0.12)",
             },
           }}
         />
