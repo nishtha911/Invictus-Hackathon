@@ -1,8 +1,12 @@
 /**
  * AI voice-call API — the "call" runs in the banker's browser.
  * STT = Web Speech API, TTS = ElevenLabs (optional) or speechSynthesis, LLM = backend Groq.
+ * All endpoints are employee-only (X-Role header, same convention as KB upload/delete).
  */
+import { useJourneyStore } from "../../store/journey-store";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const roleHeader = () => ({ "X-Role": useJourneyStore.getState().role || "" });
 
 export interface CallContext {
   lead_id?: string;
@@ -56,7 +60,7 @@ async function post<T>(path: string, body: unknown, timeoutMs = 9000): Promise<T
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...roleHeader() },
       body: JSON.stringify(body),
       signal: ctrl.signal,
     });
@@ -125,7 +129,7 @@ export async function fetchSpeechAudio(text: string): Promise<string | null> {
   try {
     const res = await fetch(`${BASE_URL}/api/v1/voice/tts`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...roleHeader() },
       body: JSON.stringify({ text }),
     });
     if (res.status === 200) {
@@ -139,7 +143,7 @@ export async function fetchSpeechAudio(text: string): Promise<string | null> {
 
 export async function fetchVoiceCalls(): Promise<VoiceCallRecord[]> {
   try {
-    const res = await fetch(`${BASE_URL}/api/v1/voice/calls`);
+    const res = await fetch(`${BASE_URL}/api/v1/voice/calls`, { headers: roleHeader() });
     if (!res.ok) return [];
     const data = await res.json();
     return (data.calls || []) as VoiceCallRecord[];

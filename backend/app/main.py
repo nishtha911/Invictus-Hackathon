@@ -1,15 +1,16 @@
 # /backend/app/main.py
 """
-FastAPI application — the HTTP interface for the advisory chat engine.
+FastAPI application — HTTP interface for the Cognis Bank loan platform.
 
-Endpoints:
-  POST /api/chat/start     → Start a new session, get greeting + first question
-  POST /api/chat/message   → Send user message, get next question(s)
-  GET  /api/chat/{id}      → Get current session state
-  GET  /api/health         → Health check
-
-Session state is stored in-memory (dict) for the hackathon.
-Production would use Redis or a database.
+Surface:
+  POST /api/v1/recommend-loans      → RAG-grounded, policy-bounded loan recommendations
+  PUT  /api/knowledge-base/profile  → persist the advisory intake context for the RAG chat
+  POST /query                       → grounded policy Q&A (RAG)
+  POST /api/v1/leads                → capture + score an inbound lead
+  GET  /api/v1/dashboard            → sales dashboard (employee only)
+  POST /api/v1/voice/*              → browser AI voice CRM (employee only)
+  POST /api/v1/auth/employee-login  → employee sign-in
+  GET  /api/health                  → health check
 """
 
 from __future__ import annotations
@@ -31,18 +32,6 @@ from db import init_db, get_conn
 from ingest import ingest_document
 from query import answer
 
-from app.config import get_settings
-from app.schemas.profile import ExtractedProfile, ExtractionMeta, UserType
-from app.schemas.chat import (
-    ChatRequest,
-    ChatResponse,
-    ChatMessage,
-    SessionState,
-    UIComponent,
-)
-from app.graph.state import AdvisoryState, compute_completeness
-from app.graph.builder import get_advisory_graph
-
 # ── Logging ────────────────────────────────────────────────────────────
 
 logging.basicConfig(
@@ -53,12 +42,7 @@ logger = logging.getLogger(__name__)
 
 import json
 
-# ── In-memory session store ───────────────────────────────────────────
-# Key: session_id, Value: AdvisoryState
-SESSION_STORE: dict[str, AdvisoryState] = {}
-
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-PROFILES_FILE = DATA_DIR / "user_profiles.json"
 KNOWLEDGE_BASE_PROFILES_FILE = DATA_DIR / "knowledge_base_profiles.json"
 
 
@@ -74,9 +58,8 @@ def _load_knowledge_base_profiles() -> dict[str, dict[str, Any]]:
         return {}
 
 
-# This is separate from SESSION_STORE because the slider-based UI does not use
-# the advisory graph session endpoints. It survives a backend restart so the
-# policy chat can recover a user's context after a browser refresh.
+# Advisory intake context (from the slider flow), keyed by session id. Persisted
+# to disk so the policy RAG chat can recover a user's context after a refresh.
 KNOWLEDGE_BASE_PROFILE_STORE: dict[str, dict[str, Any]] = _load_knowledge_base_profiles()
 
 
@@ -89,104 +72,23 @@ def _save_knowledge_base_profiles() -> None:
     )
     temporary_file.replace(KNOWLEDGE_BASE_PROFILES_FILE)
 
-def _save_profiles_to_disk():
-    """Save all current session profiles to a JSON file and sync to Supabase."""
-    try:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        profiles_list = []
-        db_rows = []
-        for sid, state in SESSION_STORE.items():
-            pct, filled, remaining = compute_completeness(state.profile)
-            extracted = ExtractedProfile(
-                session_id=state.session_id,
-                user_type=state.user_type,
-                profile=state.profile,
-                extraction_meta=ExtractionMeta(
-                    completeness_pct=pct,
-                    turns_taken=state.turn_count,
-                    model=get_settings().GROQ_MODEL,
-                    extracted_at=datetime.utcnow(),
-                    fields_filled=filled,
-                    fields_remaining=remaining,
-                ),
-            ).model_dump(mode="json")
-            profiles_list.append(extracted)
-            
-            profile_data = extracted.get("profile", {})
-            meta_data = extracted.get("extraction_meta", {})
-            db_rows.append({
-                "session_id": extracted.get("session_id"),
-                "user_type": extracted.get("user_type", "guest"),
-                "applicant_name": profile_data.get("name"),
-                "intent": profile_data.get("intent"),
-                "age": profile_data.get("age"),
-                "monthly_income": profile_data.get("monthly_income"),
-                "employment_type": profile_data.get("employment_type"),
-                "requested_loan_amount": profile_data.get("requested_loan_amount"),
-                "preferred_tenure_months": profile_data.get("preferred_tenure_months"),
-                "existing_emi_obligations": profile_data.get("existing_emi_obligations", 0.0),
-                "has_existing_loans": profile_data.get("has_existing_loans", False),
-                "credit_score_band": profile_data.get("credit_score_band", "unknown"),
-                "urgency": profile_data.get("urgency", "exploring"),
-                "completeness_pct": meta_data.get("completeness_pct", 0),
-                "turns_taken": meta_data.get("turns_taken", 0)
-            })
-        
-        with open(PROFILES_FILE, "w", encoding="utf-8") as f:
-            json.dump(profiles_list, f, indent=2, ensure_ascii=False)
-            
-        if db_rows:
-            import httpx
-            import threading
-            import os as _os
-
-            _supabase_url = _os.environ.get("SUPABASE_URL", "")
-            _supabase_key = _os.environ.get("SUPABASE_KEY", "")
-
-            def sync_to_db():
-                try:
-                    with httpx.Client() as client:
-                        client.post(
-                            f"{_supabase_url}/rest/v1/customer_profiles",
-                            headers={
-                                "apikey": _supabase_key,
-                                "Authorization": f"Bearer {_supabase_key}",
-                                "Content-Type": "application/json",
-                                "Prefer": "resolution=merge-duplicates"
-                            },
-                            json=db_rows,
-                            timeout=5.0
-                        )
-                except Exception as e:
-                    logger.error(f"Supabase sync failed: {e}")
-
-            threading.Thread(target=sync_to_db, daemon=True).start()
-
-    except Exception as e:
-        logger.error(f"Failed to save profiles to disk: {e}")
-
 
 # ── App lifecycle ──────────────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Warm up the graph on startup and auto-ingest sample documents."""
+    """Initialise the DB, warm the RAG embedder, verify sample docs."""
     logger.info("Starting Loan Advisory API...")
     settings = get_settings()
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Model: {settings.GROQ_MODEL}")
-    logger.info(f"Completeness threshold: {settings.COMPLETENESS_THRESHOLD}%")
 
-    # Pre-compile the graph
-    _ = get_advisory_graph()
-    logger.info("Advisory graph ready")
-    
-    # Init RAG database tables
+    # Init RAG + voice-call database tables
     try:
         init_db()
-        logger.info("RAG database tables initialized.")
+        logger.info("Database tables initialized.")
     except Exception as exc:
-        logger.error(f"Failed to initialize RAG database tables: {exc}")
+        logger.error(f"Failed to initialize database tables: {exc}")
 
     # Warm up RAG embedding model
     try:
@@ -207,16 +109,14 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("Shutting down Loan Advisory API...")
-    SESSION_STORE.clear()
 
 # ── FastAPI App ────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="AI Loan Advisory Engine",
+    title="Cognis Bank Loan Platform API",
     description=(
-        "Conversational AI engine that profiles loan customers through "
-        "dynamic MCQ/slider questions and extracts structured profiles "
-        "for the scoring engine."
+        "RAG-grounded loan recommendations, deterministic underwriting, "
+        "inbound lead scoring, and the employee sales dashboard + voice CRM."
     ),
     version="1.0.0",
     lifespan=lifespan,
@@ -233,63 +133,6 @@ app.add_middleware(
 )
 
 # ═══════════════════════════════════════════════════════════════════════
-#  HELPER: Convert state to API response
-# ═══════════════════════════════════════════════════════════════════════
-
-def _state_to_response(state: AdvisoryState) -> ChatResponse:
-    """Convert internal AdvisoryState to the ChatResponse API model."""
-
-    # Convert pending messages to ChatMessage objects
-    messages = []
-    for msg in state.pending_messages:
-        ui_comp = None
-        if msg.get("ui_component"):
-            ui_comp = UIComponent(**msg["ui_component"])
-
-        messages.append(
-            ChatMessage(
-                role=msg["role"],
-                content=msg["content"],
-                ui_component=ui_comp,
-                field_target=msg.get("field_target"),
-            )
-        )
-
-    pct, filled, remaining = compute_completeness(state.profile)
-
-    session_state = SessionState(
-        session_id=state.session_id,
-        completeness_pct=pct,
-        fields_filled=filled,
-        is_complete=state.is_complete,
-        current_phase=state.current_phase,
-    )
-
-    # Include extracted profile when complete
-    extracted = None
-    if state.is_complete:
-        extracted = ExtractedProfile(
-            session_id=state.session_id,
-            user_type=state.user_type,
-            profile=state.profile,
-            extraction_meta=ExtractionMeta(
-                completeness_pct=pct,
-                turns_taken=state.turn_count,
-                model=get_settings().GROQ_MODEL,
-                extracted_at=datetime.utcnow(),
-                fields_filled=filled,
-                fields_remaining=remaining,
-            ),
-        ).model_dump(mode="json")
-
-    return ChatResponse(
-        session_id=state.session_id,
-        messages=messages,
-        session_state=session_state,
-        extracted_profile=extracted,
-    )
-
-# ═══════════════════════════════════════════════════════════════════════
 #  ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -298,9 +141,8 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "loan-advisory-engine",
+        "service": "cognis-bank-loan-platform",
         "model": get_settings().GROQ_MODEL,
-        "active_sessions": len(SESSION_STORE),
     }
 
 @app.post("/api/chat/start", response_model=ChatResponse)
@@ -970,8 +812,11 @@ async def capture_lead(payload: LeadCapturePayload):
 
 @app.get("/api/v1/dashboard")
 @app.get("/api/dashboard")
-async def get_dashboard():
+async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
     """Return sales intelligence dashboard data from Supabase and memory."""
+    if x_role != "employee":
+        raise HTTPException(403, "Access restricted. Only bank employees can view the sales dashboard.")
+
     import re
     from app.services.database import fetch_leads
 
@@ -1148,9 +993,17 @@ class VoiceCompleteRequest(BaseModel):
     duration: int = 0
 
 
+def _require_employee(x_role: Optional[str]) -> None:
+    """Voice CRM actions are for bank employees only (same X-Role convention
+    already used for KB upload/delete)."""
+    if x_role != "employee":
+        raise HTTPException(403, "Access restricted. Only bank employees can use the Voice CRM.")
+
+
 @app.post("/api/v1/voice/opening")
 @app.post("/api/voice/opening")
-async def voice_opening(req: VoiceOpeningRequest):
+async def voice_opening(req: VoiceOpeningRequest, x_role: Optional[str] = Header(None, alias="X-Role")):
+    _require_employee(x_role)
     from app.services import voice_service
     context = voice_service.build_call_context(req.lead)
     return {"opening_line": voice_service.generate_opening_line(context), "context": context}
@@ -1158,7 +1011,8 @@ async def voice_opening(req: VoiceOpeningRequest):
 
 @app.post("/api/v1/voice/turn")
 @app.post("/api/voice/turn")
-async def voice_turn(req: VoiceTurnRequest):
+async def voice_turn(req: VoiceTurnRequest, x_role: Optional[str] = Header(None, alias="X-Role")):
+    _require_employee(x_role)
     from app.services import voice_service
     context = req.context or voice_service.build_call_context({})
     return voice_service.generate_turn(context, req.history, req.user_speech)
@@ -1166,7 +1020,8 @@ async def voice_turn(req: VoiceTurnRequest):
 
 @app.post("/api/v1/voice/tts")
 @app.post("/api/voice/tts")
-async def voice_tts(req: VoiceTtsRequest):
+async def voice_tts(req: VoiceTtsRequest, x_role: Optional[str] = Header(None, alias="X-Role")):
+    _require_employee(x_role)
     from app.services import voice_service
     audio = voice_service.synthesize_speech(req.text)
     if audio:
@@ -1177,7 +1032,8 @@ async def voice_tts(req: VoiceTtsRequest):
 
 @app.post("/api/v1/voice/complete")
 @app.post("/api/voice/complete")
-async def voice_complete(req: VoiceCompleteRequest):
+async def voice_complete(req: VoiceCompleteRequest, x_role: Optional[str] = Header(None, alias="X-Role")):
+    _require_employee(x_role)
     from app.services import voice_service
     context = req.context or voice_service.build_call_context({})
     analysis = voice_service.analyze_transcript(context, req.transcript)
@@ -1188,7 +1044,8 @@ async def voice_complete(req: VoiceCompleteRequest):
 
 @app.get("/api/v1/voice/calls")
 @app.get("/api/voice/calls")
-async def voice_calls():
+async def voice_calls(x_role: Optional[str] = Header(None, alias="X-Role")):
+    _require_employee(x_role)
     from app.services import voice_service
     calls = voice_service.list_calls()
     return {"total": len(calls), "calls": calls}

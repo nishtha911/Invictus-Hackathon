@@ -74,4 +74,45 @@ def init_db():
             # CREATE INDEX rag_chunks_embedding_idx ON rag.chunks
             #   USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
+            # AI voice call log (see app/services/voice_service.py). Created here so
+            # the table always exists before the app tries to insert into it.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS public.voice_calls (
+                    id               BIGSERIAL PRIMARY KEY,
+                    call_id          TEXT UNIQUE NOT NULL,
+                    lead_id          TEXT,
+                    customer_name    TEXT,
+                    phone            TEXT,
+                    loan_type        TEXT,
+                    loan_amount      NUMERIC,
+                    direction        TEXT DEFAULT 'OUTBOUND',
+                    channel          TEXT DEFAULT 'browser',
+                    duration_seconds INTEGER DEFAULT 0,
+                    transcript       TEXT,
+                    summary          TEXT,
+                    intent           TEXT,
+                    sentiment        TEXT,
+                    outcome          TEXT,
+                    next_action      TEXT,
+                    requires_human   BOOLEAN DEFAULT FALSE,
+                    follow_up_at     TIMESTAMPTZ,
+                    created_at       TIMESTAMPTZ DEFAULT NOW()
+                );
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS voice_calls_created_at_idx
+                    ON public.voice_calls (created_at DESC);
+            """)
+
         conn.commit()
+
+    # Supabase's REST layer (PostgREST) caches the schema; nudge it to pick up
+    # any table just created above so inserts via the Supabase client succeed
+    # immediately instead of erroring until the cache next refreshes on its own.
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("NOTIFY pgrst, 'reload schema';")
+            conn.commit()
+    except Exception:
+        pass

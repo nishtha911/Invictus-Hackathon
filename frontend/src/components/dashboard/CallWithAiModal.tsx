@@ -182,7 +182,6 @@ export function CallWithAiModal({ lead, onClose, onCallLogged }: CallWithAiModal
     pushTurn({ role: "assistant", text: reply.speech_reply });
     if (reply.requires_human) setNotice("Customer asked for a human — flagged for a manager call-back.");
     await speak(reply.speech_reply);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pushTurn, speak, localContext]);
 
   useEffect(() => { handleUserTurnRef.current = handleUserTurn; }, [handleUserTurn]);
@@ -190,19 +189,26 @@ export function CallWithAiModal({ lead, onClose, onCallLogged }: CallWithAiModal
   // Prime the mic permission as soon as the call opens, so we know upfront
   // whether we can listen at all instead of finding out mid-conversation.
   useEffect(() => {
-    if (!getRecognition()) { setMicState("unsupported"); return; }
-    if (typeof navigator === "undefined" || !navigator.permissions?.query) return;
-    navigator.permissions.query({ name: "microphone" as PermissionName })
-      .then((status) => {
-        if (status.state === "granted") setMicState("granted");
-        else if (status.state === "denied") setMicState("denied");
-      })
-      .catch(() => { /* Permissions API not supported for "microphone" in this browser */ });
+    const t = setTimeout(() => {
+      if (!getRecognition()) { setMicState("unsupported"); return; }
+      if (typeof navigator === "undefined" || !navigator.permissions?.query) return;
+      navigator.permissions.query({ name: "microphone" as PermissionName })
+        .then((status) => {
+          if (status.state === "granted") setMicState("granted");
+          else if (status.state === "denied") setMicState("denied");
+        })
+        .catch(() => { /* Permissions API not supported for "microphone" in this browser */ });
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   // ── init ─────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
+    // React Strict Mode (dev) mounts every effect, tears it down, then mounts
+    // it again — the first phantom run's cleanup sets endedRef true, which
+    // would otherwise permanently block every reply on the real run. Reset it.
+    endedRef.current = false;
     (async () => {
       let opening: string;
       try {
@@ -442,23 +448,43 @@ export function CallWithAiModal({ lead, onClose, onCallLogged }: CallWithAiModal
               </form>
 
               {/* Controls */}
-              <div className="flex items-center justify-between border-t border-[#E4E9F0] bg-[#F5F7FA] px-5 py-3">
+              <div className="flex items-center justify-between gap-2 border-t border-[#E4E9F0] bg-[#F5F7FA] px-4 py-3">
                 <button
                   onClick={toggleMute}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                  title={muted ? "Unmute" : "Mute (stop auto-listening after the AI speaks)"}
+                  className={`inline-flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                     muted ? "bg-rose-100 text-rose-700 border border-rose-200" : "bg-white border border-[#E4E9F0] text-[#132443] hover:bg-slate-50"
                   }`}
                 >
                   {muted ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
-                  {muted ? "Unmute" : "Mute"}
                 </button>
+
+                {/* Push-to-talk — the primary, always-available way to answer */}
+                <button
+                  onClick={() => {
+                    if (listening) { try { recognitionRef.current?.stop(); } catch { /* noop */ } }
+                    else if (micState === "denied") void requestMicAccess();
+                    else startListening();
+                  }}
+                  disabled={micState === "unsupported" || aiSpeaking || phase !== "live"}
+                  className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    listening
+                      ? "bg-[#1F7A63] text-white shadow-md ring-4 ring-[#1F7A63]/20"
+                      : "bg-white border-2 border-[#1F7A63] text-[#1F7A63] hover:bg-[#F0FDF9]"
+                  }`}
+                >
+                  {listening ? <Mic className="h-4 w-4 animate-pulse" /> : <Mic className="h-4 w-4" />}
+                  {listening ? "Listening… tap to stop" : "Tap to Speak"}
+                </button>
+
                 <button
                   onClick={endCall}
                   disabled={phase === "analyzing"}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#dc2626] hover:bg-[#b91c1c] px-4 py-2 text-xs font-bold text-white transition-colors disabled:opacity-60"
+                  title="End & analyse"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#dc2626] hover:bg-[#b91c1c] p-2.5 sm:px-4 sm:py-2.5 text-xs font-bold text-white transition-colors disabled:opacity-60"
                 >
                   {phase === "analyzing" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PhoneOff className="h-3.5 w-3.5" />}
-                  End & analyse
+                  <span className="hidden sm:inline">End &amp; analyse</span>
                 </button>
               </div>
             </>

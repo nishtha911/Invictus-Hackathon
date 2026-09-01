@@ -9,9 +9,6 @@ python-multipart
 python-dotenv
 pydantic
 pydantic-settings
-langgraph
-langchain-core
-langchain-groq
 httpx
 supabase
 

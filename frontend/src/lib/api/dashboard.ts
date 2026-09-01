@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import { DashboardKPIs, SalesDashboardLeadItem } from "../types/contracts";
+import { useJourneyStore } from "../../store/journey-store";
 import {
   MOCK_DASHBOARD_KPIS,
   MOCK_LEAD_TREND_DATA,
@@ -17,7 +18,7 @@ export async function fetchDashboardData(): Promise<{
 }> {
   return apiClient(
     "/api/v1/dashboard",
-    { method: "GET" },
+    { method: "GET", headers: { "X-Role": useJourneyStore.getState().role || "" } },
     () => ({
       kpis: MOCK_DASHBOARD_KPIS,
       trends: MOCK_LEAD_TREND_DATA,
