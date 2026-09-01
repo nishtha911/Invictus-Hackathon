@@ -145,257 +145,6 @@ async def health_check():
         "model": get_settings().GROQ_MODEL,
     }
 
-@app.post("/api/chat/start", response_model=ChatResponse)
-async def start_chat(user_type: str = "guest"):
-    """
-    Start a new advisory chat session.
-
-    Returns the greeting message with the first question (loan type MCQ).
-    The frontend should store the session_id for subsequent messages.
-    """
-    session_id = str(uuid.uuid4())
-
-    logger.info(f"Starting new session: {session_id} (user_type={user_type})")
-
-    # Create initial state
-    state = AdvisoryState(
-        session_id=session_id,
-        user_type=UserType(user_type) if user_type in ("guest", "existing_customer") else UserType.GUEST,
-    )
-
-    # Run the greeting node to initialize conversation and get first question
-    from app.graph.nodes import greeting_node
-
-    try:
-        result_state = greeting_node(state)
-
-        # Store session
-        SESSION_STORE[session_id] = result_state
-        _save_profiles_to_disk()
-
-        response = _state_to_response(result_state)
-        logger.info(
-            f"Session {session_id}: greeting sent, "
-            f"{len(response.messages)} messages"
-        )
-        return response
-
-    except Exception as e:
-        logger.error(f"Error starting session {session_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to start session: {str(e)}")
-
-@app.post("/api/chat/message", response_model=ChatResponse)
-async def send_message(request: ChatRequest):
-    """
-    Send a user message and get the next bot response(s).
-
-    The request must include the session_id from /api/chat/start.
-    The message field contains the user's answer (MCQ value, slider value, or free text).
-
-    Returns one or more bot messages, each potentially with a UI component
-    (MCQ, slider, number input) for the frontend to render.
-    """
-    session_id = request.session_id
-
-    # Retrieve session
-    state = SESSION_STORE.get(session_id)
-    if state is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Session {session_id} not found. Call /api/chat/start first.",
-        )
-
-    # Check if already complete
-    if state.is_complete:
-        logger.info(f"Session {session_id}: already complete, returning profile")
-        return _state_to_response(state)
-
-    logger.info(
-        f"Session {session_id}: received message for phase '{state.current_phase}': "
-        f"'{request.message[:100]}'"
-    )
-
-    # Inject user input into state
-    state.current_user_input = request.message
-    state.current_field_target = request.field_target
-    state.pending_messages = []  # Clear previous pending messages
-
-    # Determine which node to run based on current phase
-    # Instead of re-running the full graph, we run the specific node
-    # and then use the router to prepare for the next interaction.
-
-    try:
-        result_state = _run_next_node(state)
-
-        # Store updated session
-        SESSION_STORE[session_id] = result_state
-        _save_profiles_to_disk()
-
-        response = _state_to_response(result_state)
-
-        pct = response.session_state.completeness_pct
-        logger.info(
-            f"Session {session_id}: phase={result_state.current_phase}, "
-            f"completeness={pct}%, "
-            f"complete={result_state.is_complete}, "
-            f"messages={len(response.messages)}"
-        )
-
-        return response
-
-    except Exception as e:
-        logger.error(
-            f"Error processing message for session {session_id}: {e}",
-            exc_info=True,
-        )
-        # Return a graceful error message instead of crashing
-        state.pending_messages = [
-            {
-                "role": "assistant",
-                "content": (
-                    "I'm sorry, I had trouble processing that. "
-                    "Could you try again?"
-                ),
-                "ui_component": None,
-                "field_target": None,
-            }
-        ]
-        SESSION_STORE[session_id] = state
-        _save_profiles_to_disk()
-        return _state_to_response(state)
-
-def _run_next_node(state: AdvisoryState) -> AdvisoryState:
-    """
-    Run the appropriate extraction node based on the current phase.
-
-    This avoids re-running the full graph from the beginning —
-    we directly call the node function for the current phase.
-    """
-    from app.graph.nodes import (
-        extract_name_node,
-        extract_loan_type_node,
-        extract_loan_type_details_node,
-        extract_loan_amount_node,
-        extract_income_employment_node,
-        extract_existing_debts_node,
-        extract_credit_score_node,
-        extract_age_node,
-        extract_tenure_node,
-        extract_co_applicant_node,
-        extract_preferred_emi_node,
-        extract_interest_type_node,
-        extract_urgency_node,
-        completion_node,
-    )
-
-    phase = state.current_phase
-
-    node_map = {
-        "name": extract_name_node,
-        "loan_type": extract_loan_type_node,
-        "loan_type_details": extract_loan_type_details_node,
-        "loan_amount": extract_loan_amount_node,
-        "income_employment": extract_income_employment_node,
-        "existing_debts": extract_existing_debts_node,
-        "credit_score": extract_credit_score_node,
-        "age": extract_age_node,
-        "tenure": extract_tenure_node,
-        "co_applicant": extract_co_applicant_node,
-        "preferred_emi": extract_preferred_emi_node,
-        "interest_type": extract_interest_type_node,
-        "urgency": extract_urgency_node,
-        "complete": completion_node,
-    }
-
-    node_fn = node_map.get(phase)
-
-    if node_fn is None:
-        logger.error(f"No node found for phase: {phase}")
-        # Fallback: use the master router to figure out where we are
-        from app.graph.router import _route_by_missing_fields
-
-        next_phase = _route_by_missing_fields(state)
-        # Map node name back to phase
-        phase_map = {
-            "extract_name": "name",
-            "extract_loan_type": "loan_type",
-            "extract_loan_type_details": "loan_type_details",
-            "extract_loan_amount": "loan_amount",
-            "extract_income_employment": "income_employment",
-            "extract_existing_debts": "existing_debts",
-            "extract_credit_score": "credit_score",
-            "extract_age": "age",
-            "extract_tenure": "tenure",
-            "extract_co_applicant": "co_applicant",
-            "extract_preferred_emi": "preferred_emi",
-            "extract_interest_type": "interest_type",
-            "extract_urgency": "urgency",
-            "completion": "complete",
-        }
-        state.current_phase = phase_map.get(next_phase, "loan_type")
-        node_fn = node_map.get(state.current_phase, extract_loan_type_node)
-
-    return node_fn(state)
-
-@app.get("/api/chat/{session_id}")
-async def get_session(session_id: str):
-    """
-    Get the current state of a chat session.
-
-    Returns the extracted profile (even if partial), completeness,
-    and current phase. Useful for debugging and for the frontend
-    to restore state after a page refresh.
-    """
-    state = SESSION_STORE.get(session_id)
-    if state is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Session {session_id} not found.",
-        )
-
-    pct, filled, remaining = compute_completeness(state.profile)
-
-    return {
-        "session_id": session_id,
-        "user_type": state.user_type.value,
-        "current_phase": state.current_phase,
-        "is_complete": state.is_complete,
-        "turn_count": state.turn_count,
-        "completeness_pct": pct,
-        "fields_filled": filled,
-        "fields_remaining": remaining,
-        "warnings": state.warnings,
-        "profile": state.profile.model_dump(exclude_none=True),
-        "chat_history": state.chat_history,
-    }
-
-@app.get("/api/sessions")
-async def list_sessions():
-    """List all active sessions (for debugging)."""
-    sessions = []
-    for sid, state in SESSION_STORE.items():
-        pct, _, _ = compute_completeness(state.profile)
-        sessions.append(
-            {
-                "session_id": sid,
-                "user_type": state.user_type.value,
-                "current_phase": state.current_phase,
-                "is_complete": state.is_complete,
-                "completeness_pct": pct,
-                "turn_count": state.turn_count,
-            }
-        )
-    return {"total": len(sessions), "sessions": sessions}
-
-@app.delete("/api/chat/{session_id}")
-async def delete_session(session_id: str):
-    """Delete a chat session."""
-    if session_id in SESSION_STORE:
-        del SESSION_STORE[session_id]
-        _save_profiles_to_disk()
-        return {"status": "deleted", "session_id": session_id}
-    raise HTTPException(status_code=404, detail="Session not found.")
-
 # ── Recommendation Request / Response Models ─────────────────────────────
 
 class RecommendLoansRequest(BaseModel):
@@ -665,36 +414,6 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
         }
 
 
-@app.get("/api/recommendations/{session_id}")
-async def get_recommendations(session_id: str):
-    """
-    Generate and return loan recommendations based on the extracted profile.
-    """
-    state = SESSION_STORE.get(session_id)
-    if state is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Session {session_id} not found.",
-        )
-
-    profile = state.profile
-    req = RecommendLoansRequest(
-        session_id=session_id,
-        user_type=state.user_type.value,
-        income=profile.monthly_income or 0.0,
-        loan_amount=profile.requested_loan_amount or 0.0,
-        intent=profile.intent or "Home Loan",
-        tenure_years=int((profile.preferred_tenure_months or 240) / 12),
-        employment_type=profile.employment_type or "Salaried",
-        existing_emi=profile.existing_emi_obligations or 0.0,
-        credit_band=profile.credit_score_band or "good",
-        urgency=profile.urgency or "exploring",
-        preferred_emi=getattr(getattr(profile, "preferred_emi", None), "value", getattr(profile, "preferred_emi", None)),
-        interest_type=getattr(getattr(profile, "interest_type", None), "value", getattr(profile, "interest_type", None)),
-    )
-    return await recommend_loans_endpoint(req)
-
-
 # ── In-memory lead store ───────────────────────────────────────────────
 LEAD_STORE: list[dict] = []
 
@@ -723,24 +442,20 @@ async def capture_lead(payload: LeadCapturePayload):
     from app.services.lead_scorer import score_lead
 
     sid = payload.session_id or ""
-    state = SESSION_STORE.get(sid)
-    profile = state.profile if state else None
-    pct, _, _ = compute_completeness(profile) if profile else (0, [], [])
-
     kb_ctx = KNOWLEDGE_BASE_PROFILE_STORE.get(sid, {})
     kb_profile = kb_ctx.get("profile", {})
 
-    monthly_income = getattr(profile, "monthly_income", None) or kb_profile.get("income")
-    existing_emi = getattr(profile, "existing_emi_obligations", None) or kb_profile.get("existing_emi")
-    req_amount = payload.loan_amount or getattr(profile, "requested_loan_amount", None) or kb_profile.get("loan_amount")
-    tenure = getattr(profile, "preferred_tenure_months", None) or ((kb_profile.get("tenure_years") or 20) * 12)
-    credit = getattr(profile, "credit_score_band", None) or kb_profile.get("credit_band")
-    urgency = getattr(profile, "urgency", None) or kb_profile.get("urgency")
-    intent = getattr(profile, "intent", None) or kb_profile.get("intent")
+    monthly_income = kb_profile.get("income")
+    existing_emi = kb_profile.get("existing_emi")
+    req_amount = payload.loan_amount or kb_profile.get("loan_amount")
+    tenure = (kb_profile.get("tenure_years") or 20) * 12
+    credit = kb_profile.get("credit_band")
+    urgency = kb_profile.get("urgency")
+    intent = kb_profile.get("intent")
 
     scoring = score_lead(
         session_id=sid or f"SESSION-{int(datetime.utcnow().timestamp())}",
-        completeness_pct=pct if pct > 0 else 85,
+        completeness_pct=85,
         monthly_income=float(monthly_income) if monthly_income else None,
         existing_emi_obligations=float(existing_emi) if existing_emi else 0.0,
         requested_loan_amount=float(req_amount) if req_amount else None,
@@ -1114,43 +829,19 @@ class KnowledgeBaseProfileRequest(BaseModel):
 
 def _resolve_advisory_profile(session_id: str | None, payload_profile: dict | None = None) -> dict:
     """
-    Resolve user advisory profile across all stores:
-    1. In-memory SESSION_STORE (Paras's conversational LangGraph state)
-    2. KNOWLEDGE_BASE_PROFILE_STORE (Interactive advisory intake cache)
-    3. user_profiles.json on disk
-    4. Supabase public.customer_profiles table
-    5. Direct payload profile overlay
+    Resolve the customer's advisory context for the RAG chat / lead scoring:
+    1. KNOWLEDGE_BASE_PROFILE_STORE (the slider intake cache, saved by /api/knowledge-base/profile)
+    2. Supabase public.customer_profiles
+    3. Direct payload profile overlay
     """
     merged_profile: dict[str, Any] = {}
 
     if session_id:
-        # 1. Check in-memory SESSION_STORE
-        if session_id in SESSION_STORE:
-            state = SESSION_STORE[session_id]
-            merged_profile = {
-                "session_id": session_id,
-                "user_type": state.user_type.value if hasattr(state.user_type, "value") else str(state.user_type),
-                "profile": state.profile.model_dump(exclude_none=True) if hasattr(state.profile, "model_dump") else dict(state.profile),
-                "turn_count": state.turn_count,
-            }
-
-        # 2. Check KNOWLEDGE_BASE_PROFILE_STORE
-        if not merged_profile and session_id in KNOWLEDGE_BASE_PROFILE_STORE:
+        # 1. Check KNOWLEDGE_BASE_PROFILE_STORE
+        if session_id in KNOWLEDGE_BASE_PROFILE_STORE:
             merged_profile = dict(KNOWLEDGE_BASE_PROFILE_STORE[session_id])
 
-        # 3. Check user_profiles.json on disk
-        if not merged_profile and PROFILES_FILE.exists():
-            try:
-                profiles_data = json.loads(PROFILES_FILE.read_text(encoding="utf-8"))
-                if isinstance(profiles_data, list):
-                    for item in profiles_data:
-                        if item.get("session_id") == session_id:
-                            merged_profile = item
-                            break
-            except Exception as e:
-                logger.warning("Error reading user_profiles.json for %s: %s", session_id, e)
-
-        # 4. Check Supabase public schema customer_profiles table
+        # 2. Check Supabase public schema customer_profiles table
         if not merged_profile:
             try:
                 from app.services.database import get_customer_profile
@@ -1160,7 +851,7 @@ def _resolve_advisory_profile(session_id: str | None, payload_profile: dict | No
             except Exception as e:
                 logger.warning("Error fetching customer profile from Supabase for %s: %s", session_id, e)
 
-    # 5. Overlay with direct payload profile if passed
+    # 3. Overlay with direct payload profile if passed
     if isinstance(payload_profile, dict) and payload_profile:
         if not merged_profile:
             merged_profile = dict(payload_profile)
