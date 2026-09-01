@@ -210,12 +210,69 @@ def _last_assistant_line(history: List[Dict[str, str]]) -> str:
     return ""
 
 
+def _count_consecutive_same_intent(history: List[Dict[str, str]], intent: str) -> int:
+    """Count how many of the most recent assistant turns share the same intent tag.
+    We embed intent in assistant messages as a metadata comment to track loops."""
+    # We detect loops by checking if the last N assistant replies are all similar
+    # (same intent can't be tracked directly in plain text, so proxy via _similar)
+    assistant_turns = [t.get("text") or t.get("content") or ""
+                       for t in (history or []) if t.get("role") == "assistant"]
+    if len(assistant_turns) < 2:
+        return 0
+    last = assistant_turns[-1]
+    count = 0
+    for prev in reversed(assistant_turns[:-1]):
+        if _similar(last, prev):
+            count += 1
+        else:
+            break
+    return count
+
+
+def _all_assistant_lines(history: List[Dict[str, str]]) -> List[str]:
+    """Return all assistant lines from history, deduplicated for the prompt."""
+    seen: set[str] = set()
+    lines: List[str] = []
+    for t in (history or []):
+        if t.get("role") == "assistant":
+            line = (t.get("text") or t.get("content") or "").strip()
+            norm = re.sub(r"[^a-z0-9 ]", "", line.lower()).strip()[:80]
+            if norm and norm not in seen:
+                seen.add(norm)
+                lines.append(line)
+    return lines
+
+
 def generate_turn(context: Dict[str, Any], history: List[Dict[str, str]],
                   user_speech: str) -> Dict[str, Any]:
     name = context["name"]
     loan = context["loan_type"]
     amt = _amount_str(context["loan_amount"])
     prev = _last_assistant_line(history)
+    all_prev = _all_assistant_lines(history)
+
+    # Build a numbered list of everything Alex already said so the LLM
+    # cannot repeat any of it, even in paraphrase.
+    prior_lines_block = ""
+    if all_prev:
+        numbered = "\n".join(f"  {i+1}. {l}" for i, l in enumerate(all_prev))
+        prior_lines_block = f"""
+
+EVERYTHING YOU HAVE ALREADY SAID (DO NOT repeat, paraphrase, or echo any of these):
+{numbered}"""
+
+    # Detect if we're stuck in a loop: ≥2 consecutive similar assistant replies
+    loop_count = _count_consecutive_same_intent(history, "")
+    pivot_instruction = ""
+    if loop_count >= 1:
+        pivot_instruction = (
+            f"\n\nIMPORTANT: The conversation has been going in circles. "
+            f"You MUST pivot to a different topic. If {name} seems interested, "
+            f"close warmly: tell them a loan officer will call within a business day. "
+            f"If they haven't responded to the question yet, try asking something "
+            f"completely different — e.g. whether they have a co-applicant, or "
+            f"whether they've checked their credit score recently."
+        )
 
     system = f"""You are Alex, a warm, upbeat relationship manager at Cognis Bank on a short
 follow-up phone call with {name}, who showed interest in a {loan} of {amt} on the bank's website.
@@ -227,9 +284,9 @@ it forward. This is a friendly check-in, NOT a processing call.
 HARD RULES:
 - NEVER talk about documents, bank statements, upload links, portals, or paperwork. If they
   bring it up, just say their dedicated loan officer will guide them through everything.
-- NEVER repeat your previous sentence. Your last line was: "{prev or '(this is the first reply)'}".
-  Always move the conversation forward with something new.
-- At most 2 short spoken sentences. Sound like a real person, not a script.
+- NEVER repeat or closely paraphrase ANY sentence from your previous turns.
+- Each reply MUST move the conversation to a new angle or topic.
+- At most 2 short spoken sentences. Sound like a real person, not a script.{prior_lines_block}{pivot_instruction}
 
 HOW TO RESPOND:
 - Greeting / "hello" / "yes" / small talk  -> thank them and ask if they're looking to move
@@ -261,13 +318,18 @@ Return ONLY valid JSON:
     if user_speech:
         msgs.append({"role": "user", "content": user_speech})
 
-    parsed = _safe_json(_groq_chat(msgs, json_mode=True, temperature=0.6, max_tokens=260))
+    parsed = _safe_json(_groq_chat(msgs, json_mode=True, temperature=0.7, max_tokens=260))
     if parsed and parsed.get("speech_reply"):
         reply = str(parsed["speech_reply"]).strip()
-        # Anti-loop guard: if the model echoed its last line, nudge forward.
-        if prev and _similar(reply, prev):
-            return {"speech_reply": f"Understood. Would you like to go ahead with the {loan}, or is there anything you'd like me to clarify first?",
-                    "intent": "INTERESTED", "requires_human": False}
+        # Anti-loop guard: broader similarity check across ALL prior turns
+        for prior in all_prev:
+            if _similar(reply, prior):
+                reply = (
+                    f"Great speaking with you, {name}. If you'd like to move ahead with "
+                    f"the {loan}, I can have a loan officer call you within a business day — "
+                    f"shall I go ahead and flag your file?"
+                )
+                break
         intent = str(parsed.get("extracted_intent", "INTERESTED")).upper()
         return {
             "speech_reply": reply,
@@ -278,9 +340,21 @@ Return ONLY valid JSON:
 
 
 def _similar(a: str, b: str) -> bool:
+    """True when two strings are the same or share ≥60% of their words."""
     a2 = re.sub(r"[^a-z0-9 ]", "", a.lower()).strip()
     b2 = re.sub(r"[^a-z0-9 ]", "", b.lower()).strip()
-    return a2 == b2 or (len(a2) > 20 and (a2 in b2 or b2 in a2))
+    if a2 == b2:
+        return True
+    if len(a2) > 20 and (a2 in b2 or b2 in a2):
+        return True
+    # Word-overlap: if ≥60% of the shorter string's words appear in the longer one
+    wa = set(a2.split())
+    wb = set(b2.split())
+    if not wa or not wb:
+        return False
+    shorter = wa if len(wa) <= len(wb) else wb
+    overlap = len(wa & wb) / len(shorter)
+    return len(shorter) >= 4 and overlap >= 0.60
 
 
 def _fallback_turn(context: Dict[str, Any], history: List[Dict[str, str]],

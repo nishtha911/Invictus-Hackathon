@@ -9,6 +9,7 @@ import { fetchLoanRecommendations } from "@/lib/api/recommendations";
 import { saveKnowledgeBaseContext } from "@/knowledge-base-api";
 import { LOAN_PURPOSES } from "@/lib/constants";
 import { toast } from "sonner";
+import { Zap, ArrowRight, Loader2 } from "lucide-react";
 
 function AdvisorContent() {
   const router = useRouter();
@@ -20,29 +21,36 @@ function AdvisorContent() {
     sessionId,
     userType,
     selectedCustomer,
+    recommendations,
     updateProfile,
     setRecommendations,
     setPersonalizedOffer,
     setAdvisorNote,
-    isExtracting,
-    extractionStatusMessage,
   } = useJourneyStore();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showMobileProfile, setShowMobileProfile] = useState(false);
 
-  // Handle URL intent query parameter and clean start
+  // If an existing customer returns to /advisor but already has cached
+  // recommendations (e.g. they left and came back), skip straight to results.
+  useEffect(() => {
+    if (userType === "existing" && recommendations.length > 0) {
+      router.replace("/recommendations");
+    }
+  }, [userType, recommendations.length, router]);
+
+  // Only reset to step 0 when an explicit ?intent= URL param is present.
+  // Without this guard the effect fires on every mount — including when the
+  // user navigates away to Policy Desk and back — wiping their progress.
   useEffect(() => {
     const intentParam = searchParams.get("intent");
-    if (intentParam) {
-      const matched = LOAN_PURPOSES.find(
-        (p) => p.intentKey === intentParam || p.id.toLowerCase().replace(/\s+/g, "_") === intentParam
-      );
-      if (matched) {
-        updateProfile({ intent: matched.id });
-      }
-      setStepIndex(0);
+    if (!intentParam) return; // ← nothing to do; preserve current step
+    const matched = LOAN_PURPOSES.find(
+      (p) => p.intentKey === intentParam || p.id.toLowerCase().replace(/\s+/g, "_") === intentParam
+    );
+    if (matched) {
+      updateProfile({ intent: matched.id });
     }
+    setStepIndex(0);
   }, [searchParams, updateProfile, setStepIndex]);
 
   const handleFindMatches = async () => {
@@ -78,6 +86,9 @@ function AdvisorContent() {
     }
   };
 
+  // Existing customers have their profile pre-loaded — show a one-click skip CTA.
+  const isExistingCustomer = userType === "existing" && !!selectedCustomer;
+
   return (
     <main className="flex-1 bg-[#F5F7FA] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -91,10 +102,41 @@ function AdvisorContent() {
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Answer the questions below to calculate your exact borrowing limits and view pre-approved offers.
+              {isExistingCustomer
+                ? `Welcome back, ${selectedCustomer.name}! Your banking profile is pre-loaded — review or adjust any detail below, then find your matches.`
+                : "Answer the questions below to calculate your exact borrowing limits and view pre-approved offers."}
             </p>
           </div>
         </div>
+
+        {/* Existing Customer Skip Banner */}
+        {isExistingCustomer && (
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-gradient-to-r from-[#F0FDF9] to-[#E8F5F1] px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-xl bg-[#1F7A63] text-white flex items-center justify-center shrink-0">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#132443]">Your profile is ready, {selectedCustomer.name}!</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Pre-loaded from your banking history · {selectedCustomer.employer} · {selectedCustomer.credit_band}
+                </p>
+              </div>
+            </div>
+            <button
+              id="skip-to-recommendations"
+              onClick={handleFindMatches}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all disabled:opacity-60 shrink-0"
+            >
+              {isLoading ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" />Finding matches…</>
+              ) : (
+                <><Zap className="h-3.5 w-3.5" />Skip Questions → Find My Matches<ArrowRight className="h-3.5 w-3.5" /></>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* 2-Column Clean Desktop Grid Layout (Roadmap 4 cols + Question Engine 8 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -125,3 +167,4 @@ export default function AdvisorPage() {
     </Suspense>
   );
 }
+

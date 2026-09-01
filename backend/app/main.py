@@ -145,7 +145,112 @@ async def health_check():
         "model": get_settings().GROQ_MODEL,
     }
 
-# ── Recommendation Request / Response Models ─────────────────────────────
+
+# ── Customer Profile Lookup (used by customer login) ──────────────────────────
+
+@app.get("/api/v1/customer/profile")
+@app.get("/api/customer/profile")
+async def get_customer_profile_by_phone(phone: Optional[str] = None, name: Optional[str] = None):
+    """
+    Lookup a customer profile from Supabase by phone number (and optionally name).
+    Returns the customer's profile pre-filled for the advisor journey.
+    Returns 404 if not found — frontend falls back to demo customer list.
+    """
+    from app.services.database import supabase
+
+    # Normalise phone to digits only for comparison
+    def _digits(s: str) -> str:
+        import re as _re
+        return _re.sub(r"\D", "", s or "")
+
+    phone_digits = _digits(phone or "")
+    if not phone_digits and not (name or "").strip():
+        raise HTTPException(400, "At least one of phone or name is required.")
+
+    if supabase:
+        try:
+            # Try to find in customer_profiles table first (saved after advisory)
+            query = supabase.table("customer_profiles").select("*")
+            if name and name.strip():
+                query = query.ilike("applicant_name", f"%{name.strip()}%")
+            res = query.limit(10).execute()
+            rows = res.data or []
+
+            if phone_digits and rows:
+                # Filter by phone overlap
+                matched = [r for r in rows if phone_digits[-7:] in _digits(r.get("phone") or "")]
+                rows = matched if matched else rows
+
+            if rows:
+                row = rows[0]
+                tenure_months = row.get("preferred_tenure_months") or 240
+                tenure_years = tenure_months // 12
+                return {
+                    "status": "found",
+                    "source": "supabase_customer_profiles",
+                    "customer": {
+                        "id": str(row.get("session_id") or row.get("id") or ""),
+                        "name": row.get("applicant_name") or (name or "").strip(),
+                        "email": row.get("email") or f"{(name or '').lower().replace(' ', '.')}@example.com",
+                        "phone": phone or "",
+                        "employment_type": row.get("employment_type") or "Salaried",
+                        "employer": row.get("employer_type") or "Enterprise",
+                        "monthly_income": row.get("monthly_income") or 0,
+                        "existing_emi": row.get("existing_emi_obligations") or 0,
+                        "credit_band": row.get("credit_score_band") or "Good (720 - 779)",
+                        "cibil_score": 750,
+                        "relationship_years": 2.0,
+                        "account_type": "Savings Account",
+                        "default_intent": row.get("intent") or "Home Loan",
+                        "default_loan_amount": row.get("requested_loan_amount") or 0,
+                        # Extra fields for profile pre-fill
+                        "tenure_years": tenure_years,
+                        "urgency": row.get("urgency") or "Immediate (Within 7 Days)",
+                    },
+                }
+        except Exception as exc:
+            logger.warning("customer_profiles DB lookup failed: %s", exc)
+
+        # Also check qualified_leads table for name/phone match
+        try:
+            query2 = supabase.table("qualified_leads").select("*")
+            if name and name.strip():
+                query2 = query2.ilike("customer_name", f"%{name.strip()}%")
+            res2 = query2.limit(10).execute()
+            leads = res2.data or []
+            if phone_digits and leads:
+                matched2 = [l for l in leads if phone_digits[-7:] in _digits(l.get("phone") or "")]
+                leads = matched2 if matched2 else leads
+            if leads:
+                lead = leads[0]
+                return {
+                    "status": "found",
+                    "source": "supabase_qualified_leads",
+                    "customer": {
+                        "id": str(lead.get("id") or ""),
+                        "name": lead.get("customer_name") or (name or "").strip(),
+                        "email": lead.get("email") or f"{(name or '').lower().replace(' ', '.')}@example.com",
+                        "phone": lead.get("phone") or phone or "",
+                        "employment_type": "Salaried",
+                        "employer": "Enterprise",
+                        "monthly_income": 0,
+                        "existing_emi": 0,
+                        "credit_band": "Good (720 - 779)",
+                        "cibil_score": 740,
+                        "relationship_years": 1.0,
+                        "account_type": "Savings Account",
+                        "default_intent": lead.get("loan_type") or "Home Loan",
+                        "default_loan_amount": float(lead.get("loan_amount") or 0),
+                        "tenure_years": 20,
+                        "urgency": "Immediate (Within 7 Days)",
+                    },
+                }
+        except Exception as exc:
+            logger.warning("qualified_leads DB lookup failed: %s", exc)
+
+    raise HTTPException(404, "Customer not found in database.")
+
+
 
 class RecommendLoansRequest(BaseModel):
     user_type: Optional[str] = "new"

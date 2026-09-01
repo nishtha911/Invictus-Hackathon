@@ -102,33 +102,53 @@ export function localTurn(
   userText: string,
   ctx: Pick<CallContext, "loan_type" | "loan_amount">,
   prevAssistant = "",
+  allPriorAssistant: string[] = [],
 ): { speech_reply: string; intent: string; requires_human: boolean } {
   const t = userText.toLowerCase();
   const amt = ctx.loan_amount ? `₹${Math.round(ctx.loan_amount).toLocaleString("en-IN")}` : "your loan";
   const loan = ctx.loan_type || "loan";
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
 
-  const pick = (speech_reply: string, intent = "INTERESTED", requires_human = false) => {
-    if (prevAssistant && norm(speech_reply) === norm(prevAssistant))
-      return { speech_reply: `Understood. Would you like me to have a loan officer call you to take your ${loan} forward?`, intent: "INTERESTED", requires_human: false };
+  const isSimilar = (a: string, b: string): boolean => {
+    const na = norm(a); const nb = norm(b);
+    if (!na || !nb) return false;
+    if (na === nb) return true;
+    if (na.length > 20 && (na.includes(nb) || nb.includes(na))) return true;
+    const wa = new Set(na.split(" ")); const wb = new Set(nb.split(" "));
+    const shorter = wa.size <= wb.size ? wa : wb;
+    if (shorter.size < 4) return false;
+    const overlap = [...shorter].filter(w => wa.has(w) && wb.has(w)).length / shorter.size;
+    return overlap >= 0.60;
+  };
+
+  const dedup = (speech_reply: string, intent = "INTERESTED", requires_human = false) => {
+    // If this reply is too similar to any prior assistant turn, escalate gracefully
+    const alreadySaid = allPriorAssistant.some(p => isSimilar(speech_reply, p));
+    if (alreadySaid) {
+      return {
+        speech_reply: `I appreciate your time, ${loan} is definitely something we can help with. I'll have a loan officer reach out to you — is there a preferred time to call?`,
+        intent: "NEEDS_TIME",
+        requires_human: false,
+      };
+    }
     return { speech_reply, intent, requires_human };
   };
 
   if (/(evening|morning|later|busy|tomorrow|call me back|not now)/.test(t))
-    return pick("Of course — what time would suit you best?", "NEEDS_TIME");
+    return dedup("Of course — what time would suit you best?", "NEEDS_TIME");
   if (/(manager|human|officer|real person|speak to a person)/.test(t))
-    return pick("Of course, I'll have a senior loan officer call you back shortly.", "CALLBACK_REQUESTED", true);
+    return dedup("Of course, I'll have a senior loan officer call you back shortly.", "CALLBACK_REQUESTED", true);
   if (/(not interested|cancel|no thanks|stop calling)/.test(t))
-    return pick("No problem at all, thanks for your time. We won't follow up unless you reach out to us.", "NOT_INTERESTED");
+    return dedup("No problem at all, thanks for your time. We won't follow up unless you reach out to us.", "NOT_INTERESTED");
   if (/(rate|interest|emi|how much|cost)/.test(t))
-    return pick(`For a ${loan} of ${amt}, our rates currently start around 8.4% per annum, and your officer will confirm the exact figure for your profile.`);
+    return dedup(`For a ${loan} of ${amt}, our rates currently start around 8.4% per annum, and your officer will confirm the exact figure for your profile.`);
   if (/(when|how long|timeline|disburse|get the money|funds)/.test(t))
-    return pick("Once your application is in, funds are usually disbursed within a few working days.");
+    return dedup("Once your application is in, funds are usually disbursed within a few working days.");
   if (/(yes|sure|go ahead|proceed|interested|sounds good|what next|next step)/.test(t))
-    return pick(`That's great to hear. I'll flag your file as a priority and one of our loan officers will call you within a business day to walk you through the next steps.`, "READY_TO_APPLY");
+    return dedup(`That's great to hear. I'll flag your file as a priority and one of our loan officers will call you within a business day to walk you through the next steps.`, "READY_TO_APPLY");
   if (/(document|statement|link|upload|paperwork)/.test(t))
-    return pick("No need to worry about any of that now — your dedicated loan officer will guide you through everything when they call.");
-  return pick(`Thanks for taking the call. Are you looking to move ahead with the ${loan} soon, or still weighing your options?`);
+    return dedup("No need to worry about any of that now — your dedicated loan officer will guide you through everything when they call.");
+  return dedup(`Thanks for taking the call. Are you looking to move ahead with the ${loan} soon, or still weighing your options?`);
 }
 
 export function localAnalysis(transcript: TranscriptTurn[]): CallAnalysis {
