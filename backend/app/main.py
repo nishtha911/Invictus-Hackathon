@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, File, Form, UploadFile, Header
+from fastapi import FastAPI, HTTPException, File, Form, UploadFile, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import io
@@ -1122,6 +1122,76 @@ async def get_dashboard():
         ],
         "leads": formatted_leads,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  AI VOICE CALL ENDPOINTS  (browser-based, no telephony provider)
+# ═══════════════════════════════════════════════════════════════════════
+
+class VoiceOpeningRequest(BaseModel):
+    lead: dict[str, Any] = Field(default_factory=dict)
+
+
+class VoiceTurnRequest(BaseModel):
+    context: dict[str, Any] = Field(default_factory=dict)
+    history: list[dict[str, Any]] = Field(default_factory=list)
+    user_speech: str = ""
+
+
+class VoiceTtsRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class VoiceCompleteRequest(BaseModel):
+    context: dict[str, Any] = Field(default_factory=dict)
+    transcript: list[dict[str, Any]] = Field(default_factory=list)
+    duration: int = 0
+
+
+@app.post("/api/v1/voice/opening")
+@app.post("/api/voice/opening")
+async def voice_opening(req: VoiceOpeningRequest):
+    from app.services import voice_service
+    context = voice_service.build_call_context(req.lead)
+    return {"opening_line": voice_service.generate_opening_line(context), "context": context}
+
+
+@app.post("/api/v1/voice/turn")
+@app.post("/api/voice/turn")
+async def voice_turn(req: VoiceTurnRequest):
+    from app.services import voice_service
+    context = req.context or voice_service.build_call_context({})
+    return voice_service.generate_turn(context, req.history, req.user_speech)
+
+
+@app.post("/api/v1/voice/tts")
+@app.post("/api/voice/tts")
+async def voice_tts(req: VoiceTtsRequest):
+    from app.services import voice_service
+    audio = voice_service.synthesize_speech(req.text)
+    if audio:
+        return Response(content=audio, media_type="audio/mpeg")
+    # No ElevenLabs key — the browser falls back to speechSynthesis.
+    return Response(status_code=204)
+
+
+@app.post("/api/v1/voice/complete")
+@app.post("/api/voice/complete")
+async def voice_complete(req: VoiceCompleteRequest):
+    from app.services import voice_service
+    context = req.context or voice_service.build_call_context({})
+    analysis = voice_service.analyze_transcript(context, req.transcript)
+    record = voice_service.log_call(context, req.transcript, req.duration, analysis)
+    logger.info("Voice call logged: %s (%s / %s)", record["call_id"], analysis["intent"], analysis["sentiment"])
+    return {"call": record, "analysis": analysis}
+
+
+@app.get("/api/v1/voice/calls")
+@app.get("/api/voice/calls")
+async def voice_calls():
+    from app.services import voice_service
+    calls = voice_service.list_calls()
+    return {"total": len(calls), "calls": calls}
 
 
 # ═══════════════════════════════════════════════════════════════════════
