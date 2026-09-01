@@ -6,9 +6,11 @@ import {
   Filter,
   ArrowUpDown,
   ChevronRight,
+  PhoneCall,
 } from "lucide-react";
 import { SalesDashboardLeadItem } from "@/lib/types/contracts";
 import { formatINR } from "@/lib/utils/currency";
+import { CallWithAiModal } from "./CallWithAiModal";
 
 interface LeadsTableProps {
   leads: SalesDashboardLeadItem[];
@@ -16,6 +18,7 @@ interface LeadsTableProps {
 }
 
 export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
+  const [callLead, setCallLead] = useState<SalesDashboardLeadItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
@@ -217,10 +220,20 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
 
                   {/* Action */}
                   <td className="p-3.5 text-right">
-                    <button className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 group-hover:border-[#1F7A63] group-hover:text-[#1F7A63] transition-all">
-                      <span>Details</span>
-                      <ChevronRight className="h-3 w-3" />
-                    </button>
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setCallLead(lead); }}
+                        title="Start an AI voice call"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#1F7A63] hover:text-[#1F7A63] transition-all"
+                      >
+                        <PhoneCall className="h-3 w-3" />
+                        <span>Call</span>
+                      </button>
+                      <button className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 group-hover:border-[#1F7A63] group-hover:text-[#1F7A63] transition-all">
+                        <span>Details</span>
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -234,6 +247,10 @@ export function LeadsTable({ leads, onSelectLead }: LeadsTableProps) {
           </div>
         )}
       </div>
+
+      {callLead && (
+        <CallWithAiModal lead={callLead} onClose={() => setCallLead(null)} />
+      )}
     </div>
   );
 }

@@ -62,5 +62,3 @@ frontend/.next/
 *.njsproj
 *.sln
 *.sw?
-.DS_Store
-Thumbs.db

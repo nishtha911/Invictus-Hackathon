@@ -2,14 +2,12 @@
   "name": "cognis-bank-workspace",
   "version": "1.0.0",
   "private": true,
-  "description": "One-command launchers for the Cognis Bank MVP (frontend + FastAPI backend) and the optional voice CRM prototype.",
+  "description": "One-command launcher for the Cognis Bank MVP (Next.js frontend + FastAPI backend).",
   "scripts": {
     "dev": "concurrently -k -n web,api -c cyan,green \"npm --prefix frontend run dev\" \"npm run api\"",
-    "dev:voice": "concurrently -k -n web,api,voice-api,voice-ui -c cyan,green,yellow,magenta \"npm --prefix frontend run dev\" \"npm run api\" \"npm --prefix aivoiceassistance run server\" \"npm --prefix aivoiceassistance run client\"",
-    "voice": "concurrently -k -n voice-api,voice-ui -c yellow,magenta \"npm --prefix aivoiceassistance run server\" \"npm --prefix aivoiceassistance run client\"",
     "api": "cd backend && python run.py",
-    "install:all": "npm --prefix frontend install && npm --prefix aivoiceassistance/server install && npm --prefix aivoiceassistance/client install",
-    "voice:setup": "node -e \"const fs=require('fs'),p='aivoiceassistance/.env';fs.existsSync(p)||fs.copyFileSync('aivoiceassistance/.env.example',p);console.log('aivoiceassistance/.env ready')\""
+    "build": "npm --prefix frontend run build",
+    "install:all": "npm --prefix frontend install"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   X,
@@ -15,6 +16,7 @@ import {
 import { SalesDashboardLeadItem } from "@/lib/types/contracts";
 import { formatINR } from "@/lib/utils/currency";
 import { toast } from "sonner";
+import { CallWithAiModal } from "./CallWithAiModal";
 
 interface LeadDetailDrawerProps {
   lead: SalesDashboardLeadItem | null;
@@ -23,11 +25,8 @@ interface LeadDetailDrawerProps {
 }
 
 export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDrawerProps) {
+  const [callOpen, setCallOpen] = useState(false);
   if (!lead) return null;
-
-  const handleCall = () => {
-    toast.success(`Initiating secure bank dialer to ${lead.phone}...`, { id: "dialer" });
-  };
 
   const handleMarkContacted = () => {
     onUpdateStatus(lead.id, "Contacted");
@@ -169,11 +168,11 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
           {/* Drawer Actions */}
           <div className="pt-4 border-t border-[#E2E8F0] flex items-center gap-3">
             <button
-              onClick={handleCall}
+              onClick={() => setCallOpen(true)}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F7A63] hover:bg-[#186350] px-4 py-3 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
             >
               <PhoneCall className="h-4 w-4" />
-              <span>Call Customer</span>
+              <span>Call with AI</span>
             </button>
             <button
               onClick={handleMarkContacted}
@@ -185,6 +184,17 @@ export function LeadDetailDrawer({ lead, onClose, onUpdateStatus }: LeadDetailDr
           </div>
         </motion.div>
       </div>
+
+      {callOpen && (
+        <CallWithAiModal
+          lead={lead}
+          onClose={() => setCallOpen(false)}
+          onCallLogged={() => {
+            onUpdateStatus(lead.id, "Contacted");
+            toast.success("AI call logged and lead marked Contacted.");
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 }

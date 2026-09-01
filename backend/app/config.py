@@ -6,7 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # Points to /backend/
 
 class Settings(BaseSettings):
     GROQ_API_KEY: str
-    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    # gpt-oss-20b: same family as 120b, ~6x lighter, fast for short bounded output.
+    # Override via GROQ_MODEL in .env.
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
 

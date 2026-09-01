@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Default models for each provider
-_GROQ_DEFAULT_MODEL       = "openai/gpt-oss-120b"
+_GROQ_DEFAULT_MODEL       = "openai/gpt-oss-20b"
 _OPENROUTER_DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
@@ -56,27 +56,24 @@ def _call_llm(messages: list) -> str:
     """Route to Groq or OpenRouter with clear error handling."""
     provider, key, model = _get_api_key_and_model()
 
+    kwargs = {"model": model, "temperature": 0.3, "timeout": 30, "messages": messages}
+    # gpt-oss are reasoning models — cap the thinking so latency stays low and
+    # tokens are left for the actual answer.
+    if "gpt-oss" in model:
+        kwargs["reasoning_effort"] = "low"
+        kwargs["max_tokens"] = 4000
+    else:
+        kwargs["max_tokens"] = 1500
+
     if provider == "openrouter":
         from openai import OpenAI
-        client = OpenAI(
-            api_key=key,
-            base_url="https://openrouter.ai/api/v1",
-        )
-        response = client.chat.completions.create(
-            model=model,
-            temperature=0.0,
-            messages=messages,
-        )
-    else:  # groq (default)
+        client = OpenAI(api_key=key, base_url="https://openrouter.ai/api/v1")
+    else:
         from groq import Groq
         client = Groq(api_key=key)
-        response = client.chat.completions.create(
-            model=model,
-            temperature=0.0,
-            messages=messages,
-        )
 
-    return response.choices[0].message.content.strip()
+    response = client.chat.completions.create(**kwargs)
+    return (response.choices[0].message.content or "").strip()
 
 
 # ---------------------------------------------------------------------------

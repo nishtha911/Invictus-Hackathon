@@ -11,6 +11,10 @@ export function isMockMode(): boolean {
   return USE_MOCK;
 }
 
+// Warn / toast only once per endpoint per session so a down backend during
+// local dev (or hot-reloads) doesn't spam the console.
+const _warnedEndpoints = new Set<string>();
+
 export async function apiClient<T>(
   endpoint: string,
   options?: RequestInit,
@@ -40,17 +44,17 @@ export async function apiClient<T>(
 
     return (await response.json()) as T;
   } catch (error) {
-    // If backend is unreachable and a fallback mock is provided, seamlessly fallback with warning
+    // If backend is unreachable and a fallback mock is provided, seamlessly fall back.
     if (mockFallback) {
-      console.warn(`[Cognis Bank API] Backend unavailable at ${url}, using mock response.`, error);
-      
-      // Attempt to toast warning on client-side
-      try {
-        toast.warning("Live service unavailable. Showing simulated mock data.");
-      } catch (e) {
-        // Ignore errors in non-browser context if any
+      if (!_warnedEndpoints.has(endpoint)) {
+        _warnedEndpoints.add(endpoint);
+        console.warn(`[Cognis Bank API] ${endpoint} unavailable — showing sample data. Start the backend (python run.py) for live data.`);
+        try {
+          toast.warning("Live service unavailable — showing sample data.", { id: `mock-${endpoint}` });
+        } catch {
+          /* non-browser context */
+        }
       }
-
       return mockFallback();
     }
     throw error;

@@ -37,50 +37,104 @@ VOICE_CALL_STORE: List[Dict[str, Any]] = []
 # ─────────────────────────────────────────────────────────────────────────────
 #  LLM plumbing (reuses the Groq client / model resolution from query.py)
 # ─────────────────────────────────────────────────────────────────────────────
+# Voice turns need low latency. Preference order — the first that the account
+# can actually serve is used and cached. Override the top pick via VOICE_MODEL.
+_VOICE_MODEL_CANDIDATES = [
+    m for m in [
+        os.environ.get("VOICE_MODEL"),
+        "qwen/qwen3.8-27b",       # fastest clean-JSON chat model on our Groq plan
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+        "llama-3.1-8b-instant",   # if the plan ever gains llama access
+    ] if m
+]
+_VOICE_TIMEOUT_S = float(os.environ.get("VOICE_LLM_TIMEOUT", "8"))
+_resolved_voice_model: Optional[str] = None
+_BAD_MODEL_MARKERS = ("does not exist", "model_not_found", "decommissioned", "not found")
+
+
 def _groq_chat(messages: List[Dict[str, str]], *, json_mode: bool = False,
                temperature: float = 0.4, max_tokens: int = 320) -> Optional[str]:
+    """Best-effort Groq call. Returns None on any failure so callers can fall back."""
+    global _resolved_voice_model
     try:
         from query import _get_api_key_and_model
-        provider, key, model = _get_api_key_and_model()
+        provider, key, global_model = _get_api_key_and_model()
     except Exception as exc:  # no key configured
         logger.info("Voice LLM unavailable (%s)", exc)
         return None
 
-    try:
-        kwargs: Dict[str, Any] = {
-            "model": model,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
-        if json_mode:
-            kwargs["response_format"] = {"type": "json_object"}
+    if provider == "openrouter":
+        candidates = [global_model]
+    elif _resolved_voice_model:
+        candidates = [_resolved_voice_model]
+    else:
+        candidates = _VOICE_MODEL_CANDIDATES + [global_model]
 
-        if provider == "openrouter":
-            from openai import OpenAI
-            client = OpenAI(api_key=key, base_url="https://openrouter.ai/api/v1")
-        else:
-            from groq import Groq
-            client = Groq(api_key=key)
-        resp = client.chat.completions.create(timeout=20, **kwargs)
-        return resp.choices[0].message.content.strip()
-    except Exception as exc:
-        logger.warning("Voice LLM call failed: %s", exc)
-        return None
+    for model in candidates:
+        if not model:
+            continue
+        try:
+            is_reasoning = "gpt-oss" in model
+            kwargs: Dict[str, Any] = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens * 6 if is_reasoning else max_tokens,
+            }
+            if is_reasoning:
+                kwargs["reasoning_effort"] = "low"
+            if json_mode:
+                kwargs["response_format"] = {"type": "json_object"}
+
+            if provider == "openrouter":
+                from openai import OpenAI
+                client = OpenAI(api_key=key, base_url="https://openrouter.ai/api/v1",
+                                timeout=_VOICE_TIMEOUT_S, max_retries=0)
+            else:
+                from groq import Groq
+                client = Groq(api_key=key, timeout=_VOICE_TIMEOUT_S, max_retries=0)
+
+            resp = client.chat.completions.create(**kwargs)
+            content = (resp.choices[0].message.content or "").strip()
+            if content:
+                if provider == "groq":
+                    _resolved_voice_model = model  # cache the working model
+                return content
+            logger.warning("Voice LLM %s returned empty content", model)
+        except Exception as exc:
+            msg = str(exc).lower()
+            if any(k in msg for k in _BAD_MODEL_MARKERS):
+                logger.warning("Voice model %s unavailable, trying next candidate", model)
+                continue
+            logger.warning("Voice LLM call failed (%s): %s", model, exc)
+            return None
+    return None
 
 
 def _safe_json(text: Optional[str]) -> Optional[dict]:
+    """Tolerant JSON extraction: raw, fenced, or the first balanced object."""
     if not text:
         return None
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", text, re.DOTALL)
-        if m:
-            try:
-                return json.loads(m.group(0))
-            except json.JSONDecodeError:
-                return None
+    candidates = [text.strip()]
+    fence = re.search(r"```(?:json)?\s*(.+?)\s*```", text, re.DOTALL)
+    if fence:
+        candidates.append(fence.group(1).strip())
+    brace = re.search(r"\{.*\}", text, re.DOTALL)
+    if brace:
+        candidates.append(brace.group(0))
+    # progressively trim trailing junk after the last closing brace
+    if "}" in text:
+        candidates.append(text[: text.rfind("}") + 1][text.find("{"):] if "{" in text else "")
+    for c in candidates:
+        if not c:
+            continue
+        try:
+            data = json.loads(c)
+            if isinstance(data, dict):
+                return data
+        except (json.JSONDecodeError, ValueError):
+            continue
     return None
 
 
@@ -135,10 +189,12 @@ def generate_opening_line(context: Dict[str, Any]) -> str:
     out = _groq_chat(
         [{"role": "system", "content": system},
          {"role": "user", "content": f"Opening greeting for {name}."}],
-        temperature=0.5, max_tokens=120,
+        temperature=0.5, max_tokens=220,
     )
-    if out:
-        return out.strip().strip('"')
+    out = (out or "").strip().strip('"')
+    # Guard against a truncated / too-short generation.
+    if len(out) > 40 and out[-1] in ".?!":
+        return out
     return (
         f"Hi {name}, this is Alex from Cognis Bank, following up on the {loan} of {amt} "
         "you looked at on our website. Do you have a minute to talk through the next steps?"
