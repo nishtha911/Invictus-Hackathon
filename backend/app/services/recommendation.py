@@ -46,7 +46,122 @@ def _build_retrieval_query(profile: Dict[str, Any]) -> str:
     return ", ".join(parts)
 
 
-def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str, Any]:
+def compute_policy_match_score(scheme_name: str, profile: dict) -> float:
+    """Compute exact policy segment match score based on target segment rules in policy docs."""
+    name_clean = scheme_name.lower()
+    prof = profile.get("profile", profile) if isinstance(profile, dict) else {}
+    income = float(prof.get("monthly_income") or prof.get("income") or 0)
+    amount = float(prof.get("requested_loan_amount") or prof.get("loan_amount") or 0)
+    emp = str(prof.get("employment_type") or "").lower()
+    age = int(prof.get("age") or 30) if prof.get("age") is not None else 30
+
+    score = 0.80  # Base score
+
+    # Vehicle Loan rules
+    if "newbie" in name_clean:
+        if amount <= 500000 and (income <= 40000 or age <= 30):
+            score = 0.96
+        elif amount <= 500000:
+            score = 0.90
+        else:
+            score = 0.60
+    elif "fleet" in name_clean or "commercial" in name_clean:
+        if "business" in emp or "self" in emp or amount >= 2500000:
+            score = 0.97
+        else:
+            score = 0.50
+    elif "easydrive" in name_clean:
+        if amount <= 3000000 and (income <= 60000 or "fair" in str(prof.get("credit_score_band","")).lower()):
+            score = 0.93
+        else:
+            score = 0.85
+    elif "smartauto" in name_clean:
+        if amount > 500000 and amount <= 5000000 and ("salaried" in emp or not emp):
+            score = 0.94
+        elif amount <= 500000:
+            score = 0.82
+        else:
+            score = 0.70
+
+    # Home Loan rules
+    elif "royal" in name_clean:
+        if amount >= 50000000 or income >= 150000:
+            score = 0.97
+        else:
+            score = 0.70
+    elif "fleximortgage" in name_clean:
+        if "business" in emp or "self" in emp or amount > 30000000:
+            score = 0.95
+        else:
+            score = 0.86
+    elif "firsthome" in name_clean:
+        if amount <= 50000000 and income >= 30000 and income <= 120000:
+            score = 0.94
+        else:
+            score = 0.85
+    elif "easyhome" in name_clean:
+        if income <= 40000 or amount <= 2500000:
+            score = 0.95
+        else:
+            score = 0.88
+
+    # Personal Loan rules
+    elif "quickcash" in name_clean:
+        if amount <= 500000 and income <= 50000:
+            score = 0.96
+        else:
+            score = 0.82
+    elif "premiumpersonal" in name_clean or "premium" in name_clean:
+        if amount >= 1500000 or income >= 75000:
+            score = 0.97
+        else:
+            score = 0.75
+    elif "flexipersonal" in name_clean:
+        if "business" in emp or "self" in emp:
+            score = 0.95
+        else:
+            score = 0.85
+    elif "personalplus" in name_clean or "plus" in name_clean:
+        score = 0.89
+
+    # Education Loan rules
+    elif "studyabroad" in name_clean or "abroad" in name_clean:
+        if amount >= 3000000:
+            score = 0.97
+        else:
+            score = 0.75
+    elif "scholarplus" in name_clean or "scholar" in name_clean:
+        if amount <= 3000000:
+            score = 0.95
+        else:
+            score = 0.85
+    elif "skillboost" in name_clean or "skill" in name_clean:
+        if amount <= 500000:
+            score = 0.96
+        else:
+            score = 0.70
+
+    # Business Loan rules
+    elif "enterpriseedge" in name_clean or "enterprise" in name_clean:
+        if amount >= 5000000 or income >= 200000:
+            score = 0.97
+        else:
+            score = 0.72
+    elif "growthbooster" in name_clean or "growth" in name_clean:
+        if amount <= 5000000:
+            score = 0.94
+        else:
+            score = 0.80
+    elif "expressbiz" in name_clean or "express" in name_clean:
+        if amount <= 3000000:
+            score = 0.92
+        else:
+            score = 0.75
+
+    return round(score, 2)
+
+
+def recommend_from_profile(profile: Dict[str, Any], top_k: int = 12) -> Dict[str, Any]:
     """Produce structured, RAG-grounded loan recommendations from a customer profile.
 
     Returns a dict containing keys: `recommendations` (list), `confidence` (0-1 float),
@@ -61,7 +176,7 @@ def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str,
     loan_cat = prof.get("intent") or prof.get("loan_category") or None
 
     try:
-        chunks = retrieve(query, top_k=top_k, loan_category=loan_cat)
+        chunks = retrieve(query, top_k=max(top_k, 12), loan_category=loan_cat)
     except Exception as e:
         logger.exception("RAG retrieval failed: %s", e)
         return {"recommendations": [], "confidence": 0.0, "insufficient_information": True}
@@ -82,7 +197,6 @@ def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str,
         
         # Extract scheme name and bank from doc_name or content
         if "Scheme Name:" in content:
-            # Extract from "Scheme Name: EasyHome Loan"
             try:
                 scheme_line = [line for line in content.split("\n") if "Scheme Name:" in line][0]
                 scheme_name = scheme_line.split("Scheme Name:")[-1].strip()
@@ -111,21 +225,27 @@ def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str,
 
     user_message = (
         "You are a loan recommendation specialist. Given the customer profile and retrieved policy documents, "
-        "recommend the BEST MATCHING loan schemes.\n\n"
+        "evaluate EVERY scheme in the documents and recommend the BEST MATCHING schemes for this customer.\n\n"
+        "EVALUATION & RANKING INSTRUCTIONS:\n"
+        "1. Compare requested loan amount against each document's min/max loan limits.\n"
+        "2. Compare monthly income against each document's minimum income requirement.\n"
+        "3. Match employment type (e.g. Business Owner -> commercial fleet/business schemes; Salaried -> standard/first-time buyer schemes).\n"
+        "4. RANK the recommendations in DESCENDING order of match quality (the absolute best match FIRST).\n"
+        "5. Assign a confidence score (0.70 to 0.98) reflecting how well each scheme fits the borrower's exact situation.\n"
+
         "CRITICAL RULES:\n"
         "1. ONLY recommend schemes that appear in the retrieved documents.\n"
         "2. Extract the EXACT scheme name and bank from the documents.\n"
         "3. For each recommendation, cite which document it came from.\n"
         "4. Do NOT invent any bank or scheme name.\n"
-        "5. Do NOT suggest loans with different names than in the source.\n"
-        "6. Return result as JSON with structure: {\"recommendations\": [{\"scheme_name\": \"...\", \"bank\": \"...\", \"match_reason\": \"...\", \"eligibility\": [...], \"supporting_chunks\": [...], \"confidence\": 0.0-1.0}], \"insufficient_information\": false}\n\n"
+        "5. Return result as JSON with structure: {\"recommendations\": [{\"scheme_name\": \"...\", \"bank\": \"...\", \"match_reason\": \"...\", \"eligibility\": [...], \"supporting_chunks\": [...], \"confidence\": 0.0-1.0}], \"insufficient_information\": false}\n\n"
         f"Customer Profile:\n{profile_context}\n\n"
         f"Retrieved Policy Documents:\n{context}\n\n"
-        "Based ONLY on the documents above, which schemes best match this customer?"
+        "Based ONLY on the documents above, which schemes best match this customer? Place the TOP best match first."
     )
 
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT + "\n\nAlways extract loan scheme names and bank names EXACTLY as they appear in the source documents. Never invent or modify scheme names."},
+        {"role": "system", "content": SYSTEM_PROMPT + "\n\nAlways extract loan scheme names and bank names EXACTLY as they appear in the source documents. Never invent or modify scheme names. Always order recommendations from best fit to lowest fit."},
         {"role": "user", "content": user_message},
     ]
 
@@ -151,14 +271,23 @@ def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str,
     else:
         return {"recommendations": [], "confidence": 0.0, "insufficient_information": True}
 
-    # Basic sanitation: ensure supporting_chunks are ids and eligibility is list
+    # Basic sanitation and policy match score rescoring
     for r in recs:
         if "supporting_chunks" in r and isinstance(r["supporting_chunks"], list):
             r["supporting_chunks"] = [str(x) for x in r["supporting_chunks"]]
         if "eligibility" in r and not isinstance(r["eligibility"], list):
             r["eligibility"] = [str(r.get("eligibility"))]
+        
+        # Calculate exact policy match score
+        scheme_name = str(r.get("scheme_name") or "")
+        rule_score = compute_policy_match_score(scheme_name, profile)
+        r["confidence"] = rule_score
 
-    result = {"recommendations": recs, "confidence": float(confidence), "insufficient_information": bool(insuff)}
+    # Sort recommendations by computed policy match score descending
+    recs.sort(key=lambda x: float(x.get("confidence", 0.0)), reverse=True)
+    top_confidence = recs[0].get("confidence", 0.85) if recs else 0.0
+
+    result = {"recommendations": recs, "confidence": float(top_confidence), "insufficient_information": bool(insuff)}
     
     # Log the recommendations for debugging
     if recs:
@@ -168,3 +297,4 @@ def recommend_from_profile(profile: Dict[str, Any], top_k: int = 6) -> Dict[str,
         logger.warning("⚠ No recommendations generated (insufficient_info=%s)", insuff)
     
     return result
+

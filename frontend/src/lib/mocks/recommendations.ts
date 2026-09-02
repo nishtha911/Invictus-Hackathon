@@ -24,17 +24,19 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
   const tenureYears = profile.tenure_years || (intent === "Home Loan" ? 20 : intent === "Gold Loan" ? 2 : 5);
   const tenureMonths = tenureYears * 12;
 
-  let recommendations: RecommendedLoan[] = [];
+  let candidates: RecommendedLoan[] = [];
+
+  const isSalaried = !profile.employment_type || profile.employment_type.toLowerCase().includes("salaried");
+  const isBusinessOwner = profile.employment_type?.toLowerCase().includes("business") || profile.employment_type?.toLowerCase().includes("self");
 
   if (intent === "Home Loan") {
-    recommendations = [
+    candidates = [
       {
         loan_id: "HL-EASY-101",
         name: "EasyHome Loan",
         bank: "Neighbourhood Bank",
         category: "Home Loan",
-        tag: "BEST MATCH",
-        match_score: 94,
+        match_score: income < 50000 ? 94 : 82,
         interest_rate: 8.10,
         min_amount: 250000,
         max_amount: 30000000,
@@ -47,8 +49,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         bullet_points: [
           "Salaried applicants with a minimum 2 years employment qualify",
           "Minimum monthly income requirement: ₹20,000",
-          "Reduced processing fee for salaried applicants with employer tie-ups",
-          "Interest subsidy schemes may apply subject to government policy",
+          "Reduced processing fee for salaried applicants",
         ],
         policy_citations: [
           {
@@ -61,7 +62,6 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
           "Interest rate from 8.10% p.a.",
           "Loan amount up to ₹3,00,00,000",
           "Tenure up to 25 years",
-          "Processing fee 0.75%",
         ],
       },
       {
@@ -69,8 +69,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         name: "FirstHome Advantage",
         bank: "Apex Bank",
         category: "Home Loan",
-        tag: "POPULAR",
-        match_score: 88,
+        match_score: income >= 50000 && income <= 150000 && amount <= 50000000 ? 95 : 85,
         interest_rate: 8.35,
         min_amount: 500000,
         max_amount: 50000000,
@@ -94,7 +93,6 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         features: [
           "Interest rate from 8.35% p.a.",
           "Loan amount up to ₹5,00,00,000",
-          "Tenure up to 30 years",
         ],
       },
       {
@@ -102,8 +100,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         name: "FlexiMortgage",
         bank: "Metro Bank",
         category: "Home Loan",
-        tag: "FLEXIBLE",
-        match_score: 82,
+        match_score: isBusinessOwner || amount > 50000000 ? 92 : 80,
         interest_rate: 8.60,
         min_amount: 1000000,
         max_amount: 75000000,
@@ -114,7 +111,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         is_verified_calculation: true,
         reasoning: "Flexible home loan facility allowing interest-only payments during construction phase.",
         bullet_points: [
-          "Overdraft feature linked to salary account",
+          "Overdraft feature linked to bank account",
           "Pre-payment allowed with zero penalty",
         ],
         policy_citations: [
@@ -129,16 +126,46 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
           "Tenure up to 30 years",
         ],
       },
+      {
+        loan_id: "HL-ROYAL-104",
+        name: "RoyalMortgage Luxury Home Loan",
+        bank: "Royal Trust",
+        category: "Home Loan",
+        match_score: income > 150000 || amount >= 50000000 ? 96 : 70,
+        interest_rate: 8.25,
+        min_amount: 5000000,
+        max_amount: 100000000,
+        tenure_months: tenureMonths,
+        estimated_emi: calculateEMI(amount, 8.25, tenureMonths),
+        processing_fee_pct: 0.35,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "High net worth luxury home financing with dedicated relationship manager and priority approval.",
+        bullet_points: [
+          "Minimum monthly income requirement: ₹1,50,000",
+          "High LTV up to 80% for high-value properties",
+        ],
+        policy_citations: [
+          {
+            policy_name: "RoyalMortgage Policy",
+            clause_id: "home_scheme_royal_mortgage",
+            text: "Based on Royal Trust RoyalMortgage policy document",
+          },
+        ],
+        features: [
+          "Interest rate from 8.25% p.a.",
+          "High limit up to ₹10,00,00,000",
+        ],
+      },
     ];
   } else if (intent === "Personal Loan") {
-    recommendations = [
+    candidates = [
       {
         loan_id: "PL-QUICK-201",
         name: "QuickCash Personal Loan",
         bank: "FastCredit Bank",
         category: "Personal Loan",
-        tag: "BEST MATCH",
-        match_score: 95,
+        match_score: income <= 50000 && amount <= 1500000 ? 95 : 82,
         interest_rate: 10.50,
         min_amount: 50000,
         max_amount: 1500000,
@@ -169,8 +196,7 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         name: "FlexiPersonal Credit",
         bank: "City Trust Bank",
         category: "Personal Loan",
-        tag: "POPULAR",
-        match_score: 89,
+        match_score: isBusinessOwner || (income > 50000 && income <= 100000) ? 94 : 84,
         interest_rate: 11.25,
         min_amount: 100000,
         max_amount: 2500000,
@@ -195,16 +221,77 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
           "Revolving credit line",
         ],
       },
+      {
+        loan_id: "PL-PREMIUM-203",
+        name: "PremiumPersonal Loan",
+        bank: "Elite Finance",
+        category: "Personal Loan",
+        match_score: income > 100000 || amount > 1500000 ? 96 : 75,
+        interest_rate: 9.99,
+        min_amount: 500000,
+        max_amount: 5000000,
+        tenure_months: Math.min(tenureMonths, 84),
+        estimated_emi: calculateEMI(amount, 9.99, Math.min(tenureMonths, 84)),
+        processing_fee_pct: 0.75,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "High-ticket personal loan with prime interest rates for high-income professionals.",
+        bullet_points: [
+          "Minimum monthly income: ₹75,000",
+          "Zero pre-closure charges after 12 EMIs",
+        ],
+        policy_citations: [
+          {
+            policy_name: "PremiumPersonal Policy",
+            clause_id: "personal_scheme_premium",
+            text: "Based on Elite Finance PremiumPersonal policy document",
+          },
+        ],
+        features: [
+          "Interest rate from 9.99% p.a.",
+          "Loan up to ₹50,00,000",
+        ],
+      },
     ];
   } else if (intent === "Vehicle Loan") {
-    recommendations = [
+    candidates = [
+      {
+        loan_id: "VL-NEWBIE-304",
+        name: "NewbieCar First Auto Loan",
+        bank: "FirstAuto Finance",
+        category: "Vehicle Loan",
+        match_score: income <= 40000 && amount <= 800000 ? 96 : 72,
+        interest_rate: 9.25,
+        min_amount: 50000,
+        max_amount: 1000000,
+        tenure_months: Math.min(tenureMonths, 84),
+        estimated_emi: calculateEMI(amount, 9.25, Math.min(tenureMonths, 84)),
+        processing_fee_pct: 0.5,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Tailored car loan for first-time car buyers with accessible income criteria.",
+        bullet_points: [
+          "Minimum monthly income: ₹18,000",
+          "Special approval pathway for fresh salaried employees",
+        ],
+        policy_citations: [
+          {
+            policy_name: "NewbieCar Policy",
+            clause_id: "vehicle_scheme_newbie",
+            text: "Based on FirstAuto Finance NewbieCar policy document",
+          },
+        ],
+        features: [
+          "Interest rate 9.25% p.a.",
+          "Low income requirement ₹18,000/mo",
+        ],
+      },
       {
         loan_id: "VL-SMART-301",
         name: "SmartAuto Car Loan",
         bank: "AutoFinance Bank",
         category: "Vehicle Loan",
-        tag: "BEST MATCH",
-        match_score: 93,
+        match_score: income > 40000 && income <= 120000 && isSalaried ? 94 : 85,
         interest_rate: 8.75,
         min_amount: 100000,
         max_amount: 5000000,
@@ -231,12 +318,42 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
       {
+        loan_id: "VL-FLEET-303",
+        name: "FleetPro Business Auto Loan",
+        bank: "Commercial Auto Bank",
+        category: "Vehicle Loan",
+        match_score: isBusinessOwner || amount > 2500000 ? 97 : 70,
+        interest_rate: 8.50,
+        min_amount: 300000,
+        max_amount: 10000000,
+        tenure_months: Math.min(tenureMonths, 84),
+        estimated_emi: calculateEMI(amount, 8.50, Math.min(tenureMonths, 84)),
+        processing_fee_pct: 0.4,
+        eligibility_status: "Eligible",
+        is_verified_calculation: true,
+        reasoning: "Commercial vehicle financing for business owners, fleet operators, and high-value luxury cars.",
+        bullet_points: [
+          "100% ex-showroom funding for commercial fleets",
+          "GST tax benefit documentation provided",
+        ],
+        policy_citations: [
+          {
+            policy_name: "FleetPro Policy",
+            clause_id: "vehicle_scheme_fleet_pro",
+            text: "Based on Commercial Auto Bank FleetPro policy document",
+          },
+        ],
+        features: [
+          "Interest rate from 8.50% p.a.",
+          "Up to ₹1,00,00,000 financing",
+        ],
+      },
+      {
         loan_id: "VL-EASY-302",
         name: "EasyDrive Vehicle Loan",
         bank: "DriveCapital Bank",
         category: "Vehicle Loan",
-        tag: "POPULAR",
-        match_score: 87,
+        match_score: 83,
         interest_rate: 9.10,
         min_amount: 150000,
         max_amount: 3500000,
@@ -263,14 +380,13 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
       },
     ];
   } else if (intent === "Education Loan") {
-    recommendations = [
+    candidates = [
       {
         loan_id: "EDU-SCHOLAR-601",
         name: "ScholarPlus Education Loan",
         bank: "EduTrust Bank",
         category: "Education Loan",
-        tag: "TAX SAVER SEC 80E",
-        match_score: 94,
+        match_score: amount <= 3000000 ? 94 : 85,
         interest_rate: 8.50,
         min_amount: 200000,
         max_amount: 10000000,
@@ -283,7 +399,6 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         bullet_points: [
           "Moratorium period: Course duration + 1 year",
           "100% tax exemption on interest under Section 80E",
-          "Zero processing fee for top-ranked institutions",
         ],
         policy_citations: [
           {
@@ -298,47 +413,46 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
       {
-        loan_id: "EDU-FUTURE-602",
-        name: "FutureBuilder Education Loan",
-        bank: "Horizon Bank",
+        loan_id: "EDU-ABROAD-603",
+        name: "StudyAbroad Edge",
+        bank: "Global Edu Bank",
         category: "Education Loan",
-        tag: "POPULAR",
-        match_score: 88,
-        interest_rate: 10.25,
-        min_amount: 100000,
-        max_amount: 1500000,
-        tenure_months: 144,
-        estimated_emi: calculateEMI(amount, 10.25, 144),
-        processing_fee_pct: 0.75,
+        match_score: amount > 3000000 ? 97 : 78,
+        interest_rate: 9.10,
+        min_amount: 1000000,
+        max_amount: 15000000,
+        tenure_months: 180,
+        estimated_emi: calculateEMI(amount, 9.10, 180),
+        processing_fee_pct: 0.5,
         eligibility_status: "Eligible",
         is_verified_calculation: true,
-        reasoning: "Supports undergraduate and skill development courses with flexible parent co-signing.",
+        reasoning: "High-cap education loan tailored for foreign universities with forex card and visa support.",
         bullet_points: [
-          "Subsidised interest rates for merit scholarship holders",
+          "Covers tuition, living expenses, travel & visa fees",
+          "Multi-currency disbursal options",
         ],
         policy_citations: [
           {
-            policy_name: "FutureBuilder Policy",
-            clause_id: "education_scheme_future_builder",
-            text: "Based on Horizon Bank FutureBuilder policy document",
+            policy_name: "StudyAbroad Edge Policy",
+            clause_id: "education_scheme_study_abroad",
+            text: "Based on Global Edu Bank StudyAbroad Edge policy document",
           },
         ],
         features: [
-          "Interest rate 10.25% p.a.",
-          "Tenure up to 12 years",
+          "Interest rate 9.10% p.a.",
+          "Up to ₹1.5 Crore cover",
         ],
       },
     ];
   } else {
-    // Default / Business Loan
-    recommendations = [
+    // Business Loan
+    candidates = [
       {
         loan_id: "BIZ-GROWTH-401",
         name: "GrowthBooster Business Loan",
         bank: "Enterprise Capital",
         category: "Business Loan",
-        tag: "COLLATERAL-FREE",
-        match_score: 92,
+        match_score: amount <= 5000000 ? 93 : 80,
         interest_rate: 11.50,
         min_amount: 300000,
         max_amount: 5000000,
@@ -365,38 +479,51 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
         ],
       },
       {
-        loan_id: "BIZ-EXPRESS-402",
-        name: "ExpressBiz Loan",
-        bank: "Commercial Bank",
+        loan_id: "BIZ-ENT-404",
+        name: "EnterpriseEdge Corporate Loan",
+        bank: "Corporate Credit",
         category: "Business Loan",
-        tag: "QUICK DISBURSAL",
-        match_score: 86,
-        interest_rate: 12.00,
-        min_amount: 200000,
-        max_amount: 3000000,
-        tenure_months: 36,
-        estimated_emi: calculateEMI(amount, 12.00, 36),
-        processing_fee_pct: 1.5,
+        match_score: amount > 5000000 || income > 200000 ? 96 : 72,
+        interest_rate: 10.25,
+        min_amount: 5000000,
+        max_amount: 100000000,
+        tenure_months: 120,
+        estimated_emi: calculateEMI(amount, 10.25, 120),
+        processing_fee_pct: 0.75,
         eligibility_status: "Eligible",
         is_verified_calculation: true,
-        reasoning: "Fast-track credit facility for small business expansion and inventory purchases.",
+        reasoning: "High-capacity commercial enterprise loan for machinery purchase, expansion, and capex.",
         bullet_points: [
-          "24-hour approval based on GST filing history",
+          "Competitive corporate rates from 10.25%",
+          "Tenure up to 10 years",
         ],
         policy_citations: [
           {
-            policy_name: "ExpressBiz Policy",
-            clause_id: "business_scheme_express",
-            text: "Based on Commercial Bank ExpressBiz policy document",
+            policy_name: "EnterpriseEdge Policy",
+            clause_id: "business_scheme_enterprise",
+            text: "Based on Corporate Credit EnterpriseEdge policy document",
           },
         ],
         features: [
-          "Interest rate 12.00% p.a.",
-          "Fast 24-hour disbursal",
+          "Interest rate from 10.25% p.a.",
+          "Cap up to ₹10 Crore",
         ],
       },
     ];
   }
+
+  // Sort candidates by match_score descending
+  candidates.sort((a, b) => b.match_score - a.match_score);
+
+  // Assign tags: top match gets "BEST MATCH", second gets "POPULAR" if not already set
+  if (candidates.length > 0) {
+    candidates[0].tag = "BEST MATCH";
+  }
+  if (candidates.length > 1 && !candidates[1].tag) {
+    candidates[1].tag = "POPULAR";
+  }
+
+  const recommendations = candidates;
 
   return {
     status: "success",
@@ -416,3 +543,4 @@ export function generateMockRecommendations(profile: ProfileIntake): RecommendLo
     },
   };
 }
+

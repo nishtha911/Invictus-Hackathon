@@ -378,7 +378,7 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
         from app.services.rag_to_frontend_transformer import transform_rag_recommendation_to_loan
         from query import retrieve
         
-        rec_result = recommend_from_profile(payload.dict(), top_k=6)
+        rec_result = recommend_from_profile(payload.dict(), top_k=12)
         raw_recs = rec_result.get("recommendations", [])
         
         # Transform each RAG recommendation into frontend-compatible schema
@@ -387,10 +387,11 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
             # Retrieve chunks to get supporting content for each recommendation
             retrieval_query = f"{intent}, income: ₹{income}, amount: ₹{loan_amount}"
             try:
-                supporting_chunks = retrieve(retrieval_query, top_k=10, loan_category=category_key)
-                supporting_content = "\n".join([c.get("content", "") for c in supporting_chunks])
+                supporting_chunks = retrieve(retrieval_query, top_k=12, loan_category=category_key)
+                supporting_content = "\n\n---\n\n".join([c.get("content", "") for c in supporting_chunks])
             except Exception:
                 supporting_content = ""
+
             
             for rag_rec in raw_recs:
                 try:
@@ -405,9 +406,17 @@ async def recommend_loans_endpoint(req: RecommendLoansRequest):
                     logger.warning("Failed to transform RAG recommendation %s: %s", rag_rec.get("scheme_name"), e)
                     continue
 
+        # Sort by match_score / match_confidence descending
+        transformed_loans.sort(key=lambda x: (x.get("match_score", 0), x.get("match_confidence", 0.0)), reverse=True)
+        if transformed_loans:
+            transformed_loans[0]["tag"] = "BEST MATCH"
+            if len(transformed_loans) > 1 and not transformed_loans[1].get("tag"):
+                transformed_loans[1]["tag"] = "POPULAR"
+
         # Synthesise ONE personalised offer from the best match, bounded by bank policy.
         personalized_offer = None
         advisor_note_text = None
+
         if transformed_loans:
             try:
                 from app.services.personalized_offer import build_personalized_offer, advisor_note
