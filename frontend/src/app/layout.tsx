@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { FloatingAssistant } from "@/components/shared/FloatingAssistant";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -46,7 +45,6 @@ export default function RootLayout({
         <Navbar />
         <div className="flex-1 flex flex-col">{children}</div>
         <Footer />
-        <FloatingAssistant />
         <Toaster
           position="top-right"
           closeButton
