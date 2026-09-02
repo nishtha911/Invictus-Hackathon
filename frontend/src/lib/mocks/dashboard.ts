@@ -1,46 +1,57 @@
-import { DashboardKPIs, LeadSourceDatum, SalesDashboardLeadItem } from "../types/contracts";
+import {
+  DashboardKPIs,
+  DashboardSegment,
+  LeadSourceDatum,
+  SalesDashboardLeadItem,
+} from "../types/contracts";
 
 export const MOCK_DASHBOARD_KPIS: DashboardKPIs = {
-  total_leads: 142,
-  hot_leads: 38,
-  qualification_rate: 67,
-  total_loan_demand: 24000000, // ₹2.4 Cr
+  total_leads: 63,
+  hot_leads: 21,
+  qualification_rate: 71,
+  total_loan_demand: 187400000,
   conversion_pipeline: {
-    new: 142,
-    qualified: 96,
-    contacted: 51,
-    converted: 19,
+    new: 29,
+    qualified: 18,
+    contacted: 11,
+    converted: 5,
   },
 };
 
 export const MOCK_LEAD_TREND_DATA = [
-  { day: "Mon", total: 18, hot: 6, converted: 2 },
-  { day: "Tue", total: 24, hot: 8, converted: 3 },
-  { day: "Wed", total: 31, hot: 10, converted: 5 },
-  { day: "Thu", total: 28, hot: 7, converted: 4 },
-  { day: "Fri", total: 35, hot: 11, converted: 6 },
-  { day: "Sat", total: 22, hot: 5, converted: 3 },
-  { day: "Sun", total: 14, hot: 3, converted: 1 },
+  { day: "Mon 25", total: 7, hot: 2, converted: 0 },
+  { day: "Tue 26", total: 11, hot: 4, converted: 1 },
+  { day: "Wed 27", total: 9, hot: 3, converted: 1 },
+  { day: "Thu 28", total: 13, hot: 5, converted: 2 },
+  { day: "Fri 29", total: 8, hot: 3, converted: 1 },
+  { day: "Sat 30", total: 5, hot: 1, converted: 0 },
+  { day: "Sun 31", total: 4, hot: 2, converted: 1 },
 ];
 
 export const MOCK_PRODUCT_DEMAND_DATA = [
-  { name: "Prime Home", value: 9800000, count: 52, color: "#6366f1" },
-  { name: "Express Personal", value: 5200000, count: 44, color: "#06b6d4" },
-  { name: "Flexi Home", value: 4600000, count: 21, color: "#8b5cf6" },
-  { name: "DrivePlus Auto", value: 3100000, count: 18, color: "#10b981" },
-  { name: "Smart Finance", value: 1300000, count: 7, color: "#f59e0b" },
+  { name: "Home Loan", value: 96500000, count: 17, color: "#1F7A63" },
+  { name: "Personal Loan", value: 12800000, count: 14, color: "#6366F1" },
+  { name: "Vehicle Loan", value: 21300000, count: 9, color: "#06B6D4" },
+  { name: "Business Loan", value: 43600000, count: 6, color: "#8B5CF6" },
+  { name: "Education Loan", value: 9800000, count: 4, color: "#F59E0B" },
+  { name: "Gold Loan", value: 3400000, count: 3, color: "#94A3B8" },
 ];
 
 export const MOCK_LEAD_SOURCE_DATA: LeadSourceDatum[] = [
-  { key: "genai", name: "GenAI Voice Agent", value: 96, color: "#6366F1" },
-  { key: "manual_employee_call", name: "Manual Employee Calls", value: 46, color: "#F59E0B" },
+  { key: "genai", name: "GenAI Voice Agent", value: 41, color: "#6366F1" },
+  { key: "manual_employee_call", name: "Manual Employee Calls", value: 22, color: "#F59E0B" },
+];
+
+export const MOCK_ELIGIBILITY_DATA: DashboardSegment[] = [
+  { key: "Loan-Eligible", name: "Loan-Eligible", value: 34, color: "#1F7A63" },
+  { key: "Conditionally Eligible", name: "Conditionally Eligible", value: 21, color: "#F59E0B" },
+  { key: "Needs Review", name: "Needs Review", value: 8, color: "#94A3B8" },
 ];
 
 export const MOCK_SCORE_DISTRIBUTION_DATA = [
-  { range: "90-100 (Hot)", count: 38, fill: "#10b981" },
-  { range: "75-89 (Warm)", count: 58, fill: "#6366f1" },
-  { range: "60-74 (Moderate)", count: 32, fill: "#f59e0b" },
-  { range: "< 60 (Nurture)", count: 14, fill: "#64748b" },
+  { range: "Hot (78-100)", count: 21, fill: "#1F7A63" },
+  { range: "Warm (58-77)", count: 34, fill: "#6366F1" },
+  { range: "Nurture (< 58)", count: 8, fill: "#94A3B8" },
 ];
 
 export const MOCK_SALES_LEADS: SalesDashboardLeadItem[] = [

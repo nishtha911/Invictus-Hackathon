@@ -131,6 +131,9 @@ export const useJourneyStore = create<JourneyState>()(
               customer_id: user.customer_id || activeCustomer?.id,
               employment_type: user.employment_type || activeCustomer?.employment_type || state.profile.employment_type,
               income: user.monthly_income || activeCustomer?.monthly_income || state.profile.income,
+              existing_emi: activeCustomer?.existing_emi ?? state.profile.existing_emi,
+              credit_band: activeCustomer?.credit_band || state.profile.credit_band,
+              age: activeCustomer?.age ?? state.profile.age,
             },
           };
         }),
@@ -187,6 +190,7 @@ export const useJourneyStore = create<JourneyState>()(
                 employment_type: customer.employment_type,
                 existing_emi: customer.existing_emi,
                 credit_band: customer.credit_band,
+                age: customer.age ?? 35,
                 tenure_years: 20,
                 urgency: "Immediate (Within 7 Days)",
                 applying_as: "self",

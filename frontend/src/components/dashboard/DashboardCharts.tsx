@@ -12,9 +12,27 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { TrendingUp, PieChart, Layers, Radio } from "lucide-react";
+import type { DashboardSegment, LeadSourceDatum } from "@/lib/types/contracts";
 import { formatINR } from "@/lib/utils/currency";
-import type { LeadSourceDatum } from "@/lib/types/contracts";
+
+/* ── palette ──────────────────────────────────────────────────────────── */
+const BLUE = "#2563EB"; // applications
+const EMERALD = "#1F7A63"; // hot / eligible
+const AMBER = "#D97706"; // converted / conditional
+const SLATE = "#94A3B8"; // nurture / review
+const GRID = "#EDF0F4";
+const AXIS = "#9AA4B2";
+const INK = "#1F2937";
+
+const CATEGORY_FALLBACK = [EMERALD, "#4F46E5", "#0E7490", "#7C3AED", AMBER, SLATE];
+
+interface TrendPoint {
+  day: string;
+  date?: string;
+  total: number;
+  hot: number;
+  converted: number;
+}
 
 interface TipEntry {
   name?: string;
@@ -28,49 +46,100 @@ interface TipProps {
   payload?: TipEntry[];
 }
 
-interface DashboardChartsProps {
-  trendData: Array<{ day: string; total: number; hot: number; converted: number }>;
-  productDemandData: Array<{ name: string; value: number; count: number; color: string }>;
-  scoreDistributionData?: Array<{ range: string; count: number; fill: string }>;
-  leadSourceData?: LeadSourceDatum[];
-}
-
-const NAVY = "#132443";
-const EMERALD = "#1F7A63";
-const INDIGO = "#6366F1";
-const AMBER = "#F59E0B";
-const CYAN = "#06B6D4";
-const BAR_PALETTE = [EMERALD, INDIGO, AMBER, CYAN, "#8B5CF6", "#EC4899"];
-
 function ChartTooltip({ active, payload, label }: TipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#132443] px-3.5 py-2.5 text-xs shadow-lg">
-      {label != null && label !== "" && <p className="font-bold text-white mb-1.5">{label}</p>}
+    <div className="rounded-lg border border-[#E6E9EF] bg-white px-3 py-2 text-xs shadow-md">
+      {label != null && label !== "" && <p className="mb-1 font-semibold text-[#1F2937]">{label}</p>}
       {payload.map((p) => (
-        <p key={p.name} className="flex items-center gap-2 text-slate-200">
+        <p key={p.name} className="flex items-center gap-2 text-slate-600">
           <span
             className="h-2 w-2 rounded-full"
             style={{ background: p.color || p.payload?.color || p.payload?.fill }}
           />
-          <span className="text-slate-300">{p.name}</span>
-          <span className="ml-auto font-mono font-bold text-white">{p.value}</span>
+          <span>{p.name}</span>
+          <span className="ml-auto font-semibold tabular-nums text-[#1F2937]">{p.value}</span>
         </p>
       ))}
     </div>
   );
 }
 
-function LegendPill({ color, label }: { color: string; label: string }) {
+function Card({
+  title,
+  subtitle,
+  span,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  span: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-      style={{ background: `${color}14`, color }}
-    >
+    <section className={`${span} rounded-xl border border-[#E6E9EF] bg-white p-5 shadow-sm`}>
+      <header className="mb-4">
+        <h3 className="text-sm font-semibold text-[#1F2937]">{title}</h3>
+        {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
+      </header>
+      {children}
+    </section>
+  );
+}
+
+/** Horizontal breakdown row list — one consistent visual for every categorical split. */
+function BreakdownRows({
+  data,
+  total,
+}: {
+  data: Array<{ name: string; value: number; color: string }>;
+  total: number;
+}) {
+  const safeTotal = Math.max(1, total);
+  return (
+    <div className="space-y-3">
+      <div className="flex h-2 w-full overflow-hidden rounded-full bg-[#F1F4F8]">
+        {data.map((d) => (
+          <div
+            key={d.name}
+            title={`${d.name}: ${d.value}`}
+            style={{ width: `${(d.value / safeTotal) * 100}%`, background: d.color }}
+          />
+        ))}
+      </div>
+      {data.map((d) => (
+        <div key={d.name} className="flex items-center justify-between text-xs">
+          <span className="flex items-center gap-2 text-slate-600">
+            <span className="h-2 w-2 rounded-full" style={{ background: d.color }} />
+            {d.name}
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="font-semibold tabular-nums text-[#1F2937]">{d.value}</span>
+            <span className="w-9 text-right text-xs font-medium text-slate-400 tabular-nums">
+              {Math.round((d.value / safeTotal) * 100)}%
+            </span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
       <span className="h-2 w-2 rounded-full" style={{ background: color }} />
       {label}
     </span>
   );
+}
+
+interface DashboardChartsProps {
+  trendData: TrendPoint[];
+  productDemandData: Array<{ name: string; value: number; count: number; color: string }>;
+  scoreDistributionData?: Array<{ range: string; count: number; fill: string }>;
+  leadSourceData?: LeadSourceDatum[];
+  eligibilityData?: DashboardSegment[];
 }
 
 export function DashboardCharts({
@@ -78,116 +147,152 @@ export function DashboardCharts({
   productDemandData,
   scoreDistributionData = [],
   leadSourceData = [],
+  eligibilityData = [],
 }: DashboardChartsProps) {
+  // Always plot oldest → newest, left → right, whatever order the API sends.
+  const trend = [...trendData].sort((a, b) => {
+    const ka = a.date ?? a.day;
+    const kb = b.date ?? b.day;
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+
   const demand = [...productDemandData].sort((a, b) => b.value - a.value).slice(0, 6);
   const maxDemand = Math.max(1, ...demand.map((d) => d.value));
-  const distTotal = Math.max(1, scoreDistributionData.reduce((s, d) => s + d.count, 0));
-  const sourceTotal = leadSourceData.reduce((s, d) => s + d.value, 0);
-  // Recharts drops the whole Pie if a slice is 0 — chart only the non-empty slices.
-  const sourcePie = leadSourceData.filter((d) => d.value > 0);
+
+  const scoreRows = scoreDistributionData.map((d) => ({
+    name: d.range,
+    value: d.count,
+    color: d.fill,
+  }));
+  const scoreTotal = scoreRows.reduce((s, d) => s + d.value, 0);
+
+  const eligRows = eligibilityData.map((d) => ({ name: d.name, value: d.value, color: d.color }));
+  const eligTotal = eligRows.reduce((s, d) => s + d.value, 0);
+  const eligPie = eligRows.filter((d) => d.value > 0);
+  const eligiblePct =
+    eligTotal === 0
+      ? 0
+      : Math.round(((eligRows.find((d) => d.name === "Loan-Eligible")?.value ?? 0) / eligTotal) * 100);
+
+  const sourceRows = leadSourceData.map((d) => ({ name: d.name, value: d.value, color: d.color }));
+  const sourceTotal = sourceRows.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      {/* ── Trend: Application Volume vs Hot Leads ───────────────────── */}
-      <div className="lg:col-span-12 rounded-2xl border border-[#E4E9F0] bg-white p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#132443] text-white">
-              <TrendingUp className="h-4 w-4" />
-            </span>
-            <div>
-              <h3 className="text-sm font-bold text-[#132443]">Application Volume vs Hot Leads</h3>
-              <p className="text-[11px] text-slate-500">Inbound applications, hot-qualified, and converted over time</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <LegendPill color={NAVY} label="Total" />
-            <LegendPill color={EMERALD} label="Hot" />
-            <LegendPill color={AMBER} label="Converted" />
-          </div>
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+      {/* ── Application volume trend ─────────────────────────────────── */}
+      <Card
+        span="lg:col-span-12"
+        title="Application volume"
+        subtitle="Daily inbound applications, hot-qualified leads and conversions (oldest to newest)"
+      >
+        <div className="mb-3 flex flex-wrap gap-4 text-xs font-medium text-slate-500">
+          <Legend color={BLUE} label="Applications" />
+          <Legend color={EMERALD} label="Hot leads" />
+          <Legend color={AMBER} label="Converted" />
         </div>
 
-        {trendData.length === 0 ? (
-          <div className="h-56 flex items-center justify-center text-xs text-slate-400">
+        {trend.length === 0 ? (
+          <div className="flex h-56 items-center justify-center text-xs text-slate-400">
             No dated leads yet — capture a lead to populate the trend.
           </div>
         ) : (
-          <div className="h-64 w-full">
+          <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+              <AreaChart data={trend} margin={{ top: 6, right: 10, left: -18, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={NAVY} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={NAVY} stopOpacity={0.02} />
+                  <linearGradient id="fillApplications" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={BLUE} stopOpacity={0.16} />
+                    <stop offset="100%" stopColor={BLUE} stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gHot" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={EMERALD} stopOpacity={0.4} />
-                    <stop offset="100%" stopColor={EMERALD} stopOpacity={0.02} />
+                  <linearGradient id="fillHot" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={EMERALD} stopOpacity={0.16} />
+                    <stop offset="100%" stopColor={EMERALD} stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gConv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={AMBER} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={AMBER} stopOpacity={0.02} />
-                  </linearGradient>
-                  <filter id="glow" height="200%" width="200%" x="-50%" y="-50%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={EMERALD} floodOpacity="0.25" />
-                  </filter>
                 </defs>
-                <CartesianGrid vertical={false} stroke="#EEF2F7" />
-                <XAxis dataKey="day" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} width={34} />
-                <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#CBD5E1", strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="total" name="Total" stroke={NAVY} strokeWidth={2.5} fill="url(#gTotal)" />
-                <Area type="monotone" dataKey="converted" name="Converted" stroke={AMBER} strokeWidth={2} fill="url(#gConv)" />
-                <Area type="monotone" dataKey="hot" name="Hot" stroke={EMERALD} strokeWidth={2.5} fill="url(#gHot)" filter="url(#glow)" />
+                <CartesianGrid vertical={false} stroke={GRID} />
+                <XAxis
+                  dataKey="day"
+                  stroke={AXIS}
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={{ stroke: GRID }}
+                />
+                <YAxis
+                  stroke={AXIS}
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  width={34}
+                  allowDecimals={false}
+                />
+                <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#D8DEE7", strokeWidth: 1 }} />
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  name="Applications"
+                  stroke={BLUE}
+                  strokeWidth={2}
+                  fill="url(#fillApplications)"
+                  activeDot={{ r: 4 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="hot"
+                  name="Hot leads"
+                  stroke={EMERALD}
+                  strokeWidth={2}
+                  fill="url(#fillHot)"
+                  activeDot={{ r: 4 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="converted"
+                  name="Converted"
+                  stroke={AMBER}
+                  strokeWidth={2}
+                  strokeDasharray="4 3"
+                  fill="none"
+                  activeDot={{ r: 4 }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
-      </div>
+      </Card>
 
-      {/* ── Loan Product Demand ─────────────────────────────────────── */}
-      <div className="lg:col-span-7 rounded-2xl border border-[#E4E9F0] bg-white p-5 sm:p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1F7A63] text-white">
-            <PieChart className="h-4 w-4" />
-          </span>
-          <div>
-            <h3 className="text-sm font-bold text-[#132443]">Loan Product Demand</h3>
-            <p className="text-[11px] text-slate-500">Requested value & lead count by category</p>
-          </div>
-        </div>
-
+      {/* ── Loan product demand ─────────────────────────────────────── */}
+      <Card
+        span="lg:col-span-7"
+        title="Loan product demand"
+        subtitle="Requested value and lead count by category"
+      >
         {demand.length === 0 ? (
-          <p className="text-xs text-slate-400 py-6 text-center">No product demand yet.</p>
+          <p className="py-6 text-center text-xs text-slate-400">No product demand yet.</p>
         ) : (
           <div className="space-y-3.5">
             {demand.map((d, i) => {
-              const c = d.color?.startsWith("#") ? d.color : BAR_PALETTE[i % BAR_PALETTE.length];
+              const c = d.color?.startsWith("#") ? d.color : CATEGORY_FALLBACK[i % CATEGORY_FALLBACK.length];
               const pct = Math.round((d.value / maxDemand) * 100);
               return (
                 <div key={d.name} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-[#132443] flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-sm" style={{ background: c }} />
+                    <span className="flex items-center gap-2 font-medium text-[#1F2937]">
+                      <span className="h-2 w-2 rounded-full" style={{ background: c }} />
                       {d.name}
                     </span>
-                    <span className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#132443]">{formatINR(d.value, true)}</span>
-                      <span
-                        className="rounded-md px-1.5 py-0.5 text-[10px] font-bold"
-                        style={{ background: `${c}18`, color: c }}
-                      >
+                    <span className="flex items-center gap-2 text-slate-500">
+                      <span className="font-semibold tabular-nums text-[#1F2937]">
+                        {formatINR(d.value, true)}
+                      </span>
+                      <span className="tabular-nums">
                         {d.count} {d.count === 1 ? "lead" : "leads"}
                       </span>
                     </span>
                   </div>
-                  <div className="h-2.5 w-full rounded-full bg-[#F1F5F9] overflow-hidden">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#F1F4F8]">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${pct}%`,
-                        background: `linear-gradient(90deg, ${c}CC, ${c})`,
-                      }}
+                      className="h-full rounded-full"
+                      style={{ width: `${Math.max(pct, 2)}%`, background: c }}
                     />
                   </div>
                 </div>
@@ -195,146 +300,79 @@ export function DashboardCharts({
             })}
           </div>
         )}
-      </div>
+      </Card>
 
-      {/* ── Lead Score Distribution ─────────────────────────────────── */}
-      <div className="lg:col-span-5 rounded-2xl border border-[#E4E9F0] bg-white p-5 sm:p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#6366F1] text-white">
-            <Layers className="h-4 w-4" />
-          </span>
-          <div>
-            <h3 className="text-sm font-bold text-[#132443]">Lead Score Distribution</h3>
-            <p className="text-[11px] text-slate-500">Pipeline quality mix</p>
-          </div>
-        </div>
-
-        {scoreDistributionData.length === 0 ? (
-          <p className="text-xs text-slate-400 py-6 text-center">No scored leads yet.</p>
+      {/* ── Lead score distribution ─────────────────────────────────── */}
+      <Card span="lg:col-span-5" title="Lead score mix" subtitle="Pipeline quality by score band">
+        {scoreTotal === 0 ? (
+          <p className="py-6 text-center text-xs text-slate-400">No scored leads yet.</p>
         ) : (
-          <>
-            <div className="flex h-3 w-full rounded-full overflow-hidden mb-5">
-              {scoreDistributionData.map((d) => (
-                <div
-                  key={d.range}
-                  title={`${d.range}: ${d.count}`}
-                  style={{ width: `${(d.count / distTotal) * 100}%`, background: d.fill }}
-                />
-              ))}
-            </div>
-            <div className="space-y-3">
-              {scoreDistributionData.map((d) => (
-                <div key={d.range} className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-2 font-medium text-slate-600">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.fill }} />
-                    {d.range}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-[#132443]">{d.count}</span>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {Math.round((d.count / distTotal) * 100)}%
-                    </span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </>
+          <BreakdownRows data={scoreRows} total={scoreTotal} />
         )}
-      </div>
+      </Card>
 
-      {/* ── Lead Origination: GenAI Voice Agent vs Manual Employee Calls ── */}
-      <div className="lg:col-span-12 rounded-2xl border border-[#E4E9F0] bg-white p-5 sm:p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F59E0B] text-white">
-            <Radio className="h-4 w-4" />
-          </span>
-          <div>
-            <h3 className="text-sm font-bold text-[#132443]">Lead Origination Channel</h3>
-            <p className="text-[11px] text-slate-500">
-              Volume of leads generated by the GenAI Voice Agent vs manual employee phone calls
-            </p>
-          </div>
-        </div>
-
-        {sourceTotal === 0 ? (
-          <p className="text-xs text-slate-400 py-6 text-center">No attributed leads yet.</p>
+      {/* ── Loan eligibility of captured leads ──────────────────────── */}
+      <Card
+        span="lg:col-span-7"
+        title="Loan eligibility of captured leads"
+        subtitle="Underwriting verdict from score band, FOIR and requested amount"
+      >
+        {eligTotal === 0 ? (
+          <p className="py-6 text-center text-xs text-slate-400">No leads to assess yet.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-            <div className="h-56 w-full relative">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
+            <div className="relative h-40 w-40 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <RePieChart>
                   <Pie
-                    data={sourcePie}
+                    data={eligPie}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={58}
-                    outerRadius={86}
-                    paddingAngle={sourcePie.length > 1 ? 3 : 0}
+                    innerRadius={46}
+                    outerRadius={68}
+                    paddingAngle={eligPie.length > 1 ? 2 : 0}
                     stroke="none"
                     isAnimationActive={false}
                   >
-                    {sourcePie.map((d) => (
-                      <Cell key={d.key} fill={d.color} />
+                    {eligPie.map((d) => (
+                      <Cell key={d.name} fill={d.color} />
                     ))}
                   </Pie>
                   <Tooltip content={<ChartTooltip />} />
                 </RePieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-extrabold text-[#132443] font-mono">{sourceTotal}</span>
-                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
-                  Total Leads
-                </span>
+                <span className="text-lg font-bold tabular-nums text-[#1F2937]">{eligiblePct}%</span>
+                <span className="text-xs font-medium text-slate-400">eligible</span>
               </div>
             </div>
-
-            <div className="space-y-3">
-              {leadSourceData.map((d) => {
-                const pct = Math.round((d.value / sourceTotal) * 100);
-                return (
-                  <div key={d.key} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[#132443] flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 rounded-sm" style={{ background: d.color }} />
-                        {d.name}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[#132443]">{d.value}</span>
-                        <span
-                          className="rounded-md px-1.5 py-0.5 text-[10px] font-bold"
-                          style={{ background: `${d.color}18`, color: d.color }}
-                        >
-                          {pct}%
-                        </span>
-                      </span>
-                    </div>
-                    <div className="h-2.5 w-full rounded-full bg-[#F1F5F9] overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${d.color}CC, ${d.color})` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-              <p className="pt-1 text-[11px] text-slate-500">
-                {(() => {
-                  const genai = leadSourceData.find((d) => d.key === "genai")?.value ?? 0;
-                  const manual = leadSourceData.find((d) => d.key === "manual_employee_call")?.value ?? 0;
-                  if (genai === manual) return "GenAI and manual calls are contributing equally.";
-                  const lead = genai > manual ? "GenAI Voice Agent" : "Manual employee calls";
-                  const ratio = manual > 0 && genai > 0
-                    ? `${(Math.max(genai, manual) / Math.min(genai, manual)).toFixed(1)}×`
-                    : "";
-                  return `${lead} is the larger channel${ratio ? ` (${ratio} the other)` : ""}.`;
-                })()}
-              </p>
-            </div>
+            <BreakdownRows data={eligRows} total={eligTotal} />
           </div>
         )}
-      </div>
+      </Card>
+
+      {/* ── Lead origination channel ────────────────────────────────── */}
+      <Card
+        span="lg:col-span-5"
+        title="Lead origination channel"
+        subtitle="GenAI voice agent vs manual employee phone calls"
+      >
+        {sourceTotal === 0 ? (
+          <p className="py-6 text-center text-xs text-slate-400">No attributed leads yet.</p>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tabular-nums text-[#1F2937]" style={{ color: INK }}>
+                {sourceTotal}
+              </span>
+              <span className="text-xs text-slate-400">attributed leads</span>
+            </div>
+            <BreakdownRows data={sourceRows} total={sourceTotal} />
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

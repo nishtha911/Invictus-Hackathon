@@ -206,7 +206,34 @@ export function getDynamicSteps(profile: ProfileIntake): DynamicJourneyStep[] {
     return trimmed;
   }
 
+  // Returning customers: the bank already holds their profession, income, age,
+  // credit band and current obligations — don't re-ask what's on file.
+  if (profile.user_type === "existing") {
+    const onFile = (v: unknown) => v !== undefined && v !== null && v !== "";
+    const skip = new Set<string>();
+    if (onFile(profile.employment_type)) {
+      skip.add("employment").add("employer_details").add("business_details");
+    }
+    if (onFile(profile.income)) skip.add("income");
+    if (onFile(profile.age)) skip.add("age");
+    if (onFile(profile.credit_band)) skip.add("credit");
+    if (onFile(profile.existing_emi)) skip.add("existing_emi");
+    return steps.filter((s) => !skip.has(s.id));
+  }
+
   return steps;
+}
+
+/** Fields the bank already has on file for a returning customer (for the UI note). */
+export function prefilledStepLabels(profile: ProfileIntake): string[] {
+  if (profile.user_type !== "existing") return [];
+  const labels: string[] = [];
+  if (profile.employment_type) labels.push("employment");
+  if (profile.income) labels.push("take-home income");
+  if (profile.age) labels.push("age");
+  if (profile.credit_band) labels.push("credit band");
+  if (profile.existing_emi !== undefined && profile.existing_emi !== null) labels.push("current EMIs");
+  return labels;
 }
 
 interface AdvisorJourneyRailProps {

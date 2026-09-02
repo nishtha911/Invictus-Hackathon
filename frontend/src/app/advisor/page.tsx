@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AdvisorJourneyRail } from "@/components/advisor/AdvisorJourneyRail";
+import { AdvisorJourneyRail, prefilledStepLabels } from "@/components/advisor/AdvisorJourneyRail";
 import { AdvisorQuestionCard } from "@/components/advisor/AdvisorQuestionCard";
 import { useJourneyStore } from "@/store/journey-store";
 import { fetchLoanRecommendations } from "@/lib/api/recommendations";
@@ -117,6 +117,15 @@ function AdvisorContent() {
                 <p className="text-xs text-slate-500 mt-0.5">
                   Pre-loaded from your banking history · {selectedCustomer.employer} · {selectedCustomer.credit_band}
                 </p>
+                {prefilledStepLabels(profile).length > 0 && (
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Skipped questions we already have on file:{" "}
+                    <span className="font-semibold text-[#132443]">
+                      {prefilledStepLabels(profile).join(", ")}
+                    </span>
+                    . You can still adjust these in the summary before submitting.
+                  </p>
+                )}
               </div>
             </div>
             <button

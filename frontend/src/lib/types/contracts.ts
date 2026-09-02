@@ -11,6 +11,7 @@ export interface DemoCustomer {
   avatar: string;
   email: string;
   phone: string;
+  age: number;
   employment_type: string;
   employer: string;
   monthly_income: number;
@@ -220,10 +221,18 @@ export interface SalesDashboardLeadItem {
   scoring_factors: string[];
   talking_points: string[];
   lead_source?: LeadSource;
+  eligibility?: "Loan-Eligible" | "Conditionally Eligible" | "Needs Review";
 }
 
 export interface LeadSourceDatum {
   key: LeadSource;
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface DashboardSegment {
+  key: string;
   name: string;
   value: number;
   color: string;

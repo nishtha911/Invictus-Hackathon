@@ -20,6 +20,7 @@ import {
   MOCK_PRODUCT_DEMAND_DATA,
   MOCK_SCORE_DISTRIBUTION_DATA,
   MOCK_LEAD_SOURCE_DATA,
+  MOCK_ELIGIBILITY_DATA,
   MOCK_SALES_LEADS,
 } from "@/lib/mocks/dashboard";
 import { toast } from "sonner";
@@ -47,9 +48,11 @@ export default function DashboardPage() {
   const [productDemand, setProductDemand] = useState(MOCK_PRODUCT_DEMAND_DATA);
   const [scoreDistribution, setScoreDistribution] = useState(MOCK_SCORE_DISTRIBUTION_DATA);
   const [leadSource, setLeadSource] = useState(MOCK_LEAD_SOURCE_DATA);
+  const [eligibility, setEligibility] = useState(MOCK_ELIGIBILITY_DATA);
   const [leads, setLeads] = useState<SalesDashboardLeadItem[]>(MOCK_SALES_LEADS);
   const [selectedLead, setSelectedLead] = useState<SalesDashboardLeadItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
   const loadData = useCallback(async () => {
     if (role !== "employee") return;
@@ -61,8 +64,15 @@ export default function DashboardPage() {
       setProductDemand(data.productDemand);
       setScoreDistribution(data.scoreDistribution);
       if (data.leadSourceBreakdown?.length) setLeadSource(data.leadSourceBreakdown);
+      if (data.eligibilityBreakdown?.length) setEligibility(data.eligibilityBreakdown);
       setLeads(data.leads);
-      toast.success("Dashboard data refreshed from underwriting API.", { id: "refresh" });
+      setIsLive(Boolean(data.meta?.is_live));
+      toast.success(
+        data.meta?.is_live
+          ? "Dashboard refreshed — live data from the lead pipeline."
+          : "Backend offline — showing sample data.",
+        { id: "refresh" },
+      );
     } catch (e) {
       console.error(e);
       toast.error("Failed to refresh dashboard data", { id: "refresh" });
@@ -128,11 +138,27 @@ export default function DashboardPage() {
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1F7A63]">
               Sales Dashboard
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#132443] tracking-tight">
-              Inbound Lead Pipeline
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#132443] tracking-tight">
+                Inbound Lead Pipeline
+              </h1>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  isLive
+                    ? "bg-[#ECFDF5] text-[#047857]"
+                    : "bg-[#F1F5F9] text-slate-500"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-[#10B981]" : "bg-slate-400"}`}
+                />
+                {isLive ? "Live data" : "Sample data"}
+              </span>
+            </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Scored borrower applications from completed advisory sessions.
+              {isLive
+                ? "Live scored borrower applications from the advisory pipeline and voice CRM."
+                : "Representative pipeline — start the backend to see live captured leads."}
             </p>
           </div>
 
@@ -173,6 +199,7 @@ export default function DashboardPage() {
           productDemandData={productDemand}
           scoreDistributionData={scoreDistribution}
           leadSourceData={leadSource}
+          eligibilityData={eligibility}
         />
 
         {/* 3. Inbound Leads Table */}

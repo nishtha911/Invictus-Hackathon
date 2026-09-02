@@ -32,6 +32,7 @@ export async function loginCustomer(payload: LoginPayload): Promise<{ status: st
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
     email: `${payload.name.trim().toLowerCase().replace(/\s+/g, ".")}@example.com`,
     phone: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
+    age: 36,
     employment_type: "Salaried",
     employer: "Prime Enterprise Services",
     monthly_income: 125000,

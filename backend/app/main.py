@@ -739,6 +739,16 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
                 return label
         return "Loan"
 
+    def _eligibility(score: int, band: str) -> str:
+        """Coarse underwriting verdict from the lead score + band — the same
+        thresholds the advisory FOIR check uses (Eligible / Conditional / Review)."""
+        b = (band or "").upper()
+        if "HOT" in b or score >= 78:
+            return "Loan-Eligible"
+        if "WARM" in b or score >= 58:
+            return "Conditionally Eligible"
+        return "Needs Review"
+
     formatted_leads = []
 
     # 1. Fetch live leads from Supabase qualified_leads
@@ -767,6 +777,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
             "scoring_factors": dl.get("score_factors", []),
             "talking_points": dl.get("recommended_talking_points", []),
             "lead_source": str(dl.get("lead_source") or "genai"),
+            "eligibility": _eligibility(int(dl.get("lead_score", 80)), score_band_display),
         })
 
     # 2. Append any session in-memory leads if not already present
@@ -790,6 +801,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
             "scoring_factors": l.get("key_scoring_factors", []),
             "talking_points": l.get("talking_points", []),
             "lead_source": str(l.get("lead_source") or "genai"),
+            "eligibility": _eligibility(int(l.get("score", 85)), l.get("score_band", "WARM LEAD")),
         })
 
     total_leads = len(formatted_leads)
@@ -823,22 +835,23 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
         for i, (name, v) in enumerate(sorted(_cat_agg.items(), key=lambda kv: kv[1]["value"], reverse=True))
     ]
 
-    # Weekly trend from created_at (best-effort parse; empty when timestamps unavailable)
-    from collections import OrderedDict
-    trend_buckets: "OrderedDict[str, dict]" = OrderedDict()
+    # Daily trend from created_at — keyed on the actual date so it stays in
+    # chronological order (last 7 populated days), not lead-insertion order.
+    trend_by_date: dict = {}
     for l in formatted_leads:
         raw = str(l.get("created_at", ""))
         try:
-            day = datetime.fromisoformat(raw.replace("Z", "+00:00")).strftime("%a %d")
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
         except (ValueError, TypeError):
             continue
-        b = trend_buckets.setdefault(day, {"day": day, "total": 0, "hot": 0, "converted": 0})
+        key = dt.date()
+        b = trend_by_date.setdefault(key, {"day": dt.strftime("%a %d"), "total": 0, "hot": 0, "converted": 0})
         b["total"] += 1
         if "HOT" in str(l.get("score_band", "")).upper():
             b["hot"] += 1
         if str(l.get("status", "")).lower() == "converted":
             b["converted"] += 1
-    trends = list(trend_buckets.values())
+    trends = [trend_by_date[k] for k in sorted(trend_by_date)][-7:]
 
     qualification_rate = (
         round((hot_leads + warm_leads) / total_leads * 100) if total_leads else 0
@@ -852,7 +865,26 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
         {"key": "manual_employee_call", "name": "Manual Employee Calls", "value": manual_count, "color": "#F59E0B"},
     ]
 
+    # Eligibility split — how many captured leads actually clear underwriting
+    _elig_order = ["Loan-Eligible", "Conditionally Eligible", "Needs Review"]
+    _elig_color = {
+        "Loan-Eligible": "#1F7A63",
+        "Conditionally Eligible": "#F59E0B",
+        "Needs Review": "#94A3B8",
+    }
+    _elig_counts = {k: 0 for k in _elig_order}
+    for l in formatted_leads:
+        _elig_counts[l.get("eligibility", "Needs Review")] = _elig_counts.get(l.get("eligibility", "Needs Review"), 0) + 1
+    eligibility_breakdown = [
+        {"key": k, "name": k, "value": _elig_counts[k], "color": _elig_color[k]} for k in _elig_order
+    ]
+
     return {
+        "meta": {
+            "is_live": True,
+            "source": "supabase_qualified_leads+session_store",
+            "generated_at": datetime.utcnow().isoformat(),
+        },
         "kpis": {
             "total_leads": total_leads,
             "hot_leads": hot_leads,
@@ -864,6 +896,7 @@ async def get_dashboard(x_role: Optional[str] = Header(None, alias="X-Role")):
         "trends": trends,
         "productDemand": product_demand,
         "leadSourceBreakdown": lead_source_breakdown,
+        "eligibilityBreakdown": eligibility_breakdown,
         "scoreDistribution": [
             {"range": "Hot (70-100)", "count": hot_leads, "fill": "#1F7A63"},
             {"range": "Warm (50-69)", "count": warm_leads, "fill": "#6366f1"},
