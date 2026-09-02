@@ -18,14 +18,22 @@ export const MOCK_DASHBOARD_KPIS: DashboardKPIs = {
   },
 };
 
-export const MOCK_LEAD_TREND_DATA = [
-  { day: "Mon 25", total: 7, hot: 2, converted: 0 },
-  { day: "Tue 26", total: 11, hot: 4, converted: 1 },
-  { day: "Wed 27", total: 9, hot: 3, converted: 1 },
-  { day: "Thu 28", total: 13, hot: 5, converted: 2 },
-  { day: "Fri 29", total: 8, hot: 3, converted: 1 },
-  { day: "Sat 30", total: 5, hot: 1, converted: 0 },
-  { day: "Sun 31", total: 4, hot: 2, converted: 1 },
+export interface LeadTrendPoint {
+  day: string;
+  date?: string;
+  total: number;
+  hot: number;
+  converted: number;
+}
+
+export const MOCK_LEAD_TREND_DATA: LeadTrendPoint[] = [
+  { day: "Mon 25", date: "2026-08-25", total: 7, hot: 2, converted: 0 },
+  { day: "Tue 26", date: "2026-08-26", total: 11, hot: 4, converted: 1 },
+  { day: "Wed 27", date: "2026-08-27", total: 9, hot: 3, converted: 1 },
+  { day: "Thu 28", date: "2026-08-28", total: 13, hot: 5, converted: 2 },
+  { day: "Fri 29", date: "2026-08-29", total: 8, hot: 3, converted: 1 },
+  { day: "Sat 30", date: "2026-08-30", total: 5, hot: 1, converted: 0 },
+  { day: "Sun 31", date: "2026-08-31", total: 4, hot: 2, converted: 1 },
 ];
 
 export const MOCK_PRODUCT_DEMAND_DATA = [
